@@ -6,13 +6,15 @@ public class Unit : MonoBehaviour
 {
 
     public int HP { get; private set; }
+    public Player.ETeam Team { get; private set; }
     public int MaxHP { get; private set; }
     public int ID { get; private set; }
 
     private static int _idCount = 0;
 
-    public Unit Init(int maxhp)
+    public Unit Init(int maxhp, Player.ETeam team)
     {
+        Team = team;
         MaxHP = maxhp;
         HP = MaxHP;
         ID = ++_idCount;

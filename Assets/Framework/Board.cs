@@ -35,7 +35,7 @@ public class Board : MonoBehaviour
 
     public void CreateBoard()
     {
-        GenerateMap(Map.MapList[0], 0.5f);
+        GenerateMap(Map.MapList[0], 0.54f);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class Board : MonoBehaviour
             //quick reference var
             string hstr = map.HXN[u];
 
-            //for visualization
+            //for logging
             Debug.Log($"generating row: [{hstr}]");
 
             for (int x = 0; x < hstr.Length; x++)
@@ -70,11 +70,11 @@ public class Board : MonoBehaviour
                 Hex hex = Instantiate(hexprefab, transform).Init(coords);
 
                 //Uses helper class BoardCoords 
-                Vector3 worldpos = new Vector3(BoardCoords.CartesianCoordsOf(coords).x, 0, BoardCoords.CartesianCoordsOf(coords).y);
+                Vector3 worldpos = new Vector3(BoardCoords.CartesianCoordsOf(coords).x, BoardCoords.CartesianCoordsOf(coords).y, 0);
                 hex.transform.localPosition = worldpos * hexSpacing;
                 _hexDict.Add(coords, hex);
 
-                //for visualization
+                //for visualization (Can be removed)
                 await Task.Delay(60);
 
             }

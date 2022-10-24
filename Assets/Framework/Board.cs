@@ -38,10 +38,14 @@ public class Board : MonoBehaviour
 
     public async void CreateBoard()
     {
+        //waits for GenerateMap() to finish, then runs GenerateUnits()
         await GenerateMap(Map.MapList[0]);
         GenerateUnits();
     }
 
+    /// <summary>
+    /// Instantiates Units on every BaseHex on the board. (GenerateMap() must be called first).
+    /// </summary>
     private void GenerateUnits()
     {
         foreach (Hex hex in new HashSet<Hex>(_hexDict.Values).Where(h => h as BaseHex != null))
@@ -53,6 +57,7 @@ public class Board : MonoBehaviour
         }
     }
 
+    //Currently async (awaitable) so that hex generation can be visualized/delayed, this is completely unecessary functionally.
     /// <summary>
     /// Instantiates/renders the physical Hexes of the given <see cref="Map"/>
     /// </summary>

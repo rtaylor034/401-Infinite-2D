@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 //ABSTRACT (Must instantiate a derived class)
@@ -21,7 +22,7 @@ public abstract class Hex : MonoBehaviour
 
     public virtual void TestMethod()
     {
-        Debug.Log($"I am a hex at coordinate {Position}.");
+        Debug.Log($"I am a {GetType().Name} hex at coordinate {Position}.");
     }
 
 

@@ -12,5 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6c8f87fa765f22459230919c7e381ca, type: 3}
   m_Name: Main HXN Key
   m_EditorClassIdentifier: 
-  _hexPrefabs: []
-  _keys: 
+  _hexPrefabs:
+  - {fileID: -1771352197507449314, guid: d3e7377ca22afc24295c6ed341640fb4, type: 3}
+  - {fileID: 5852756765717951257, guid: dfb40e6edbf78b54f9665ab53514cc4d, type: 3}
+  - {fileID: 83746313008168427, guid: 4f9aca0b51dc8e343b855ec48563b4e6, type: 3}
+  - {fileID: 83746313008168427, guid: 68e47985ce8a16842b0dac32006c4b01, type: 3}
+  - {fileID: 5949854662235704027, guid: 4a42c73aa2431a1498752c96ad900d2a, type: 3}
+  _keys: 6f007700520042006300

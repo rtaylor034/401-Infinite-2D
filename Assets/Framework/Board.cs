@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class Board : MonoBehaviour
     private Unit _UnitObject;
     [SerializeField]
     public HXNKey HXNKey;
+    [SerializeField]
+    private float _hexSpacing = 0.54f;
 
     private Dictionary<Vector3Int, Hex> _hexDict = new();
 
@@ -33,9 +36,21 @@ public class Board : MonoBehaviour
     }
     */
 
-    public void CreateBoard()
+    public async void CreateBoard()
     {
-        GenerateMap(Map.MapList[0], 0.54f);
+        await GenerateMap(Map.MapList[0]);
+        GenerateUnits();
+    }
+
+    private void GenerateUnits()
+    {
+        foreach (Hex hex in new HashSet<Hex>(_hexDict.Values).Where(h => h as BaseHex != null))
+        {
+            BaseHex b = hex as BaseHex;
+            Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
+            u.transform.position = u.Position.CartesianCoordsOf() * _hexSpacing;
+            b.Occupant = u;
+        }
     }
 
     /// <summary>
@@ -43,7 +58,7 @@ public class Board : MonoBehaviour
     /// </summary>
     /// <param name="map"></param>
     /// <param name="hexSpacing"></param>
-    private async void GenerateMap(Map map, float hexSpacing = 1)
+    private async Task GenerateMap(Map map)
     {
         /*
          The first element(string) of map.HXN starts at 0,0,0(bottom left of map), and then each char in that string generates a Hex at that position.
@@ -71,11 +86,11 @@ public class Board : MonoBehaviour
 
                 //Uses helper class BoardCoords 
                 Vector3 worldpos = new Vector3(BoardCoords.CartesianCoordsOf(coords).x, BoardCoords.CartesianCoordsOf(coords).y, 0);
-                hex.transform.localPosition = worldpos * hexSpacing;
+                hex.transform.localPosition = worldpos * _hexSpacing;
                 _hexDict.Add(coords, hex);
 
                 //for visualization (Can be removed)
-                await Task.Delay(60);
+                await Task.Delay(20);
 
             }
 

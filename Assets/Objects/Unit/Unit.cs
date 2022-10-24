@@ -10,10 +10,13 @@ public class Unit : MonoBehaviour
     public int MaxHP { get; private set; }
     public int ID { get; private set; }
 
+    public Vector3Int Position { get; private set; }
+
     private static int _idCount = 0;
 
-    public Unit Init(int maxhp, Player.ETeam team)
+    public Unit Init(int maxhp, Player.ETeam team, Vector3Int pos)
     {
+        Position = pos;
         Team = team;
         MaxHP = maxhp;
         HP = MaxHP;

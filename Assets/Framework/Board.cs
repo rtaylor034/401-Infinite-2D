@@ -15,7 +15,13 @@ public class Board : MonoBehaviour
     [SerializeField]
     private float _hexSpacing = 0.54f;
 
-    private Dictionary<Vector3Int, Hex> _hexDict = new();
+    private readonly HashSet<Unit> _units = new();
+    private readonly Dictionary<Vector3Int, Hex> _hexDict = new();
+
+    /// <summary>
+    /// Gets the set of all Units on the board.
+    /// </summary>
+    public HashSet<Unit> Units => new HashSet<Unit>(_units);
 
     /*
     public void CreateBoard()
@@ -36,6 +42,7 @@ public class Board : MonoBehaviour
     }
     */
 
+
     public async void CreateBoard()
     {
         //waits for GenerateMap() to finish, then runs GenerateUnits()
@@ -54,6 +61,7 @@ public class Board : MonoBehaviour
             Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
             u.transform.position = u.Position.CartesianCoordsOf() * _hexSpacing;
             b.Occupant = u;
+            _units.Add(u);
         }
     }
 

@@ -55,7 +55,7 @@ public class Board : MonoBehaviour
     /// </summary>
     private void GenerateUnits()
     {
-        foreach (Hex hex in new HashSet<Hex>(_hexDict.Values).Where(h => h as BaseHex != null))
+        foreach (Hex hex in new HashSet<Hex>(_hexDict.Values).Where(h => h is BaseHex))
         {
             BaseHex b = hex as BaseHex;
             Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);

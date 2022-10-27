@@ -111,9 +111,10 @@ public class Board : MonoBehaviour
     /// </summary>
     /// <param name="coords"></param>
     /// <returns></returns>
-    public Vector3 GetLocalTransformAt(Vector3Int coords)
+    public Vector3 GetLocalTransformAt(Vector3Int coords, int zPos = 0)
     {
-        return coords.CartesianCoordsOf() * _hexSpacing;
+        Vector2 fpos = coords.CartesianCoordsOf() * _hexSpacing;
+        return new Vector3(fpos.x, fpos.y, zPos);
     }
 
 }

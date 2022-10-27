@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour
+public class Unit : Selectable
 {
 
     public int HP { get; private set; }
@@ -28,5 +28,18 @@ public class Unit : MonoBehaviour
     {
         Debug.Log($"I am unit {ID} with {HP} HP.");
     }
+    #region Selectable Implementations
+    protected override void OnHover(bool state)
+    {
 
+    }
+    protected override void OnSelectable(bool state)
+    {
+
+    }
+    protected override void OnSelected()
+    {
+        TestMethod();
+    }
+    #endregion
 }

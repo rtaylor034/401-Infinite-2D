@@ -39,7 +39,7 @@ public class Board : MonoBehaviour
         {
             BaseHex b = hex as BaseHex;
             Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position, 1);
+            u.transform.localPosition = GetLocalTransformAt(b.Position);
             b.Occupant = u;
             _units.Add(u);
         }
@@ -114,7 +114,7 @@ public class Board : MonoBehaviour
     public Vector3 GetLocalTransformAt(Vector3Int coords, int zPos = 0)
     {
         Vector2 fpos = coords.CartesianCoordsOf() * _hexSpacing;
-        return new Vector3(fpos.x, fpos.y, -zPos);
+        return new Vector3(fpos.x, fpos.y, zPos);
     }
 
 }

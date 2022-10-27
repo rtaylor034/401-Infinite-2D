@@ -25,4 +25,5 @@ public abstract class Hex : MonoBehaviour
         Debug.Log($"I am a {GetType().Name} hex at coordinate {Position}.");
     }
 
+    
 }

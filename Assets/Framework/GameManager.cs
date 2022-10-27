@@ -11,26 +11,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board board;
+    [SerializeField]
+    private Selector selector;
 
     //public static reference to this single instance (there is and only ever will be 1 GameManager object).
     public static GameManager GAME;
     public static Inputs INPUT;
-
-
-    //-> Called before Start()
-    private void Awake()
-    {
-        SSingletons();
-        Debug.Log("GameManager is initialized");
-    }
-
-    //-> Called on the very first frame of application run
-    private void Start()
-    {
-        Debug.Log("Game is now running");
-        board.CreateBoard();
-
-    }
 
     #region Setups
 
@@ -43,12 +29,29 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Unity Messages
+    //-> Called before Start()
+    private void Awake()
+    {
+        SSingletons();
 
+        INPUT.Test.Testprompt.performed += c => selector.Prompt(board.Units, sel => Debug.Log($"Selected {sel.Selection.gameObject.name}"));
+
+        Debug.Log("GameManager is initialized");
+    }
+
+    //-> Called on the very first frame of application run
+    private void Start()
+    {
+        Debug.Log("Game is now running");
+        board.CreateBoard();
+
+    }
 
     //-> Called every frame
     private void Update()
     {
 
     }
-
+    #endregion
 }

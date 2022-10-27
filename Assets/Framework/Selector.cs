@@ -52,7 +52,7 @@ public class Selector : MonoBehaviour
 
     private void FinalizeSelection(SelectorArgs args)
     {
-        _confirmMethod.Invoke(args);
+        _confirmMethod?.Invoke(args);
 
         foreach (var s in _currentPrompt)
         {

@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 //ABSTRACT (Must instantiate a derived class)
-public abstract class Hex : MonoBehaviour, ISelectable
+public abstract class Hex : MonoBehaviour
 {
     //position in board coordinates.
     public Vector3Int Position { get; private set; }
@@ -24,12 +24,5 @@ public abstract class Hex : MonoBehaviour, ISelectable
     {
         Debug.Log($"I am a {GetType().Name} hex at coordinate {Position}.");
     }
-
-    #region ISelectable
-    //empty for now
-    public void ToggleSelectable(bool toggle) { }
-    public void ToggleHovered(bool toggle) { }
-
-    #endregion
 
 }

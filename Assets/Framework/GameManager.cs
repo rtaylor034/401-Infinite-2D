@@ -11,8 +11,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board board;
-    [SerializeField]
-    private Selector selector;
 
     //public static reference to this single instance (there is and only ever will be 1 GameManager object).
     public static GameManager GAME;
@@ -23,7 +21,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         SSingletons();
-        INPUT.Test.Testprompt.performed += TestSelector;
         Debug.Log("GameManager is initialized");
     }
 
@@ -46,10 +43,6 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    private void TestSelector(InputAction.CallbackContext context)
-    {
-        selector.Prompt(board.Units, null, x => Debug.Log("Nice"), null);
-    }
 
 
     //-> Called every frame

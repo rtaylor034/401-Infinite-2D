@@ -9,18 +9,16 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
-    private Board _boardObject;
+    private Board _board;
 
     //public static reference to this single instance (there is and only ever will be 1 GameManager object).
     public static GameManager GAME;
-    public static Board BOARD;
 
 
     //-> Called before Start()
     private void Awake()
     {
         GAME = this;
-        BOARD = _boardObject;
         Debug.Log("GameManager is initialized");
 
     }
@@ -29,7 +27,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Debug.Log("Game is now running");
-        BOARD.CreateBoard();
+        _board.CreateBoard();
 
     }
 

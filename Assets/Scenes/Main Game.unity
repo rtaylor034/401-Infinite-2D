@@ -200,8 +200,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19f81499bcd79da4892a650b24049359, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _board: {fileID: 1283633491}
-  _selector: {fileID: 1289678320}
+  board: {fileID: 1283633491}
+  selector: {fileID: 1289678320}
 --- !u!4 &1289678319
 Transform:
   m_ObjectHideFlags: 0
@@ -231,11 +231,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c3f65988d3545d4e89e2ddc24a28430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _selectableLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  _camera: {fileID: 2090556029}
-  _selectRange: 100
 --- !u!1 &2090556027
 GameObject:
   m_ObjectHideFlags: 0

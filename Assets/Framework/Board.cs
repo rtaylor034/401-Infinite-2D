@@ -39,7 +39,7 @@ public class Board : MonoBehaviour
         {
             BaseHex b = hex as BaseHex;
             Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
-            u.transform.position = u.Position.CartesianCoordsOf() * _hexSpacing;
+            u.transform.localPosition = GetLocalTransformAt(b.Position);
             b.Occupant = u;
             _units.Add(u);
         }
@@ -78,8 +78,7 @@ public class Board : MonoBehaviour
                 Hex hex = Instantiate(hexprefab, transform).Init(coords);
 
                 //Uses helper class BoardCoords 
-                Vector3 worldpos = new Vector3(BoardCoords.CartesianCoordsOf(coords).x, BoardCoords.CartesianCoordsOf(coords).y, 0);
-                hex.transform.localPosition = worldpos * _hexSpacing;
+                hex.transform.localPosition = GetLocalTransformAt(coords);
                 _hexDict.Add(coords, hex);
 
                 //for visualization (Can be removed)
@@ -106,7 +105,7 @@ public class Board : MonoBehaviour
         return hex;
     }
 
-    //ALL changing of a GameObject's in-world position should happen in Board or GameManager.
+    //ALL changing of a GameObject's in-world position should happen in Board or GameManager. (transform.position should not be used, use transform.localPosition).
     /// <summary>
     /// Gets the transform.localPosition of the specified board coords.
     /// </summary>

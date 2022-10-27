@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3662389059090707681}
   - component: {fileID: 1563852504310540368}
   - component: {fileID: 5949854662235704027}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: ControlHex
   m_TagString: Untagged
   m_Icon: {fileID: 0}

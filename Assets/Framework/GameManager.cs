@@ -11,10 +11,15 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board _board;
+    [SerializeField]
+    private Inputs _input;
+    [SerializeField]
+    private Selector _selector;
 
     //public static reference to this single instance (there is and only ever will be 1 GameManager object).
     public static GameManager GAME;
 
+    public Inputs Input => _input;
 
     //-> Called before Start()
     private void Awake()

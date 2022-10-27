@@ -4,10 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+
     [SerializeField]
     private Board _board;
 
@@ -20,7 +21,6 @@ public class GameManager : MonoBehaviour
     {
         GAME = this;
         Debug.Log("GameManager is initialized");
-
     }
 
     //-> Called on the very first frame of application run

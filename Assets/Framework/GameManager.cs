@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     {
         SSingletons();
 
-        INPUT.Test.Testprompt.performed += c => selector.Prompt(board.Units, sel => Debug.Log($"Selected {sel.Selection.gameObject.name}"));
+        INPUT.Test.Testprompt.performed += c => selector.Prompt(board.Units, sel => Debug.Log($"Selected {sel.Selection?.gameObject.name}"));
 
         Debug.Log("GameManager is initialized");
     }

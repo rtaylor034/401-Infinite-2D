@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Selector : MonoBehaviour
 {
@@ -12,9 +13,34 @@ public class Selector : MonoBehaviour
     private IEnumerable<Selectable> _currentPrompt;
     private SelectionConfirmMethod _confirmMethod;
 
+    #region Setups
+    private void SInputs(bool value)
+    {
+        if (value == true)
+        {
+            GameManager.INPUT.Selector.Cancel.performed += InputCancel;
+        } else
+        {
+            GameManager.INPUT.Selector.Cancel.performed -= InputCancel;
+        }
+    }
+
+    #endregion
+
+
     private void Awake()
     {
         enabled = false;
+    }
+
+    private void OnEnable()
+    {
+        SInputs(true);
+    }
+
+    private void OnDisable()
+    {
+        SInputs(false);
     }
 
     //TODO: add Player argument at some point
@@ -78,6 +104,15 @@ public class Selector : MonoBehaviour
         SelectionCancel();
         return true;
     }
+
+    #region Input Methods
+
+    public void InputCancel(InputAction.CallbackContext context)
+    {
+        SelectionCancel();
+    }
+
+    #endregion
 
     public class SelectorArgs : EventArgs
     {

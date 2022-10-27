@@ -23,26 +23,6 @@ public class Board : MonoBehaviour
     /// </summary>
     public HashSet<Unit> Units => new HashSet<Unit>(_units);
 
-    /*
-    public void CreateBoard()
-    {
-        
-        //(This is placeholder code)
-        
-        //"this" refers to the empty GameObject floating in space at (0, 0, 0). It can be ommited in "this.transform", but its there for clarity.
-        Unit testunit = Instantiate(_UnitObject, this.transform).Init(3);
-        testunit.TestMethod();
-
-        Hex testopenhex = Instantiate(_OpenHexObject, this.transform.position + new Vector3(0, -1, 0), this.transform.rotation, this.transform).Init(new Vector3Int(1, 2, -3));
-        testopenhex.TestMethod();
-        
-        Hex testwallhex = Instantiate(_WallHexObject, this.transform.position + new Vector3(0, -2, 0), this.transform.rotation, this.transform).Init(new Vector3Int(-1, -2, 3));
-        testwallhex.TestMethod();
-
-    }
-    */
-
-
     public async void CreateBoard()
     {
         //waits for GenerateMap() to finish, then runs GenerateUnits()
@@ -126,6 +106,7 @@ public class Board : MonoBehaviour
         return hex;
     }
 
+    //ALL changing of a GameObject's in-world position should happen in Board or GameManager.
     /// <summary>
     /// Gets the transform.localPosition of the specified board coords.
     /// </summary>

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -139,8 +140,7 @@ public class Selector : MonoBehaviour
         _confirmMethod = confirmMethod;
 
         HoverSelection();
-
-        foreach (ISelectable EXISTS in selectables) { return true; }
+        if (selectables.Count() > 0) return true;
 
         //No selectables failsafe.
         Debug.LogWarning("Selector: No selection available, null returned");

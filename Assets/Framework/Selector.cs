@@ -73,6 +73,7 @@ public class Selector : MonoBehaviour
         if (Physics.Raycast(_camera.ScreenPointToRay(_input.Selector.MousePos.ReadValue<Vector2>()), out RaycastHit hit, _selectRange, _selectableLayer))
         {
             ISelectable tempsel = hit.collider.GetComponent<ISelectable>();
+            
             if (tempsel == _currentSelection) return true;
 
             foreach (ISelectable comp in _currentPrompt)

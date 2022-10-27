@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19f81499bcd79da4892a650b24049359, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _boardObject: {fileID: 1283633491}
+  _board: {fileID: 1283633491}
 --- !u!4 &1289678319
 Transform:
   m_ObjectHideFlags: 0

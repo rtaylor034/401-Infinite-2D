@@ -25,7 +25,7 @@ public class Selector : MonoBehaviour
     #region Unity Events
     private void Awake()
     {
-        _input = GameManager.GAME.Input;
+        _input = GameManager.INPUT;
         _currentSelection = null;
         _currentPlayer = null;
         enabled = false;

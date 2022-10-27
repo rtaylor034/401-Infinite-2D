@@ -12,19 +12,20 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Board _board;
     [SerializeField]
-    private Inputs _input;
-    [SerializeField]
     private Selector _selector;
 
     //public static reference to this single instance (there is and only ever will be 1 GameManager object).
     public static GameManager GAME;
+    public static Inputs INPUT;
 
-    public Inputs Input => _input;
 
     //-> Called before Start()
     private void Awake()
     {
+        INPUT = new Inputs();
+        INPUT.Enable();
         GAME = this;
+        INPUT.Test.Testprompt.performed += TestSelector;
         Debug.Log("GameManager is initialized");
     }
 
@@ -34,6 +35,11 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game is now running");
         _board.CreateBoard();
 
+    }
+
+    private void TestSelector(InputAction.CallbackContext context)
+    {
+        Debug.Log("Hey");
     }
 
 

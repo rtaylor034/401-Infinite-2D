@@ -126,4 +126,14 @@ public class Board : MonoBehaviour
         return hex;
     }
 
+    /// <summary>
+    /// Gets the transform.localPosition of the specified board coords.
+    /// </summary>
+    /// <param name="coords"></param>
+    /// <returns></returns>
+    public Vector3 GetLocalTransformAt(Vector3Int coords)
+    {
+        return coords.CartesianCoordsOf() * _hexSpacing;
+    }
+
 }

@@ -14,6 +14,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Selector selector;
 
+    //TBI
+    public Player CurrentPlayer => _turnRotation.Peek();
+
+    //TBI
+    private Queue<Player> _turnRotation;
+
+
     //Single instances
     public static GameManager GAME;
     public static Inputs INPUT;

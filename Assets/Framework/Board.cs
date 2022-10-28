@@ -23,10 +23,9 @@ public class Board : MonoBehaviour
     /// </summary>
     public HashSet<Unit> Units => new HashSet<Unit>(_units);
 
-    public async void CreateBoard()
+    public void CreateBoard()
     {
-        //waits for GenerateMap() to finish, then runs GenerateUnits()
-        await GenerateMap(Map.MapList[0]);
+        GenerateMap(Map.MapList[0]);
         GenerateUnits();
     }
 
@@ -45,13 +44,12 @@ public class Board : MonoBehaviour
         }
     }
 
-    //Currently async (awaitable) so that hex generation can be visualized/delayed, this is completely unecessary functionally.
     /// <summary>
     /// Instantiates/renders the physical Hexes of the given <see cref="Map"/>
     /// </summary>
     /// <param name="map"></param>
     /// <param name="hexSpacing"></param>
-    private async Task GenerateMap(Map map)
+    private void GenerateMap(Map map)
     {
         /*
          The first element(string) of map.HXN starts at 0,0,0(bottom left of map), and then each char in that string generates a Hex at that position.
@@ -66,7 +64,7 @@ public class Board : MonoBehaviour
             string hstr = map.HXN[u];
 
             //for logging
-            Debug.Log($"generating row: [{hstr}]");
+            //Debug.Log($"generating row: [{hstr}]");
 
             for (int x = 0; x < hstr.Length; x++)
             {
@@ -80,9 +78,6 @@ public class Board : MonoBehaviour
                 //Uses helper class BoardCoords 
                 hex.transform.localPosition = GetLocalTransformAt(coords);
                 _hexDict.Add(coords, hex);
-
-                //for visualization (Can be removed)
-                await Task.Delay(20);
 
             }
 

@@ -10,9 +10,11 @@ public abstract class Hex : Selectable
     //position in board coordinates.
     public Vector3Int Position { get; private set; }
 
-    public Unit Occupant { get; set; } = null;
+    public virtual bool IsOccupiable => Occupant == null;
+    public virtual bool BlocksPathing => false;
+    public virtual bool BlocksTargeting => false;
 
-    public virtual bool IsBlocker => false;
+    public Unit Occupant { get; set; } = null;
 
     public Hex Init(Vector3Int pos)
     {

@@ -11,11 +11,17 @@ public class Unit : Selectable
     public int ID { get; private set; }
 
     public Vector3Int Position { get; private set; }
+    public Board Board => _board;
+
+    protected Board _board;
 
     private static int _idCount = 0;
+    
+    
 
-    public Unit Init(int maxhp, Player.ETeam team, Vector3Int pos)
+    public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
     {
+        _board = board;
         Position = pos;
         Team = team;
         MaxHP = maxhp;

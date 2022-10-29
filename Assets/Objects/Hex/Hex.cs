@@ -15,9 +15,13 @@ public abstract class Hex : Selectable
     public virtual bool BlocksTargeting => false;
 
     public Unit Occupant { get; set; } = null;
+    public Board Board => _board;
 
-    public Hex Init(Vector3Int pos)
+    protected Board _board;
+
+    public Hex Init(Board board, Vector3Int pos)
     {
+        _board = board;
         Position = pos;
         return this;
     }

@@ -38,7 +38,7 @@ public class Board : MonoBehaviour
         {
             BaseHex b = hex as BaseHex;
             Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position);
+            u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
             b.Occupant = u;
             _units.Add(u);
         }

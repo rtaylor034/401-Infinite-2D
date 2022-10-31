@@ -56,7 +56,6 @@ public static class BoardCoords
         return result;
     }
 
-
     /// <summary>
     /// Gets all board coordinates that are adjacent to the one specified.
     /// </summary>

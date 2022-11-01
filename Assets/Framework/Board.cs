@@ -21,7 +21,8 @@ public class Board : MonoBehaviour
     /// <summary>
     /// Gets the set of all Units on the board.
     /// </summary>
-    public HashSet<Unit> Units => new HashSet<Unit>(_units);
+    public HashSet<Unit> Units => new(_units);
+    public Dictionary<Vector3Int, Hex> HexDict => new(_hexDict);
 
     public void CreateBoard()
     {
@@ -34,11 +35,14 @@ public class Board : MonoBehaviour
     /// </summary>
     private void GenerateUnits()
     {
-        foreach (Hex hex in new HashSet<Hex>(_hexDict.Values).Where(h => h is BaseHex))
+        foreach (Hex hex in _hexDict.Values)
         {
-            BaseHex b = hex as BaseHex;
-            Unit u = Instantiate(_UnitObject, transform).Init(3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
+
+            if (hex is not BaseHex b) continue;
+
+            Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
+            u.transform.localPosition = GetLocalTransformAt(b.Position);
+
             b.Occupant = u;
             _units.Add(u);
         }
@@ -73,7 +77,7 @@ public class Board : MonoBehaviour
 
                 if (hexprefab == null) continue;
 
-                Hex hex = Instantiate(hexprefab, transform).Init(coords);
+                Hex hex = Instantiate(hexprefab, transform).Init(this, coords);
 
                 //Uses helper class BoardCoords 
                 hex.transform.localPosition = GetLocalTransformAt(coords);

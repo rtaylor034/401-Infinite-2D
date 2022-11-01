@@ -78,13 +78,15 @@ public class Selector : MonoBehaviour
 
     private void FinalizeSelection(SelectorArgs args)
     {
-        _confirmMethod?.Invoke(args);
-
+        enabled = false;
         foreach (var s in _currentPrompt)
         {
             s.DisableSelection();
         }
-        enabled = false;
+        _confirmMethod?.Invoke(args);
+
+        
+        
     }
 
     private void SelectionCancel()

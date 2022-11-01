@@ -37,10 +37,12 @@ public class Board : MonoBehaviour
     {
         foreach (Hex hex in _hexDict.Values)
         {
+
             if (hex is not BaseHex b) continue;
 
             Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
             u.transform.localPosition = GetLocalTransformAt(b.Position);
+
             b.Occupant = u;
             _units.Add(u);
         }

@@ -19,6 +19,12 @@ public class Unit : Selectable
     private static int _idCount = 0;
     
     
+    public void UpdatePosition(Vector3Int pos)
+    {
+        _board.HexAt(Position).Occupant = null;
+        Position = pos;
+        _board.HexAt(pos).Occupant = this;
+    }
 
     public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
     {

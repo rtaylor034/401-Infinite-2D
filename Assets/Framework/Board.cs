@@ -94,13 +94,18 @@ public class Board : MonoBehaviour
     /// Gets the Hex at the given coordinates.
     /// </summary>
     /// <remarks>
-    /// Returns null if there is not a Hex at the given coordinates.
+    /// If no hex is found at the coordinates: <br></br>
+    /// > <paramref name="strict"/> = true : throws an exception. (Default) <br></br>
+    /// > <paramref name="strict"/> = false : returns null.
     /// </remarks>
     /// <param name="coords"></param>
     /// <returns></returns>
-    public Hex HexAt(Vector3Int coords)
+    public Hex HexAt(Vector3Int coords, bool strict = true)
     {
-        if (!_hexDict.TryGetValue(coords, out Hex hex)) return null;
+        if (!_hexDict.TryGetValue(coords, out Hex hex))
+        {
+            if (strict) throw new System.Exception($"No Hex found at {coords} on board {name} | (strict was set)");
+        }
         return hex;
     }
 

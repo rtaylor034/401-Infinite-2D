@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     private LinkedList<Player> _turnOrder;
 
     //TBI
-    private List<GameAction> _game;
+    private Stack<GameAction> _game;
 
 
     //Single instances
@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        board.CreateBoard();
+        StartGame();
     }
 
     private void Update()
@@ -57,24 +57,39 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    public void StartGame()
+    private void StartGame()
     {
         _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
         _turnOrder.AddAfter(_turnOrder.First, new Player(Player.ETeam.Red));
         
         _game = new();
+
+        board.CreateBoard();
     }
 
-    public void FinalizeGameAction(GameAction action)
+    public void PushGameAction(GameAction action)
     {
-        _game.Add(action);
+        _game.Push(action);
         action.Perform();
 
-        //Turn Handling
         if (action is GameAction.Turn turn) HandleTurnAction(turn);
     }
 
-    public void HandleTurnAction(GameAction.Turn turn, bool undo = false)
+    private bool UndoLastGameAction(bool canUndoTurns)
+    {
+        GameAction action = _game.Peek();
+        if (action is GameAction.Turn turn)
+        {
+            if (!canUndoTurns) return false;
+            HandleTurnAction(turn, true);
+        }
+
+        action.Undo();
+        _game.Pop();
+        return true;
+    }
+
+    private void HandleTurnAction(GameAction.Turn turn, bool undo = false)
     {
         if (undo)
         {
@@ -83,7 +98,6 @@ public class GameManager : MonoBehaviour
         }
 
         CurrentPlayer = turn.ToPlayer;
-
     }
 
 }

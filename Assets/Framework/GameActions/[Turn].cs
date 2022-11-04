@@ -2,9 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public partial class GameAction
+public abstract partial class GameAction
 {
-
 
     public class Turn : GameAction
     {
@@ -32,7 +31,7 @@ public partial class GameAction
 
         public static void Declare(Player fromPlayer, Player toPlayer)
         {
-            GameManager.GAME.FinalizeGameAction(new Turn(fromPlayer, toPlayer));
+            GameManager.GAME.PushGameAction(new Turn(fromPlayer, toPlayer));
         }
     }
 

@@ -59,11 +59,15 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        _game = new();
+
         _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
         _turnOrder.AddLast(new Player(Player.ETeam.Red));
         _turnOrder.AddLast(_turnOrder.First);
-        
-        _game = new();
+
+        CurrentPlayer = null;
+        NextTurn();
+
 
         board.CreateBoard();
     }
@@ -74,6 +78,12 @@ public class GameManager : MonoBehaviour
     }
 
     #region GameActions
+
+    /// <summary>
+    /// Adds <paramref name="action"/> to this game's main GameAction stack and performs it.<br></br>
+    /// (Should be called in every GameActions static Declare() method)
+    /// </summary>
+    /// <param name="action"></param>
     public void PushGameAction(GameAction action)
     {
         _game.Push(action);

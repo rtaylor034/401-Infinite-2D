@@ -44,8 +44,10 @@ public abstract partial class GameAction
             void Confirm(Selector.SelectorArgs args)
             {
                 if (args.Selection is not Hex h) throw new System.Exception();
-                Move action = new Move(performer, movingUnit, movingUnit.Position, h.Position);
-                //UNFINISHED
+                Move action = new(performer, movingUnit, movingUnit.Position, h.Position);
+                GameManager.GAME.PushGameAction(action);
+
+                confirmMethod?.Invoke(args);
             }
 
 

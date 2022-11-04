@@ -6,6 +6,12 @@ using UnityEngine;
 public class Player
 {
 
+    public ETeam Team { get; private set; }
+    
+    public Player(ETeam team)
+    {
+        Team = team;
+    }
     //main team enum
     public enum ETeam : byte
     {

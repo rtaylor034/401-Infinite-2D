@@ -15,14 +15,17 @@ public class GameManager : MonoBehaviour
     private Selector selector;
 
     //TBI
-    public Player CurrentPlayer => _turnRotation.Peek();
+    public Player CurrentPlayer { get; private set; }
+
+    private LinkedList<Player> _turnOrder;
 
     //TBI
-    private Queue<Player> _turnRotation;
+    private List<GameAction> _game;
 
 
     //Single instances
     public static GameManager GAME;
+    public static Selector SELECTOR;
     public static Inputs INPUT;
 
     #region Setups
@@ -32,6 +35,7 @@ public class GameManager : MonoBehaviour
         INPUT = new Inputs();
         INPUT.Enable();
         GAME = this;
+        SELECTOR = selector;
     }
 
     #endregion
@@ -52,4 +56,34 @@ public class GameManager : MonoBehaviour
 
     }
     #endregion
+
+    public void StartGame()
+    {
+        _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
+        _turnOrder.AddAfter(_turnOrder.First, new Player(Player.ETeam.Red));
+        
+        _game = new();
+    }
+
+    public void FinalizeGameAction(GameAction action)
+    {
+        _game.Add(action);
+        action.Perform();
+
+        //Turn Handling
+        if (action is GameAction.Turn turn) HandleTurnAction(turn);
+    }
+
+    public void HandleTurnAction(GameAction.Turn turn, bool undo = false)
+    {
+        if (undo)
+        {
+            CurrentPlayer = turn.FromPlayer;
+            return;
+        }
+
+        CurrentPlayer = turn.ToPlayer;
+
+    }
+
 }

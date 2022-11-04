@@ -42,7 +42,6 @@ public class Board : MonoBehaviour
 
             Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
             u.transform.localPosition = GetLocalTransformAt(b.Position);
-
             b.Occupant = u;
             _units.Add(u);
         }
@@ -104,7 +103,7 @@ public class Board : MonoBehaviour
     {
         if (!_hexDict.TryGetValue(coords, out Hex hex))
         {
-            if (strict) throw new System.Exception($"No Hex found at {coords} on board {name} | (strict was set)");
+            if (strict) throw new System.Exception($"No Hex found at {coords} on board {name} | (strict was set true)");
         }
         return hex;
     }

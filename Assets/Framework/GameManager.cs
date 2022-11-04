@@ -60,13 +60,20 @@ public class GameManager : MonoBehaviour
     private void StartGame()
     {
         _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
-        _turnOrder.AddAfter(_turnOrder.First, new Player(Player.ETeam.Red));
+        _turnOrder.AddLast(new Player(Player.ETeam.Red));
+        _turnOrder.AddLast(_turnOrder.First);
         
         _game = new();
 
         board.CreateBoard();
     }
 
+    private void NextTurn()
+    {
+        GameAction.Turn.Declare(CurrentPlayer, _turnOrder.Find(CurrentPlayer).Next.Value);
+    }
+
+    #region GameActions
     public void PushGameAction(GameAction action)
     {
         _game.Push(action);
@@ -100,4 +107,5 @@ public class GameManager : MonoBehaviour
         CurrentPlayer = turn.ToPlayer;
     }
 
+    #endregion
 }

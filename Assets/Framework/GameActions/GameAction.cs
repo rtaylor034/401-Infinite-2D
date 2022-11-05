@@ -19,7 +19,7 @@ public abstract partial class GameAction
     public void Undo()
     {
         for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
-        Undo();
+        InternalUndo();
     }
 
     protected abstract void InternalPerform();

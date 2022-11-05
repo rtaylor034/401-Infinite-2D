@@ -17,8 +17,8 @@ public class GameManager : MonoBehaviour
     public Player CurrentPlayer { get; private set; }
 
     private LinkedList<Player> _turnOrder;
-    private bool _gameActive = false;
     private Stack<GameAction> _game;
+    private bool _gameActive = false;
 
 
     //Singleton instances
@@ -91,7 +91,8 @@ public class GameManager : MonoBehaviour
 
     private void OnTurn(GameAction.Turn action)
     {
-        GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e += 2);
+        GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
+        GameAction.EnergyChange.DeclareAsResultant(action, action.FromPlayer, e => 0);
     }
 
     #region GameActions

@@ -35,22 +35,9 @@ public abstract partial class GameAction
         }
 
 
-        public static void Declare(Player performer, Unit movingUnit, int maxHexes, Selector.SelectionConfirmMethod confirmMethod)
+        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
         {
-            //TBI (Dummy code)
-            
-            GameManager.SELECTOR.Prompt(movingUnit.Board.HexDict.Values, Confirm);
-
-            void Confirm(Selector.SelectorArgs args)
-            {
-                if (args.Selection is not Hex h) throw new System.Exception();
-                Move action = new(performer, movingUnit, movingUnit.Position, h.Position);
-                GameManager.GAME.PushGameAction(action);
-
-                confirmMethod?.Invoke(args);
-            }
-
-
+            GameManager.GAME.PushGameAction(new Move(performer, movedUnit, fromPos, ToPos));
         }
     }
 

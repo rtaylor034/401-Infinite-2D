@@ -27,7 +27,7 @@ public class Selector : MonoBehaviour
 
     #endregion
 
-
+    #region Unity Messages
     private void Awake()
     {
         enabled = false;
@@ -42,6 +42,7 @@ public class Selector : MonoBehaviour
     {
         SInputs(false);
     }
+    #endregion
 
     //TODO: add Player argument at some point
     /// <summary>

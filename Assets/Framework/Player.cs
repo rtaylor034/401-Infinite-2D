@@ -7,6 +7,7 @@ public class Player
 {
 
     public ETeam Team { get; private set; }
+    public int Energy { get; set; } = 0;
     
     public Player(ETeam team)
     {
@@ -18,6 +19,7 @@ public class Player
         Blue,
         Red
     }
+
 
     //Player class stores a player's Abilities, Passive, Control spheres, etc.
     //Under normal circumstances there will only be 2 player instances (Blue player and Red player).

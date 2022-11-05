@@ -18,8 +18,7 @@ public class GameManager : MonoBehaviour
     public Player CurrentPlayer { get; private set; }
 
     private LinkedList<Player> _turnOrder;
-
-    //TBI
+    private bool _gameActive = false;
     private Stack<GameAction> _game;
 
 
@@ -59,6 +58,9 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        if (_gameActive) throw new Exception("Game is already active!");
+
+        _gameActive = true;
         _game = new();
 
         _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
@@ -66,15 +68,29 @@ public class GameManager : MonoBehaviour
         _turnOrder.AddLast(_turnOrder.First);
 
         CurrentPlayer = null;
+        GameAction.Turn.OnPerform += OnTurn;
         NextTurn();
 
 
         board.CreateBoard();
     }
 
+    private void EndGame()
+    {
+        if (!_gameActive) throw new Exception("Game is not active!");
+        _gameActive = false;
+
+
+    }
+
     private void NextTurn()
     {
         GameAction.Turn.Declare(CurrentPlayer, _turnOrder.Find(CurrentPlayer).Next.Value);
+    }
+
+    private void OnTurn(GameAction.Turn action)
+    {
+        GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e += 2);
     }
 
     #region GameActions

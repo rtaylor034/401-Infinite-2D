@@ -18,7 +18,7 @@ public abstract partial class GameAction
     }
     public void Undo()
     {
-        for (int i = 0; i < _resultantActions.Count; i++) _resultantActions[i].Undo();
+        for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
         Undo();
     }
 
@@ -30,8 +30,10 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
-    protected void MakeResultantOf(GameAction action)
+    protected GameAction AddResultant(GameAction action)
     {
         action._resultantActions.Add(this);
+        action.InternalPerform();
+        return this;
     }
 }

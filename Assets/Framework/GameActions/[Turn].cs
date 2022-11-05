@@ -23,7 +23,7 @@ public abstract partial class GameAction
             //Handled by GameManager
         }
 
-        private Turn(Player fromPlayer, Player toPlayer) : base(fromPlayer)
+        private Turn(Player fromPlayer, Player toPlayer) : base(toPlayer)
         {
             FromPlayer = fromPlayer;
             ToPlayer = toPlayer;

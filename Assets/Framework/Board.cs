@@ -121,29 +121,43 @@ public class Board : MonoBehaviour
     }
 
     public delegate bool PathingCondition(Hex prev, Hex next);
-    //Not particularly effecient ;)
-    public HashSet<Hex> PathFind(Vector3Int startPos, int range, int minRange = 0, PathingCondition condition = null)
+    public delegate bool FinalCondition(Hex hex);
+    //Not particularly effecient, but straightforward.
+    public HashSet<Hex> PathFind(Vector3Int startPos, int range, PathingCondition pathCondition, FinalCondition finalCondition)
     {
-        HashSet<Hex> o = new();
-        HashSet<Hex> branches = new();
+        HashSet<Hex> o = new() { HexAt(startPos) };
+        Recur(o, range);
 
-        branches.Add(HexAt(startPos));
-
-        for (int r = 0; r <= range; r++)
+        void Recur(HashSet<Hex> roots, int r)
         {
-            foreach (Hex prev in branches)
+            o.UnionWith(roots);
+            if (r == 0) return;
+
+            HashSet<Hex> branches = new();
+
+            foreach (Hex prev in roots)
             {
                 foreach (Vector3Int nPos in prev.Position.GetAdjacent())
                 {
-                    Hex next = HexAt(nPos);
-                    //ENDED HERE, WILL FINISH LATER
+                    Hex next = HexAt(nPos, false);
+                    if (next is null) continue;
 
+                    if (pathCondition(prev, next))
+                    {
+                        branches.Add(next);
+                    }
                 }
-
-
+                
             }
+            branches.ExceptWith(o);
+            branches.ExceptWith(roots);
+            if (branches.Count > 0) Recur(branches, r - 1);
+
         }
-        throw new System.NotImplementedException();
+
+        o.RemoveWhere(hex => !finalCondition(hex));
+
+        return o;
     }
 
 }

@@ -120,4 +120,30 @@ public class Board : MonoBehaviour
         return new Vector3(fpos.x, fpos.y, zPos);
     }
 
+    public delegate bool PathingCondition(Hex prev, Hex next);
+    //Not particularly effecient ;)
+    public HashSet<Hex> PathFind(Vector3Int startPos, int range, int minRange = 0, PathingCondition condition = null)
+    {
+        HashSet<Hex> o = new();
+        HashSet<Hex> branches = new();
+
+        branches.Add(HexAt(startPos));
+
+        for (int r = 0; r <= range; r++)
+        {
+            foreach (Hex prev in branches)
+            {
+                foreach (Vector3Int nPos in prev.Position.GetAdjacent())
+                {
+                    Hex next = HexAt(nPos);
+                    //ENDED HERE, WILL FINISH LATER
+
+                }
+
+
+            }
+        }
+        throw new System.NotImplementedException();
+    }
+
 }

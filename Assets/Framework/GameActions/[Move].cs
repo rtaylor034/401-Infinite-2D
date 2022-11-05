@@ -37,7 +37,12 @@ public abstract partial class GameAction
 
         public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
         {
-            GameManager.GAME.PushGameAction(new Move(performer, movedUnit, fromPos, ToPos));
+            FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
+        }
+
+        public static void Prompt(Player performer, Unit movingUnit, int maxUnits, Selector.SelectorArgs continueMethod)
+        {
+
         }
     }
 

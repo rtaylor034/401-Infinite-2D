@@ -36,4 +36,9 @@ public abstract partial class GameAction
         action.InternalPerform();
         return this;
     }
+
+    private static void FinalizeDeclare(GameAction action)
+    {
+        GameManager.GAME.PushGameAction(action);
+    }
 }

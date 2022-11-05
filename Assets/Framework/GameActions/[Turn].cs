@@ -31,7 +31,7 @@ public abstract partial class GameAction
 
         public static void Declare(Player fromPlayer, Player toPlayer)
         {
-            GameManager.GAME.PushGameAction(new Turn(fromPlayer, toPlayer));
+            FinalizeDeclare(new Turn(fromPlayer, toPlayer));
         }
     }
 

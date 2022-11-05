@@ -34,7 +34,6 @@ public abstract partial class GameAction
 
         public static void DeclareAsResultant(GameAction resultOf, Player reciever, Func<int, int> changeFunction)
         {
-            
             resultOf.AddResultant(new EnergyChange(resultOf.Performer, reciever, reciever.Energy, changeFunction(reciever.Energy)));
         }
 

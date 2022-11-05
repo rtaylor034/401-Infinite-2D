@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Selector selector;
 
-    //TBI
     public Player CurrentPlayer { get; private set; }
 
     private LinkedList<Player> _turnOrder;
@@ -22,7 +21,7 @@ public class GameManager : MonoBehaviour
     private Stack<GameAction> _game;
 
 
-    //Single instances
+    //Singleton instances
     public static GameManager GAME;
     public static Selector SELECTOR;
     public static Inputs INPUT;
@@ -61,8 +60,10 @@ public class GameManager : MonoBehaviour
         if (_gameActive) throw new Exception("Game is already active!");
 
         _gameActive = true;
+
         _game = new();
 
+        _turnOrder = new();
         _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
         _turnOrder.AddLast(new Player(Player.ETeam.Red));
         _turnOrder.AddLast(_turnOrder.First);
@@ -71,16 +72,16 @@ public class GameManager : MonoBehaviour
         GameAction.Turn.OnPerform += OnTurn;
         NextTurn();
 
-
         board.CreateBoard();
     }
 
+    //TBI
     private void EndGame()
     {
         if (!_gameActive) throw new Exception("Game is not active!");
         _gameActive = false;
 
-
+        GameAction.Turn.OnPerform -= OnTurn;
     }
 
     private void NextTurn()

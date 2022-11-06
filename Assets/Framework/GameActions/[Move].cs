@@ -40,10 +40,40 @@ public abstract partial class GameAction
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
         }
 
-        public static void Prompt(Player performer, Unit movingUnit, int maxUnits, Selector.SelectorArgs continueMethod)
+        public static void Prompt(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod, int minDistance = 0)
         {
+            Unit u = movingUnit;
+            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (minDistance, distance), null, null), null);
 
         }
+
+
+        private static class MoveConditions
+        {
+            public delegate Board.PathingCondition UnitPathingCondition(Unit u);
+            public delegate Board.FinalCondition UnitFinalCondition(Unit u);
+
+
+            public static Board.PathingCondition GetPathingCondition(Unit movingUnit, IEnumerable<UnitPathingCondition> unitConditions)
+            {
+                return (prev, next) =>
+                {
+                    foreach(var condition in unitConditions)
+                    {
+                        if (!condition.Invoke(movingUnit).Invoke(prev, next)) return false;
+                    }
+                    return true;
+                };
+            }
+
+            public static Board.PathingCondition ExcludeBlockers(Unit u)
+            {
+                return (prev, next) => !next.BlocksPathing;
+            }
+
+        }
+
+
     }
 
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -123,15 +124,19 @@ public class Board : MonoBehaviour
     public delegate bool PathingCondition(Hex prev, Hex next);
     public delegate bool FinalCondition(Hex hex);
     //Not particularly effecient, but straightforward.
-    public HashSet<Hex> PathFind(Vector3Int startPos, int range, PathingCondition pathCondition, FinalCondition finalCondition)
+    public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, PathingCondition pathCondition, FinalCondition finalCondition)
     {
         HashSet<Hex> o = new() { HexAt(startPos) };
-        Recur(o, range);
+
+        HashSet<Hex> traversed = new();
+        Recur(o, range.Item2);
 
         void Recur(HashSet<Hex> roots, int r)
         {
-            o.UnionWith(roots);
+            if (r > range.Item1) o.UnionWith(roots);
             if (r == 0) return;
+
+            traversed.UnionWith(roots);
 
             HashSet<Hex> branches = new();
 
@@ -149,10 +154,9 @@ public class Board : MonoBehaviour
                 }
                 
             }
-            branches.ExceptWith(o);
+            branches.ExceptWith(traversed);
             branches.ExceptWith(roots);
             if (branches.Count > 0) Recur(branches, r - 1);
-
         }
 
         o.RemoveWhere(hex => !finalCondition(hex));

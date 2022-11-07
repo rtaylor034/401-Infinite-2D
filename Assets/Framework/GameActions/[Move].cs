@@ -41,10 +41,10 @@ public abstract partial class GameAction
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
         }
 
-        public static void PromptBasic(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod, int minDistance = 0)
+        public static void PromptBasic(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod)
         {
             Unit u = movingUnit;
-            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (minDistance, distance), null, null), null);
+            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (0, distance), null, null), null);
 
         }
 

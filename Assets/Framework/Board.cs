@@ -121,10 +121,10 @@ public class Board : MonoBehaviour
         return new Vector3(fpos.x, fpos.y, zPos);
     }
 
-    public delegate bool PathingCondition(Hex prev, Hex next);
-    public delegate bool FinalCondition(Hex hex);
+    public delegate bool ContinuePathCondition(Hex prev, Hex next);
+    public delegate bool FinalPathCondition(Hex hex);
     //Not particularly effecient, but straightforward.
-    public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, PathingCondition pathCondition, FinalCondition finalCondition)
+    public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
     {
         HashSet<Hex> o = new() { HexAt(startPos) };
 

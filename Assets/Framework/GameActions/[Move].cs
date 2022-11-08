@@ -36,19 +36,28 @@ public abstract partial class GameAction
         }
 
 
-        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
+        private static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
         {
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
         }
 
-        public static void PromptBasic(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod)
+        public static void Prompt(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod)
         {
             Unit u = movingUnit;
             GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (0, distance), null, null), null);
 
         }
+        //make struct "MovePromptArgs" that contains all arguments for moevement prompt.
 
-        #region Standard Movement Conditions
+        [Flags]
+        public enum ECollisionIgnoresF : byte
+        {
+            None = 0,
+            Walls = 1,
+            Bases = 2,
+        }
+
+        #region Standard Collision Conditions
         private static Board.ContinuePathCondition HexCollision => (prev, next) =>
         !next.BlocksPathing;
         private static Func<Unit, Board.ContinuePathCondition> OpposingUnitCollision => u => (prev, next) =>

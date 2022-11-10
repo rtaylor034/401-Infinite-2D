@@ -142,13 +142,12 @@ public abstract partial class GameAction
                 customFinalPathRestriction = _ => true;
                 customFinalPathOverride = _ => false;
             }
-            
-
         }
 
-        
-
-        
+        public override string ToString()
+        {
+            return $"<MOVE>: {MovedUnit}: {FromPos} -> {ToPos}" + base.ToString();
+        }
 
     }
 

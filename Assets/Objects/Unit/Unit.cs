@@ -46,6 +46,11 @@ public class Unit : Selectable
     {
         Debug.Log($"I am unit {ID} with {HP} HP.");
     }
+
+    public override string ToString()
+    {
+        return $"[U{ID}{Team.ToString()[0]}]";
+    }
     #region Selectable Implementations
     protected override void OnHover(bool state)
     {

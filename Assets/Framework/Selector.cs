@@ -67,14 +67,22 @@ public class Selector : MonoBehaviour
             s.EnableSelection(SelectionConfirm);
         }
 
-        if (_currentPrompt.Count() == 0) throw new ArgumentException("Empty select prompt given.");
+        if (_currentPrompt.Count() == 0) SelectionEmpty();
 
         return true;
     }
 
     private void SelectionConfirm(Selectable selection)
     {
-        FinalizeSelection(new SelectorArgs(selection, false));
+        FinalizeSelection(new SelectorArgs(selection));
+    }
+    private void SelectionCancel()
+    {
+        FinalizeSelection(new SelectorArgs(null, cancelled: true));
+    }
+    private void SelectionEmpty()
+    {
+        FinalizeSelection(new SelectorArgs(null, empty: true));
     }
 
     private void FinalizeSelection(SelectorArgs args)
@@ -89,11 +97,7 @@ public class Selector : MonoBehaviour
         
         
     }
-
-    private void SelectionCancel()
-    {
-        FinalizeSelection(new SelectorArgs(null, true));
-    }
+    
 
     /// <summary>
     /// Forces the selection prompt to cancel immediatly.
@@ -121,9 +125,11 @@ public class Selector : MonoBehaviour
     {
         public Selectable Selection { get; set; }
         public bool WasCancelled { get; set; }
+        public bool WasEmpty { get; set; }
 
-        public SelectorArgs(Selectable selection, bool cancelled)
+        public SelectorArgs(Selectable selection, bool cancelled = false, bool empty = false)
         {
+            WasEmpty = empty;
             Selection = selection;
             WasCancelled = cancelled;
         }

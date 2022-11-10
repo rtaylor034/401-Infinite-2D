@@ -6,6 +6,8 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Experimental.AI;
+using UnityEngine.UIElements;
+using static UnityEditor.PlayerSettings;
 
 public class Board : MonoBehaviour
 {
@@ -98,15 +100,30 @@ public class Board : MonoBehaviour
     /// > <paramref name="strict"/> = true : throws an exception. (Default) <br></br>
     /// > <paramref name="strict"/> = false : returns null.
     /// </remarks>
-    /// <param name="coords"></param>
+    /// <param name="position"></param>
     /// <returns></returns>
-    public Hex HexAt(Vector3Int coords, bool strict = true)
+    public Hex HexAt(Vector3Int position, bool strict = false)
     {
-        if (!_hexDict.TryGetValue(coords, out Hex hex))
+        if (!_hexDict.TryGetValue(position, out Hex hex))
         {
-            if (strict) throw new System.Exception($"No Hex found at {coords} on board {name} | (strict was set true)");
+            if (strict) throw new System.Exception($"No Hex found at {position} on board {name} | (strict was set true)");
         }
         return hex;
+    }
+
+    public HashSet<Hex> HexesAt(IEnumerable<Vector3Int> positions, bool strict = false)
+    {
+        HashSet<Hex> o = new HashSet<Hex>();
+
+        foreach (Vector3Int pos in positions)
+        {
+            if (!_hexDict.TryGetValue(pos, out Hex hex))
+            {
+                if (strict) throw new System.Exception($"No Hex found at {pos} on board {name} | (strict was set true)");
+            }
+            o.Add(hex);
+        }
+        return o;
     }
 
     //ALL changing of a GameObject's in-world position should happen in Board or GameManager. (transform.position should not be used, use transform.localPosition).

@@ -43,39 +43,47 @@ public abstract partial class GameAction
 
         public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
         {
-            Unit u = args.movingUnit;
-            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (args.minDistance, args.distance), GetCombinedContinueCondition(args), h => (args.customFinalPathRestriction(h) && h.IsOccupiable) || args.customFinalPathOverride(h)), OnSelect);
+            Unit u = args.MovingUnit;
+
+            if (args is PathArgs p)
+            {
+                GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), h => (p.CustomFinalRestriction(h) && h.IsOccupiable) || p.CustomFinalOverride(h)), OnSelect);
+            }
+            if (args is PositionalArgs a)
+            {
+
+            }
             
             void OnSelect(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is Hex s)
                 {
-                    Declare(args.performer, u, u.Position, s.Position);
+                    Declare(args.Performer, u, u.Position, s.Position);
                 }
 
                 confirmMethod?.Invoke(sel);
             }
         }
 
-        private static Board.ContinuePathCondition GetCombinedContinueCondition(PromptArgs args)
+        private static Board.ContinuePathCondition GetCombinedPathingCondition(PathArgs args)
         {
-            Unit u = args.movingUnit;
-            PromptArgs.ECollisionIgnoresF ci = args.collisionIgnores;
-            (PromptArgs.EDirectionalsF, Vector3Int) dir = args.directionals;
+            Unit u = args.MovingUnit;
+            PathArgs.ECollisionIgnoresF ci = args.CollisionIgnores;
+            (PathArgs.EDirectionalsF, Vector3Int) dir = args.Directionals;
             var dpos = dir.Item2;
 
             return (p, n) =>
-            ((ci.HasFlag(PromptArgs.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
-            (ci.HasFlag(PromptArgs.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
+            ((ci.HasFlag(PathArgs.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
+            (ci.HasFlag(PathArgs.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
             &&
-            ((dir.Item1 == PromptArgs.EDirectionalsF.None) ||
-            (dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
-            (dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
-            dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
+            ((dir.Item1 == PathArgs.EDirectionalsF.None) ||
+            (dir.Item1.HasFlag(PathArgs.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
+            (dir.Item1.HasFlag(PathArgs.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
+            dir.Item1.HasFlag(PathArgs.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
             &&
-            args.customPathingRestriction(p, n))
+            args.CustomPathingRestriction(p, n))
             ||
-            args.customPathingOverride(p, n);
+            args.CustomPathingOverride(p, n);
 
         }
 
@@ -98,21 +106,31 @@ public abstract partial class GameAction
 
         #endregion
 
-        public struct PromptArgs
+
+        public abstract class PromptArgs
         {
-            public Player performer;
-            public Unit movingUnit;
-            public int distance;
-            public int minDistance;
-            public ECollisionIgnoresF collisionIgnores;
-            public (EDirectionalsF, Vector3Int) directionals;
+            public Player Performer { get; set; }
+            public Unit MovingUnit { get; set; }
+            public Board.FinalPathCondition CustomFinalRestriction { get; set; } = _ => true;
+            public Board.FinalPathCondition CustomFinalOverride { get; set; } = _ => false;
+
+            protected PromptArgs(Player performer, Unit movingUnit)
+            {
+                Performer = performer;
+                MovingUnit = movingUnit;
+            }
+        }
+        public class PathArgs : PromptArgs
+        {
+            public int Distance { get; set; }
+            public int MinDistance { get; set; } = 0;
+            public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
+            public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
 
             //Will stop pathing if return FALSE
-            public Board.ContinuePathCondition customPathingRestriction;
+            public Board.ContinuePathCondition CustomPathingRestriction { get; set; } = (_, _) => true;
             //Will always allow pathing if return TRUE (overrides all restrictions)
-            public Board.ContinuePathCondition customPathingOverride;
-            public Board.FinalPathCondition customFinalPathRestriction;
-            public Board.FinalPathCondition customFinalPathOverride;
+            public Board.ContinuePathCondition CustomPathingOverride { get; set; } = (_, _) => false;
 
             [Flags]
             public enum ECollisionIgnoresF : byte
@@ -129,18 +147,22 @@ public abstract partial class GameAction
                 Away = 2,
                 Around = 4
             }
-            public PromptArgs(Player performer, Unit movingUnit, int distance)
+            public PathArgs(Player performer, Unit movingUnit, int distance) : base(performer, movingUnit)
             {
-                this.performer = performer;
-                this.movingUnit = movingUnit;
-                this.distance = distance;
-                minDistance = 0;
-                collisionIgnores = ECollisionIgnoresF.None;
-                directionals = (EDirectionalsF.None, Vector3Int.zero);
-                customPathingOverride = (_, _) => false;
-                customPathingRestriction = (_, _) => true;
-                customFinalPathRestriction = _ => true;
-                customFinalPathOverride = _ => false;
+                Distance = distance;
+            }
+        }
+
+        public class PositionalArgs : PromptArgs
+        {
+            public Vector3Int AnchorPosition { get; set; }
+            public IEnumerable<Vector3Int> PositionalOffset { get; set; }
+            public bool SideDependent { get; set; } = true;
+
+            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset) : base(performer, movingUnit)
+            {
+                AnchorPosition = anchorPosition;
+                PositionalOffset = positionalOffset;
             }
         }
 

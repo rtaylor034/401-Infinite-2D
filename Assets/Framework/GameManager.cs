@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
             Debug.Log("moveprompted");
             Unit test = null;
             foreach (var u in board.Units) test = u;
-            GameAction.Move.Prompt(new GameAction.Move.PromptArgs(CurrentPlayer, test, 4), _ => Debug.Log("confirmed"));
+            GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, test, 4), _ => Debug.Log("confirmed"));
         };
         
     }

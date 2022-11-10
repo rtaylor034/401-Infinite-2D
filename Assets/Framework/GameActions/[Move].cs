@@ -11,6 +11,7 @@ public abstract partial class GameAction
     public class Move : GameAction
     {
         public static event GameActionEventHandler<Move> OnPerform;
+        public static event Action<PromptArgs> OnPrompt;
 
         public Unit MovedUnit { get; private set; }
         public Vector3Int FromPos { get; private set; }
@@ -43,6 +44,7 @@ public abstract partial class GameAction
 
         public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
         {
+            OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
 
             if (args is PathArgs p)
@@ -152,7 +154,6 @@ public abstract partial class GameAction
                 Distance = distance;
             }
         }
-
         public class PositionalArgs : PromptArgs
         {
             public Vector3Int AnchorPosition { get; set; }

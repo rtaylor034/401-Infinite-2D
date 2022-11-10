@@ -43,17 +43,22 @@ public abstract partial class GameAction
 
         public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod continueMethod)
         {
+            Unit u = args.movingUnit;
+            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (args.minDistance, args.distance), GetCombinedContinueCondition(args), h => (args.customFinalPathRestriction(h) && h.IsOccupiable) || args.customFinalPathOverride(h)), OnSelect);
             
-            
+            void OnSelect(Selector.SelectorArgs sel)
+            {
+
+            }
         }
 
-        private Board.ContinuePathCondition GetCombinedContinueCondition(PromptArgs args)
+        private static Board.ContinuePathCondition GetCombinedContinueCondition(PromptArgs args)
         {
             Unit u = args.movingUnit;
             PromptArgs.ECollisionIgnoresF ci = args.collisionIgnores;
             (PromptArgs.EDirectionalsF, Vector3Int) dir = args.directionals;
 
-            Board.ContinuePathCondition condition = args.CustomPathingRestrictions;
+            Board.ContinuePathCondition condition = args.customPathingRestriction;
 
             //Collision conditions (<Cond> && <col> && <col>...))
             if (!ci.HasFlag(PromptArgs.ECollisionIgnoresF.Walls)) condition = (p, n) => condition(p, n) && HexCollision(p, n) && OpposingUnitCollision(u)(p, n);
@@ -71,7 +76,7 @@ public abstract partial class GameAction
             }
 
             //Pathing override
-            condition = (p, n) => condition(p, n) || args.CustomPathingOverrides(p, n);
+            condition = (p, n) => condition(p, n) || args.customPathingOverride(p, n);
             return condition;
         }
 
@@ -103,6 +108,13 @@ public abstract partial class GameAction
             public ECollisionIgnoresF collisionIgnores;
             public (EDirectionalsF, Vector3Int) directionals;
 
+            //Will stop pathing if return FALSE
+            public Board.ContinuePathCondition customPathingRestriction;
+            //Will always allow pathing if return TRUE (overrides all restrictions)
+            public Board.ContinuePathCondition customPathingOverride;
+            public Board.FinalPathCondition customFinalPathRestriction;
+            public Board.FinalPathCondition customFinalPathOverride;
+
             [Flags]
             public enum ECollisionIgnoresF : byte
             {
@@ -118,13 +130,6 @@ public abstract partial class GameAction
                 Away = 2,
                 Around = 4
             }
-
-            //Will stop pathing if return FALSE
-            public Board.ContinuePathCondition CustomPathingRestrictions;
-
-            //Will always allow pathing if return TRUE (overrides all restrictions)
-            public Board.ContinuePathCondition CustomPathingOverrides;
-
             public PromptArgs(Player performer, Unit movingUnit, int distance)
             {
                 this.performer = performer;
@@ -133,8 +138,10 @@ public abstract partial class GameAction
                 minDistance = 0;
                 collisionIgnores = ECollisionIgnoresF.None;
                 directionals = (EDirectionalsF.None, Vector3Int.zero);
-                CustomPathingOverrides = (_, _) => false;
-                CustomPathingRestrictions = (_, _) => true;
+                customPathingOverride = (_, _) => false;
+                customPathingRestriction = (_, _) => true;
+                customFinalPathRestriction = _ => true;
+                customFinalPathOverride = _ => true;
             }
             
 

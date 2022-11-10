@@ -49,12 +49,33 @@ public abstract partial class GameAction
         }
         //make struct "MovePromptArgs" that contains all arguments for moevement prompt.
 
+        public struct PromptArgs
+        {
+            public Player performer;
+            public Unit movingUnit;
+            public int distance;
+            public int minDistance;
+            public ECollisionIgnoresF collisionIgnores;
+            public EDirectionalsF directionals;
+            public List<Board.ContinuePathCondition> CustomPathingRestrictions;
+            
+
+        }
+
         [Flags]
         public enum ECollisionIgnoresF : byte
         {
             None = 0,
             Walls = 1,
             Bases = 2,
+        }
+        [Flags]
+        public enum EDirectionalsF : byte
+        {
+            None = 0,
+            Toward = 1,
+            Away = 2,
+            Around = 4
         }
 
         #region Standard Collision Conditions

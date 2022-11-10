@@ -54,6 +54,7 @@ public abstract partial class GameAction
             if (args is PositionalArgs a)
             {
 
+                HashSet<Hex> positions = u.Board.HexesAt(a.PositionalOffsets)
             }
             
             void OnSelect(Selector.SelectorArgs sel)
@@ -88,6 +89,16 @@ public abstract partial class GameAction
             args.CustomPathingOverride(p, n);
 
         }
+        private static HashSet<Vector3Int> GetPositionalPositions(PositionalArgs args)
+        {
+            HashSet<Vector3Int> o = new HashSet<Vector3Int>();
+            foreach (var pos in args.PositionalOffsets)
+            {
+                o.Add(pos + args.AnchorPosition);
+            }
+            if (args.SideDependent && args.MovingUnit.Team == Player.ETeam.Red) o = BoardCoords.Mirror(o, (byte)BoardCoords.UpAxis);
+            return o;
+        }
 
         #region Standard Collision Conditions
         private static Board.ContinuePathCondition HexCollision => (_, next) =>
@@ -107,7 +118,6 @@ public abstract partial class GameAction
         BoardCoords.RadiusBetween(pos, prev.Position) > BoardCoords.RadiusBetween(pos, next.Position);
 
         #endregion
-
 
         public abstract class PromptArgs
         {
@@ -157,13 +167,13 @@ public abstract partial class GameAction
         public class PositionalArgs : PromptArgs
         {
             public Vector3Int AnchorPosition { get; set; }
-            public IEnumerable<Vector3Int> PositionalOffset { get; set; }
+            public IEnumerable<Vector3Int> PositionalOffsets { get; set; }
             public bool SideDependent { get; set; } = true;
 
             public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset) : base(performer, movingUnit)
             {
                 AnchorPosition = anchorPosition;
-                PositionalOffset = positionalOffset;
+                PositionalOffsets = positionalOffset;
             }
         }
 

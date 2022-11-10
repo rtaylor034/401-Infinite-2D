@@ -64,11 +64,10 @@ public class GameManager : MonoBehaviour
         _game = new();
 
         _turnOrder = new();
-        _turnOrder.AddFirst(new Player(Player.ETeam.Blue));
+        _turnOrder.AddLast(new Player(Player.ETeam.Blue));
         _turnOrder.AddLast(new Player(Player.ETeam.Red));
-        _turnOrder.AddLast(_turnOrder.First);
 
-        CurrentPlayer = null;
+        CurrentPlayer = Player.DummyPlayer;
         GameAction.Turn.OnPerform += OnTurn;
         NextTurn();
 
@@ -86,13 +85,16 @@ public class GameManager : MonoBehaviour
 
     private void NextTurn()
     {
-        GameAction.Turn.Declare(CurrentPlayer, _turnOrder.Find(CurrentPlayer).Next.Value);
+        var cnode = _turnOrder.Find(CurrentPlayer);
+        GameAction.Turn.Declare(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value);
+        
     }
 
     private void OnTurn(GameAction.Turn action)
     {
         GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
         GameAction.EnergyChange.DeclareAsResultant(action, action.FromPlayer, e => 0);
+        //Debug.Log($"OnTurn() {action}");
     }
 
     #region GameActions

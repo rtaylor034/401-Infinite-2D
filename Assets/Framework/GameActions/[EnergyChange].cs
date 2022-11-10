@@ -37,6 +37,10 @@ public abstract partial class GameAction
             resultOf.AddResultant(new EnergyChange(resultOf.Performer, reciever, reciever.Energy, changeFunction(reciever.Energy)));
         }
 
+        public override string ToString()
+        {
+            return $"<ENERGY>: {Reciever} = {BeforeAmount} -> {AfterAmount}" + base.ToString();
+        }
     }
 
 }

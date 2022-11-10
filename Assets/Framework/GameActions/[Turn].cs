@@ -33,6 +33,11 @@ public abstract partial class GameAction
         {
             FinalizeDeclare(new Turn(fromPlayer, toPlayer));
         }
+
+        public override string ToString()
+        {
+            return $"<TURN>: {FromPlayer} -> {ToPlayer}" + base.ToString();
+        }
     }
 
 }

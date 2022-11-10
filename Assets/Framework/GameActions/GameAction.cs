@@ -32,7 +32,7 @@ public abstract partial class GameAction
 
     protected GameAction AddResultant(GameAction action)
     {
-        action._resultantActions.Add(this);
+        _resultantActions.Add(action);
         action.InternalPerform();
         return this;
     }
@@ -40,5 +40,11 @@ public abstract partial class GameAction
     private static void FinalizeDeclare(GameAction action)
     {
         GameManager.GAME.PushGameAction(action);
+        Debug.Log($"(Action Declare) {action}");
+    }
+
+    public override string ToString()
+    {
+        return $" BY {Performer} [{string.Join(" | ", _resultantActions)}]";
     }
 }

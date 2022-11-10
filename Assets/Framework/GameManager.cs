@@ -94,7 +94,6 @@ public class GameManager : MonoBehaviour
     {
         GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
         GameAction.EnergyChange.DeclareAsResultant(action, action.FromPlayer, e => 0);
-        //Debug.Log($"OnTurn() {action}");
     }
 
     #region GameActions

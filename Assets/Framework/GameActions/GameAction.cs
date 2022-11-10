@@ -45,6 +45,6 @@ public abstract partial class GameAction
 
     public override string ToString()
     {
-        return $" BY {Performer} [{string.Join(" | ", _resultantActions)}]";
+        return $" : {Performer} [{string.Join(" | ", _resultantActions)}]";
     }
 }

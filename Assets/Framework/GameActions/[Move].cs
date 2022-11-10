@@ -41,13 +41,58 @@ public abstract partial class GameAction
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
         }
 
-        public static void Prompt(Player performer, Unit movingUnit, int distance, Selector.SelectionConfirmMethod continueMethod)
+        public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod continueMethod)
         {
-            Unit u = movingUnit;
-            GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (0, distance), null, null), null);
-
+            
+            
         }
-        //make struct "MovePromptArgs" that contains all arguments for moevement prompt.
+
+        private Board.ContinuePathCondition GetCombinedContinueCondition(PromptArgs args)
+        {
+            Unit u = args.movingUnit;
+            PromptArgs.ECollisionIgnoresF ci = args.collisionIgnores;
+            (PromptArgs.EDirectionalsF, Vector3Int) dir = args.directionals;
+
+            Board.ContinuePathCondition condition = args.CustomPathingRestrictions;
+
+            //Collision conditions (<Cond> && <col> && <col>...))
+            if (!ci.HasFlag(PromptArgs.ECollisionIgnoresF.Walls)) condition = (p, n) => condition(p, n) && HexCollision(p, n) && OpposingUnitCollision(u)(p, n);
+            if (!ci.HasFlag(PromptArgs.ECollisionIgnoresF.Bases)) condition = (p, n) => condition(p, n) && GuardedBaseCollision(u)(p, n);
+
+            //Directional conditions (<Cond> && (<dir> || <dir>...))
+            if (dir.Item1 != PromptArgs.EDirectionalsF.None)
+            {
+                Board.ContinuePathCondition direction = (prev, next) => false;
+                Vector3Int dpos = dir.Item2;
+                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Toward)) direction = (p, n) => direction(p, n) || DirectionalToward(dpos)(p, n);
+                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Away)) direction = (p, n) => direction(p, n) || DirectionalAway(dpos)(p, n);
+                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Around)) direction = (p, n) => direction(p, n) || DirectionalAround(dpos)(p, n);
+                condition = (p, n) => condition(p, n) && direction(p, n);
+            }
+
+            //Pathing override
+            condition = (p, n) => condition(p, n) || args.CustomPathingOverrides(p, n);
+            return condition;
+        }
+
+        #region Standard Collision Conditions
+        private static Board.ContinuePathCondition HexCollision => (_, next) =>
+        !next.BlocksPathing;
+        private static Func<Unit, Board.ContinuePathCondition> OpposingUnitCollision => u => (_, next) =>
+        !(next.Occupant != null && next.Occupant.Team != u.Team);
+        private static Func<Unit, Board.ContinuePathCondition> GuardedBaseCollision => u => (_, next) =>
+        !(next is BaseHex bhex && bhex.Team != u.Team);
+
+        #endregion
+        #region Standard Directional Conditions
+        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalAway => pos => (prev, next) =>
+        BoardCoords.RadiusBetween(pos, prev.Position) < BoardCoords.RadiusBetween(pos, next.Position);
+        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalAround => pos => (prev, next) =>
+        BoardCoords.RadiusBetween(pos, prev.Position) == BoardCoords.RadiusBetween(pos, next.Position);
+        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalToward => pos => (prev, next) =>
+        BoardCoords.RadiusBetween(pos, prev.Position) > BoardCoords.RadiusBetween(pos, next.Position);
+
+        #endregion
 
         public struct PromptArgs
         {
@@ -56,37 +101,48 @@ public abstract partial class GameAction
             public int distance;
             public int minDistance;
             public ECollisionIgnoresF collisionIgnores;
-            public EDirectionalsF directionals;
-            public List<Board.ContinuePathCondition> CustomPathingRestrictions;
+            public (EDirectionalsF, Vector3Int) directionals;
+
+            [Flags]
+            public enum ECollisionIgnoresF : byte
+            {
+                None = 0,
+                Walls = 1,
+                Bases = 2,
+            }
+            [Flags]
+            public enum EDirectionalsF : byte
+            {
+                None = 0,
+                Toward = 1,
+                Away = 2,
+                Around = 4
+            }
+
+            //Will stop pathing if return FALSE
+            public Board.ContinuePathCondition CustomPathingRestrictions;
+
+            //Will always allow pathing if return TRUE (overrides all restrictions)
+            public Board.ContinuePathCondition CustomPathingOverrides;
+
+            public PromptArgs(Player performer, Unit movingUnit, int distance)
+            {
+                this.performer = performer;
+                this.movingUnit = movingUnit;
+                this.distance = distance;
+                minDistance = 0;
+                collisionIgnores = ECollisionIgnoresF.None;
+                directionals = (EDirectionalsF.None, Vector3Int.zero);
+                CustomPathingOverrides = (_, _) => false;
+                CustomPathingRestrictions = (_, _) => true;
+            }
             
 
         }
 
-        [Flags]
-        public enum ECollisionIgnoresF : byte
-        {
-            None = 0,
-            Walls = 1,
-            Bases = 2,
-        }
-        [Flags]
-        public enum EDirectionalsF : byte
-        {
-            None = 0,
-            Toward = 1,
-            Away = 2,
-            Around = 4
-        }
+        
 
-        #region Standard Collision Conditions
-        private static Board.ContinuePathCondition HexCollision => (prev, next) =>
-        !next.BlocksPathing;
-        private static Func<Unit, Board.ContinuePathCondition> OpposingUnitCollision => u => (prev, next) =>
-        !(next.Occupant != null && next.Occupant.Team != u.Team);
-        private static Func<Unit, Board.ContinuePathCondition> GuardedBaseCollision => u => (prev, next) =>
-        !(next is BaseHex bhex && bhex.Team != u.Team);
-
-        #endregion
+        
 
     }
 

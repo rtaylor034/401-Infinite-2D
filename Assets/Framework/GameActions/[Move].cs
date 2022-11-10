@@ -62,27 +62,21 @@ public abstract partial class GameAction
             Unit u = args.movingUnit;
             PromptArgs.ECollisionIgnoresF ci = args.collisionIgnores;
             (PromptArgs.EDirectionalsF, Vector3Int) dir = args.directionals;
+            var dpos = dir.Item2;
 
-            Board.ContinuePathCondition condition = args.customPathingRestriction;
+            return (p, n) =>
+            ((ci.HasFlag(PromptArgs.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
+            (ci.HasFlag(PromptArgs.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
+            &&
+            ((dir.Item1 == PromptArgs.EDirectionalsF.None) ||
+            (dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
+            (dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
+            dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
+            &&
+            args.customPathingRestriction(p, n))
+            ||
+            args.customPathingOverride(p, n);
 
-            //Collision conditions (<Cond> && <col> && <col>...))
-            if (!ci.HasFlag(PromptArgs.ECollisionIgnoresF.Walls)) condition = (p, n) => condition(p, n) && HexCollision(p, n) && OpposingUnitCollision(u)(p, n);
-            if (!ci.HasFlag(PromptArgs.ECollisionIgnoresF.Bases)) condition = (p, n) => condition(p, n) && GuardedBaseCollision(u)(p, n);
-
-            //Directional conditions (<Cond> && (<dir> || <dir>...))
-            if (dir.Item1 != PromptArgs.EDirectionalsF.None)
-            {
-                Board.ContinuePathCondition direction = (prev, next) => false;
-                Vector3Int dpos = dir.Item2;
-                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Toward)) direction = (p, n) => direction(p, n) || DirectionalToward(dpos)(p, n);
-                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Away)) direction = (p, n) => direction(p, n) || DirectionalAway(dpos)(p, n);
-                if (!dir.Item1.HasFlag(PromptArgs.EDirectionalsF.Around)) direction = (p, n) => direction(p, n) || DirectionalAround(dpos)(p, n);
-                condition = (p, n) => condition(p, n) && direction(p, n);
-            }
-
-            //Pathing override
-            condition = (p, n) => condition(p, n) || args.customPathingOverride(p, n);
-            return condition;
         }
 
         #region Standard Collision Conditions
@@ -146,7 +140,7 @@ public abstract partial class GameAction
                 customPathingOverride = (_, _) => false;
                 customPathingRestriction = (_, _) => true;
                 customFinalPathRestriction = _ => true;
-                customFinalPathOverride = _ => true;
+                customFinalPathOverride = _ => false;
             }
             
 

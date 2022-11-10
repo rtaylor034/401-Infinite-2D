@@ -69,9 +69,20 @@ public class GameManager : MonoBehaviour
 
         CurrentPlayer = Player.DummyPlayer;
         GameAction.Turn.OnPerform += OnTurn;
-        NextTurn();
 
         board.CreateBoard();
+
+        NextTurn();
+
+        //test movement
+        INPUT.Test.moveprompt.performed += c =>
+        {
+            Debug.Log("moveprompted");
+            Unit test = null;
+            foreach (var u in board.Units) test = u;
+            GameAction.Move.Prompt(new GameAction.Move.PromptArgs(CurrentPlayer, test, 4), _ => Debug.Log("confirmed"));
+        };
+        
     }
 
     //TBI

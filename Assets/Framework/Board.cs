@@ -42,7 +42,7 @@ public class Board : MonoBehaviour
             if (hex is not BaseHex b) continue;
 
             Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position);
+            u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
             b.Occupant = u;
             _units.Add(u);
         }
@@ -126,6 +126,7 @@ public class Board : MonoBehaviour
     //Not particularly effecient, but straightforward.
     public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
     {
+
         HashSet<Hex> o = new() { HexAt(startPos) };
 
         HashSet<Hex> traversed = new();
@@ -133,7 +134,7 @@ public class Board : MonoBehaviour
 
         void Recur(HashSet<Hex> roots, int r)
         {
-            if (r > range.Item1) o.UnionWith(roots);
+            if (range.Item2 - range.Item1 > r) o.UnionWith(roots);
             if (r == 0) return;
 
             traversed.UnionWith(roots);

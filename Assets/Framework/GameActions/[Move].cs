@@ -36,19 +36,24 @@ public abstract partial class GameAction
         }
 
 
-        private static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
+        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
         {
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
         }
 
-        public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod continueMethod)
+        public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
         {
             Unit u = args.movingUnit;
             GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (args.minDistance, args.distance), GetCombinedContinueCondition(args), h => (args.customFinalPathRestriction(h) && h.IsOccupiable) || args.customFinalPathOverride(h)), OnSelect);
             
             void OnSelect(Selector.SelectorArgs sel)
             {
+                if (sel.Selection is Hex s)
+                {
+                    Declare(args.performer, u, u.Position, s.Position);
+                }
 
+                confirmMethod?.Invoke(sel);
             }
         }
 

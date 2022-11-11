@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
             {
                 if (sel.Selection is not Unit u) return;
 
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4), _ => Debug.Log("moved"));
+                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4) { CustomPathingRestrictions = new() { (_, h) => h.Position.y < 0 } }, _ => Debug.Log("moved"));
             }
             
         };

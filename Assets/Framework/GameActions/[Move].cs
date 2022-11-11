@@ -72,8 +72,8 @@ public abstract partial class GameAction
             bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
 
             IEnumerable<Hex> possibleHexes = 
-                (args is PathArgs p)         ? u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition) :
-                (args is PositionalArgs a)   ? u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition) :
+                (args is PathArgs p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition):
+                (args is PositionalArgs a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition):
                 throw new Exception("PromptArgs not recognized?");
 
             if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);

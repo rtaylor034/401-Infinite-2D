@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Selector : MonoBehaviour
 {
     public delegate void SelectionConfirmMethod(SelectorArgs args);
+
+    public static bool Active => GameManager.SELECTOR.enabled;
 
     private IEnumerable<Selectable> _currentPrompt;
     private SelectionConfirmMethod _confirmMethod;

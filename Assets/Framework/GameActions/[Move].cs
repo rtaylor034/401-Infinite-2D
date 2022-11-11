@@ -74,11 +74,11 @@ public abstract partial class GameAction
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
-            bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
+            bool FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
 
             IEnumerable<Selectable> possibleHexes = 
-                (args is PathArgs p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition):
-                (args is PositionalArgs a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition):
+                (args is PathArgs p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), FinalCondition):
+                (args is PositionalArgs a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(FinalCondition):
                 throw new ArgumentException("PromptArgs not recognized?");
 
             if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
@@ -123,9 +123,49 @@ public abstract partial class GameAction
             (dir.Item1.HasFlag(PathArgs.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
             dir.Item1.HasFlag(PathArgs.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
             &&
-            args.CustomPathingRestriction(p, n))
+            Combined(args.CustomPathingRestrictions)(p, n))
             ||
-            args.CustomPathingOverride(p, n);
+            Combined(args.CustomPathingOverrides, true)(p, n);
+
+            Board.ContinuePathCondition Combined(IEnumerable<Board.ContinuePathCondition> cond, bool invert = false)
+            {
+                return (invert) ?
+                (p, n) =>
+                {
+                    foreach (var r in cond)
+                        if (r.Invoke(p, n)) return true;
+                    return false;
+                }
+                :
+                (p, n) =>
+                {
+                    foreach (var r in cond)
+                        if (!r.Invoke(p, n)) return false;
+                    return true;
+                };
+            }
+        }
+        private static Board.FinalPathCondition GetCombinedFinalConditon(PromptArgs args)
+        {
+            return (h) => (Combined(args.CustomFinalRestrictions)(h) && h.IsOccupiable) || Combined(args.CustomFinalOverrides, true)(h);
+
+            Board.FinalPathCondition Combined(IEnumerable<Board.FinalPathCondition> cond, bool invert = false)
+            {
+                return (invert) ?
+                (h) =>
+                {
+                    foreach (var r in cond)
+                        if (r.Invoke(h)) return true;
+                    return false;
+                }
+                :
+                (h) =>
+                {
+                    foreach (var r in cond)
+                        if (!r.Invoke(h)) return false;
+                    return true;
+                };
+            }
 
         }
         private static HashSet<Vector3Int> GetPositionalPositions(PositionalArgs args)
@@ -174,7 +214,7 @@ public abstract partial class GameAction
             /// <remarks>
             /// Default: <c>{ return true; }</c>
             /// </remarks>
-            public Board.FinalPathCondition CustomFinalRestriction { get; set; } = _ => true;
+            public List<Board.FinalPathCondition> CustomFinalRestrictions { get; set; } = new();
 
             /// <summary>
             /// Hexes that pass this condition will override the <see cref="Hex.IsOccupiable"/> check (and the CustomFinalRestriction). <br></br>
@@ -183,7 +223,7 @@ public abstract partial class GameAction
             /// <remarks>
             /// Default: <c>{ return false; }</c>
             /// </remarks>
-            public Board.FinalPathCondition CustomFinalOverride { get; set; } = _ => false;
+            public List<Board.FinalPathCondition> CustomFinalOverrides { get; set; } = new();
             public virtual bool Forced { get; set; } = false;
 
             protected PromptArgs(Player performer, Unit movingUnit)
@@ -200,9 +240,9 @@ public abstract partial class GameAction
             public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
 
             //Will stop pathing if return FALSE
-            public Board.ContinuePathCondition CustomPathingRestriction { get; set; } = (_, _) => true;
+            public List<Board.ContinuePathCondition> CustomPathingRestrictions { get; set; } = new();
             //Will always allow pathing if return TRUE (overrides all restrictions)
-            public Board.ContinuePathCondition CustomPathingOverride { get; set; } = (_, _) => false;
+            public List<Board.ContinuePathCondition> CustomPathingOverrides { get; set; } = new();
 
             [Flags]
             public enum ECollisionIgnoresF : byte

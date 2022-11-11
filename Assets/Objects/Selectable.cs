@@ -50,6 +50,8 @@ public abstract class Selectable : MonoBehaviour
     }
 
     //These methods are for unique visual effects when selection state changes.
+
+
     /// <summary>
     /// Called whenever this object is hovered over and is selectable.
     /// </summary>
@@ -57,7 +59,13 @@ public abstract class Selectable : MonoBehaviour
     /// <paramref name="state"/> is true on hover Enter, false on hover Exit.
     /// </remarks>
     /// <param name="state"></param>
-    protected abstract void OnHover(bool state);
+    protected virtual void OnHover(bool state)
+    {
+        var s = GetComponent<SpriteRenderer>();
+
+        if (state) s.color = new Color(s.color.r, s.color.g, s.color.b, 0.4f);
+        else OnSelectable(true);
+    }
     /// <summary>
     /// Called whenever this object is prompted to be selected.
     /// </summary>
@@ -65,10 +73,16 @@ public abstract class Selectable : MonoBehaviour
     /// <paramref name="state"/> is true when prompted, false when prompt ends.
     /// </remarks>
     /// <param name="state"></param>
-    protected abstract void OnSelectable(bool state);
-
+    protected virtual void OnSelectable(bool state)
+    {
+        var s = GetComponent<SpriteRenderer>();
+        if (state) s.color = new Color(s.color.r, s.color.g, s.color.b, 0.7f);
+        else s.color = new Color(s.color.r, s.color.g, s.color.b, 1f);
+    }
     /// <summary>
     /// Called when this object is selected.
     /// </summary>
-    protected abstract void OnSelected();
+    protected virtual void OnSelected()
+    {
+    }
 }

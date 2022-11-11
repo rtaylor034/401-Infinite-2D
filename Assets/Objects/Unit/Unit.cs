@@ -51,18 +51,4 @@ public class Unit : Selectable
     {
         return $"[U{ID}{Team.ToString()[0]}]";
     }
-    #region Selectable Implementations
-    protected override void OnHover(bool state)
-    {
-
-    }
-    protected override void OnSelectable(bool state)
-    {
-
-    }
-    protected override void OnSelected()
-    {
-        TestMethod();
-    }
-    #endregion
 }

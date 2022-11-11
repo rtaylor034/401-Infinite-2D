@@ -13,12 +13,12 @@ public abstract partial class GameAction
         public static event GameActionEventHandler<Turn> OnPerform;
 
         /// <summary>
-        /// The <see cref="Player"/> that ended their turn. <br></br>
+        /// The <see cref="Player"/> that ends their turn on this action. <br></br>
         /// <i>Turn is transferred to this Player when this actions is undone.</i>
         /// </summary>
         public Player FromPlayer { get; private set; }
         /// <summary>
-        /// The <see cref="Player"/> that started their turn. <br></br>
+        /// The <see cref="Player"/> that starts their turn on this action. <br></br>
         /// <i>Turn is transferred to this Player when this actions is performed.</i>
         /// </summary>
         public Player ToPlayer { get; private set; }

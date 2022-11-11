@@ -14,8 +14,19 @@ public abstract partial class GameAction
         public static event GameActionEventHandler<Move> OnPerform;
         public static event Action<PromptArgs> OnPrompt;
 
+        /// <summary>
+        /// The <see cref="Unit"/> that is Moved by this action.
+        /// </summary>
         public Unit MovedUnit { get; private set; }
+        /// <summary>
+        /// The position that MovedUnit was at before this action. <br></br>
+        /// <i>MovedUnit is Moved to this position when this action is undone.</i>
+        /// </summary>
         public Vector3Int FromPos { get; private set; }
+        /// <summary>
+        /// The position that MovedUnit was Moved to, due to this action. <br></br>
+        /// <i>MovedUnit is Moved to this position when this action is performed.</i>
+        /// </summary>
         public Vector3Int ToPos { get; private set; }
 
 
@@ -37,10 +48,20 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-
-        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int ToPos)
+        /// <summary>
+        /// Declare a <see cref="Move"/>, Moving <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
+        /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
+        /// </summary>
+        /// <remarks>
+        /// <i>Prompt() prompts the player to make a Move, and then automatically declares it.
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="movedUnit"></param>
+        /// <param name="fromPos"></param>
+        /// <param name="toPos"></param>
+        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos)
         {
-            FinalizeDeclare(new Move(performer, movedUnit, fromPos, ToPos));
+            FinalizeDeclare(new Move(performer, movedUnit, fromPos, toPos));
         }
 
         public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)

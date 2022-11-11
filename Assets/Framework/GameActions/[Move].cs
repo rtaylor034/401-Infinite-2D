@@ -71,19 +71,12 @@ public abstract partial class GameAction
             Unit u = args.MovingUnit;
             bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
 
-            IEnumerable<Hex> possibleHexes = null;
-            //Pathed Move
-            if (args is PathArgs p)
-            {
-                possibleHexes = u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition);
-            }
+            IEnumerable<Hex> possibleHexes = 
+                (args is PathArgs p)         ? u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition) :
+                (args is PositionalArgs a)   ? u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition) :
+                throw new Exception("PromptArgs not recognized?");
 
-            //Positional Move
-            if (args is PositionalArgs a)
-            {
-                possibleHexes = u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition);
-            }
-
+            if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
             GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
             
             void OnSelect(Selector.SelectorArgs sel)

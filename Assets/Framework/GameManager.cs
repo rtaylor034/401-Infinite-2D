@@ -74,22 +74,20 @@ public class GameManager : MonoBehaviour
 
         NextTurn();
 
-        //test movement
-        /*
+        
+        //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += c =>
         {
             Debug.Log("moveprompted");
-            Unit test = null;
-            foreach (var u in board.Units) test = u;
-            GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, test, 4), _ => Debug.Log("confirmed"));
-        };
-        */
-        INPUT.Test.moveprompt.performed += c =>
-        {
-            Debug.Log("moveprompted");
-            Unit test = null;
-            foreach (var u in board.Units) test = u;
-            GameAction.Move.Prompt(new GameAction.Move.PositionalArgs(CurrentPlayer, test, test.Position, GameAction.Move.PositionalArgs.ADJACENT, test.Team), _ => Debug.Log("confirmed"));
+            SELECTOR.Prompt(board.Units, Confirm);
+
+            void Confirm(Selector.SelectorArgs sel)
+            {
+                if (sel.Selection is not Unit u) return;
+
+                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4), _ => Debug.Log("moved"));
+            }
+            
         };
         //test undo
         INPUT.Test.undo.performed += c =>

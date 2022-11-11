@@ -123,6 +123,15 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""undo"",
+                    ""type"": ""Button"",
+                    ""id"": ""c2023c06-d457-4543-8137-6c26a64ffbde"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -134,6 +143,17 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""moveprompt"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5a4787e1-4273-4c89-848e-5ace1dea75d7"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""undo"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -212,6 +232,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         // Test
         m_Test = asset.FindActionMap("Test", throwIfNotFound: true);
         m_Test_moveprompt = m_Test.FindAction("moveprompt", throwIfNotFound: true);
+        m_Test_undo = m_Test.FindAction("undo", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -329,11 +350,13 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Test;
     private ITestActions m_TestActionsCallbackInterface;
     private readonly InputAction m_Test_moveprompt;
+    private readonly InputAction m_Test_undo;
     public struct TestActions
     {
         private @Inputs m_Wrapper;
         public TestActions(@Inputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @moveprompt => m_Wrapper.m_Test_moveprompt;
+        public InputAction @undo => m_Wrapper.m_Test_undo;
         public InputActionMap Get() { return m_Wrapper.m_Test; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -346,6 +369,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @moveprompt.started -= m_Wrapper.m_TestActionsCallbackInterface.OnMoveprompt;
                 @moveprompt.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnMoveprompt;
                 @moveprompt.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnMoveprompt;
+                @undo.started -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
+                @undo.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
+                @undo.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
             }
             m_Wrapper.m_TestActionsCallbackInterface = instance;
             if (instance != null)
@@ -353,6 +379,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @moveprompt.started += instance.OnMoveprompt;
                 @moveprompt.performed += instance.OnMoveprompt;
                 @moveprompt.canceled += instance.OnMoveprompt;
+                @undo.started += instance.OnUndo;
+                @undo.performed += instance.OnUndo;
+                @undo.canceled += instance.OnUndo;
             }
         }
     }
@@ -412,5 +441,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     public interface ITestActions
     {
         void OnMoveprompt(InputAction.CallbackContext context);
+        void OnUndo(InputAction.CallbackContext context);
     }
 }

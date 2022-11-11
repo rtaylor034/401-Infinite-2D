@@ -75,6 +75,7 @@ public class GameManager : MonoBehaviour
         NextTurn();
 
         //test movement
+        /*
         INPUT.Test.moveprompt.performed += c =>
         {
             Debug.Log("moveprompted");
@@ -82,7 +83,21 @@ public class GameManager : MonoBehaviour
             foreach (var u in board.Units) test = u;
             GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, test, 4), _ => Debug.Log("confirmed"));
         };
-        
+        */
+        INPUT.Test.moveprompt.performed += c =>
+        {
+            Debug.Log("moveprompted");
+            Unit test = null;
+            foreach (var u in board.Units) test = u;
+            GameAction.Move.Prompt(new GameAction.Move.PositionalArgs(CurrentPlayer, test, test.Position, GameAction.Move.PositionalArgs.ADJACENT, test.Team), _ => Debug.Log("confirmed"));
+        };
+        //test undo
+        INPUT.Test.undo.performed += c =>
+        {
+            Debug.Log($"UNDO CALL: {_game.Peek()}");
+            Debug.Log(UndoLastGameAction(false));
+
+        };
     }
 
     //TBI

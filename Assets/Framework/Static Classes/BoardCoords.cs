@@ -103,9 +103,9 @@ public static class BoardCoords
     /// <param name="posSet"></param>
     /// <param name="axis"></param>
     /// <returns></returns>
-    public static HashSet<Vector3Int> Mirror(this IEnumerable<Vector3Int> coords, byte axis)
+    public static List<Vector3Int> Mirror(this IEnumerable<Vector3Int> coords, byte axis)
     {
-        var result = new HashSet<Vector3Int>();
+        var result = new List<Vector3Int>();
         foreach (Vector3Int v in coords)
         {
             result.Add(Mirror(v, axis));

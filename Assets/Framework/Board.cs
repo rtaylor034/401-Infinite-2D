@@ -121,6 +121,7 @@ public class Board : MonoBehaviour
             {
                 if (strict) throw new System.Exception($"No Hex found at {pos} on board {name} | (strict was set true)");
             }
+            else
             o.Add(hex);
         }
         return o;

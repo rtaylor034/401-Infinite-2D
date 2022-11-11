@@ -2,6 +2,7 @@ using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -46,15 +47,18 @@ public abstract partial class GameAction
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
+            bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
 
+            //Pathed Move
             if (args is PathArgs p)
             {
-                GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), h => (p.CustomFinalRestriction(h) && h.IsOccupiable) || p.CustomFinalOverride(h)), OnSelect);
+                GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition), OnSelect);
             }
+
+            //Positional Move
             if (args is PositionalArgs a)
             {
-
-                HashSet<Hex> positions = u.Board.HexesAt(a.PositionalOffsets)
+                GameManager.SELECTOR.Prompt(u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition), OnSelect);
             }
             
             void OnSelect(Selector.SelectorArgs sel)
@@ -169,6 +173,10 @@ public abstract partial class GameAction
             public Vector3Int AnchorPosition { get; set; }
             public IEnumerable<Vector3Int> PositionalOffsets { get; set; }
             public Player.ETeam TeamRelativity { get; set; }
+
+            public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
+            public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };
+            public static IEnumerable<Vector3Int> BEHIND => new[] { -BoardCoords.up };
 
             public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset, Player.ETeam teamRelativity) : base(performer, movingUnit)
             {

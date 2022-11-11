@@ -101,6 +101,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "undo",
+                    "type": "Button",
+                    "id": "c2023c06-d457-4543-8137-6c26a64ffbde",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -112,6 +121,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "moveprompt",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a4787e1-4273-4c89-848e-5ace1dea75d7",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "undo",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

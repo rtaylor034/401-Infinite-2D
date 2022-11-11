@@ -52,7 +52,7 @@ public class Selector : MonoBehaviour
     /// <param name="selectables"></param>
     /// <param name="confirmMethod"></param>
     /// <returns>
-    /// false if a prompt is already active (will do nothing). | true otherwise.
+    /// FALSE if a prompt is already active (will do nothing).
     /// </returns>
     public bool Prompt(IEnumerable<Selectable> selectables, SelectionConfirmMethod confirmMethod)
     {
@@ -68,6 +68,28 @@ public class Selector : MonoBehaviour
         }
 
         if (_currentPrompt.Count() == 0) SelectionEmpty();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Acts as Prompt(), but immediatly selects <paramref name="selection"/>.
+    /// </summary>
+    /// <param name="selection"></param>
+    /// <param name="confirmMethod"></param>
+    /// <remarks>
+    /// <i>DEVNOTE - May not call <see cref="Selectable.OnSelected"/> of <paramref name="selection"/>.</i>
+    /// </remarks>
+    public bool SpoofSelection(Selectable selection, SelectionConfirmMethod confirmMethod)
+    {
+        if (enabled) return false;
+
+        enabled = true;
+        _currentPrompt = new[] { selection };
+        _confirmMethod = confirmMethod;
+
+        selection.EnableSelection(SelectionConfirm);
+        SelectionConfirm(selection);
 
         return true;
     }
@@ -93,8 +115,6 @@ public class Selector : MonoBehaviour
             s.DisableSelection();
         }
         _confirmMethod?.Invoke(args);
-
-        
         
     }
     

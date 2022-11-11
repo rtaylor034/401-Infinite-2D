@@ -92,8 +92,7 @@ public class GameManager : MonoBehaviour
         //test undo
         INPUT.Test.undo.performed += c =>
         {
-            Debug.Log($"UNDO CALL: {_game.Peek()}");
-            Debug.Log(UndoLastGameAction(false));
+            Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(false)}");
 
         };
     }
@@ -123,10 +122,13 @@ public class GameManager : MonoBehaviour
     #region GameActions
 
     /// <summary>
-    /// Adds <paramref name="action"/> to this game's main GameAction stack and performs it.<br></br>
-    /// (Should be called in every GameActions static Declare() method)
+    /// Adds <paramref name="action"/> to the main action stack and performs it.<br></br>
+    /// > Called by <see cref="GameAction.FinalizeDeclare(GameAction)"/>. <br></br>
     /// </summary>
     /// <param name="action"></param>
+    /// <remarks>
+    /// <i>All static Declare() methods of GameActions call FinalizeDeclare(). </i>
+    /// </remarks>
     public void PushGameAction(GameAction action)
     {
         _game.Push(action);
@@ -135,6 +137,14 @@ public class GameManager : MonoBehaviour
         if (action is GameAction.Turn turn) HandleTurnAction(turn);
     }
 
+    /// <summary>
+    /// Undoes the last performed action and removes it from the main action stack.
+    /// </summary>
+    /// <param name="canUndoTurns"></param>
+    /// <remarks>
+    /// If <paramref name="canUndoTurns"/> is FALSE, this method will not undo <see cref="GameAction.Turn"/> actions. <br></br>
+    /// Returns FALSE if the last action cannot be undone.
+    /// </remarks>
     private bool UndoLastGameAction(bool canUndoTurns)
     {
         GameAction action = _game.Peek();

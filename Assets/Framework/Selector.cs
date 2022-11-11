@@ -11,8 +11,6 @@ public class Selector : MonoBehaviour
 {
     public delegate void SelectionConfirmMethod(SelectorArgs args);
 
-    public static bool Active => GameManager.SELECTOR.enabled;
-
     private IEnumerable<Selectable> _currentPrompt;
     private SelectionConfirmMethod _confirmMethod;
 
@@ -93,7 +91,6 @@ public class Selector : MonoBehaviour
 
         selection.EnableSelection(SelectionConfirm);
         SelectionConfirm(selection);
-
         return true;
     }
 
@@ -120,7 +117,6 @@ public class Selector : MonoBehaviour
         _confirmMethod?.Invoke(args);
         
     }
-    
 
     /// <summary>
     /// Forces the selection prompt to cancel immediatly.

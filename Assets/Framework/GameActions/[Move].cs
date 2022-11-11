@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract partial class GameAction
@@ -88,6 +89,18 @@ public abstract partial class GameAction
                 {
                     Declare(args.Performer, u, u.Position, s.Position);
                 }
+                if (sel.WasCancelled && args.Forced)
+                {
+                    if (!sel.WasEmpty)
+                    {
+                        Debug.Log("you cannot cancel a forced move");
+                        Prompt(args, confirmMethod);
+                        return;
+                    }
+                    //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
+                    //Ex: If a card has a forced Move, it should validate the move before it tries to prompt it, so that if validation fails, the card is unplayable. (although it could also be ignored idk.)
+                    Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
+                }
 
                 confirmMethod?.Invoke(sel);
             }
@@ -150,6 +163,7 @@ public abstract partial class GameAction
             public Unit MovingUnit { get; set; }
             public Board.FinalPathCondition CustomFinalRestriction { get; set; } = _ => true;
             public Board.FinalPathCondition CustomFinalOverride { get; set; } = _ => false;
+            public virtual bool Forced { get; set; } = false;
 
             protected PromptArgs(Player performer, Unit movingUnit)
             {
@@ -194,6 +208,7 @@ public abstract partial class GameAction
             public Vector3Int AnchorPosition { get; set; }
             public IEnumerable<Vector3Int> PositionalOffsets { get; set; }
             public Player.ETeam TeamRelativity { get; set; }
+            public override bool Forced { get; set; } = true;
 
             public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
             public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };

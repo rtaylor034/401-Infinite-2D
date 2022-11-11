@@ -106,13 +106,20 @@ public class GameManager : MonoBehaviour
         GameAction.Turn.OnPerform -= OnTurn;
     }
 
+    /// <summary>
+    /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation.
+    /// </summary>
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
         GameAction.Turn.Declare(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value);
-        
     }
 
+    /// <summary>
+    /// <b>[Event Subscriber]</b> - <see cref="GameAction.Turn.OnPerform"/> <br></br>
+    /// Called whenever a <see cref="GameAction.Turn"/> is declared.
+    /// </summary>
+    /// <param name="action"></param>
     private void OnTurn(GameAction.Turn action)
     {
         GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
@@ -159,6 +166,15 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Acts as a <see cref="GameAction.Turn"/>'s Perform() method. <br></br>
+    /// ><i> This method exists because <see cref="GameAction"/> does not have access to turn order.</i>
+    /// </summary>
+    /// <param name="turn"></param>
+    /// <param name="undo"></param>
+    /// <remarks>
+    /// If <paramref name="undo"/> is TRUE, this acts as its Undo() method.
+    /// </remarks>
     private void HandleTurnAction(GameAction.Turn turn, bool undo = false)
     {
         if (undo)

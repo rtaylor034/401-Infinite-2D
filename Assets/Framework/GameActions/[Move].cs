@@ -96,7 +96,7 @@ public abstract partial class GameAction
             {
                 o.Add(pos + args.AnchorPosition);
             }
-            if (args.SideDependent && args.MovingUnit.Team == Player.ETeam.Red) o = BoardCoords.Mirror(o, (byte)BoardCoords.UpAxis);
+            BoardCoords.Rotate(o, args.AnchorPosition, Player.PerspectiveRotationOf(args.TeamRelativity));
             return o;
         }
 
@@ -168,12 +168,13 @@ public abstract partial class GameAction
         {
             public Vector3Int AnchorPosition { get; set; }
             public IEnumerable<Vector3Int> PositionalOffsets { get; set; }
-            public bool SideDependent { get; set; } = true;
+            public Player.ETeam TeamRelativity { get; set; }
 
-            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset) : base(performer, movingUnit)
+            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset, Player.ETeam teamRelativity) : base(performer, movingUnit)
             {
                 AnchorPosition = anchorPosition;
                 PositionalOffsets = positionalOffset;
+                TeamRelativity = teamRelativity;
             }
         }
 

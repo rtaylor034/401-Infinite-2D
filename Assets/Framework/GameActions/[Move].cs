@@ -54,7 +54,7 @@ public abstract partial class GameAction
         /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
         /// </summary>
         /// <remarks>
-        /// <i>Prompt() prompts the player to make a Move, and then automatically declares it.
+        /// <i>Declare() is called within Prompt().</i>
         /// </remarks>
         /// <param name="performer"></param>
         /// <param name="movedUnit"></param>
@@ -65,16 +65,21 @@ public abstract partial class GameAction
             FinalizeDeclare(new Move(performer, movedUnit, fromPos, toPos));
         }
 
+        /// <summary>
+        /// Prompts a <see cref="Move"/> based on <paramref name="args"/>, and then runs <paramref name="confirmMethod"/> with the <see cref="Selector.SelectorArgs"/> of the selected Move position. <br></br>
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="confirmMethod"></param>
         public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
             bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
 
-            IEnumerable<Hex> possibleHexes = 
+            IEnumerable<Selectable> possibleHexes = 
                 (args is PathArgs p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition):
                 (args is PositionalArgs a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition):
-                throw new Exception("PromptArgs not recognized?");
+                throw new ArgumentException("PromptArgs not recognized?");
 
             if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
             GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
@@ -155,9 +160,29 @@ public abstract partial class GameAction
 
         public abstract class PromptArgs
         {
+            /// <summary>
+            /// The Player that is performing this <see cref="Move"/>.
+            /// </summary>
             public Player Performer { get; set; }
+            /// <summary>
+            /// The Unit that is Moving.
+            /// </summary>
             public Unit MovingUnit { get; set; }
+            /// <summary>
+            /// Hexes that do not pass this condition will be excluded from the selection prompt.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ return true; }</c>
+            /// </remarks>
             public Board.FinalPathCondition CustomFinalRestriction { get; set; } = _ => true;
+
+            /// <summary>
+            /// Hexes that pass this condition will override the <see cref="Hex.IsOccupiable"/> check (and the CustomFinalRestriction). <br></br>
+            ///
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ return false; }</c>
+            /// </remarks>
             public Board.FinalPathCondition CustomFinalOverride { get; set; } = _ => false;
             public virtual bool Forced { get; set; } = false;
 

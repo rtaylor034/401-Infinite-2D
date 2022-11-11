@@ -71,17 +71,20 @@ public abstract partial class GameAction
             Unit u = args.MovingUnit;
             bool finalCondition(Hex h) => (args.CustomFinalRestriction(h) && h.IsOccupiable) || args.CustomFinalOverride(h);
 
+            IEnumerable<Hex> possibleHexes = null;
             //Pathed Move
             if (args is PathArgs p)
             {
-                GameManager.SELECTOR.Prompt(u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition), OnSelect);
+                possibleHexes = u.Board.PathFind(u.Position, (p.MinDistance, p.Distance), GetCombinedPathingCondition(p), finalCondition);
             }
 
             //Positional Move
             if (args is PositionalArgs a)
             {
-                GameManager.SELECTOR.Prompt(u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition), OnSelect);
+                possibleHexes = u.Board.HexesAt(GetPositionalPositions(a)).Where(finalCondition);
             }
+
+            GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
             
             void OnSelect(Selector.SelectorArgs sel)
             {

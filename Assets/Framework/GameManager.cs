@@ -85,8 +85,10 @@ public class GameManager : MonoBehaviour
             void Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
-
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4) { CustomFinalRestrictions = new() { (h) => h.Position.y % 2 == 0 } }, _ => Debug.Log("moved"));
+                //funny lazer movement
+                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10) { CustomPathingRestrictions = new() { (prev, next) 
+                    => { foreach (var i in BoardCoords.Indicies) if (next.Position[i] == u.Position[i]) return true; return false; } 
+                }, MinDistance = 1}, _ => Debug.Log("moved"));
             }
             
         };

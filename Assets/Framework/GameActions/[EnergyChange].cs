@@ -5,9 +5,12 @@ using UnityEngine;
 
 public abstract partial class GameAction
 {
-
+    /// <summary>
+    /// <b>[ : ] <see cref="GameAction"/></b>
+    /// </summary>
     public class EnergyChange : GameAction
     {
+
         public static event GameActionEventHandler<EnergyChange> OnPerform;
 
         public Player Reciever { get; private set; }

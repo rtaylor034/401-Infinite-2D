@@ -14,7 +14,17 @@ public abstract partial class GameAction
     /// </summary>
     public class Move : GameAction
     {
+        /// <summary>
+        /// Occurs when any <see cref="Move"/> is performed. <br></br>
+        /// </summary>
         public static event GameActionEventHandler<Move> OnPerform;
+
+        /// <summary>
+        /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/>. <br></br>
+        /// </summary>
+        /// <remarks>
+        /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
+        /// </remarks>
         public static event Action<PromptArgs> OnPrompt;
 
         /// <summary>

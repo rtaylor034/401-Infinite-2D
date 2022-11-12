@@ -10,7 +10,7 @@ public abstract partial class GameAction
     public class Turn : GameAction
     {
         /// <summary>
-        /// Triggered when any <see cref="Turn"/> is performed.
+        /// Occurs when any <see cref="Turn"/> is performed.
         /// </summary>
         public static event GameActionEventHandler<Turn> OnPerform;
 

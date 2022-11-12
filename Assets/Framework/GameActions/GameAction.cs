@@ -8,6 +8,14 @@ using UnityEngine;
 /// </summary>
 public abstract partial class GameAction
 {
+    /// <summary>
+    /// [Event Handler Delegate] <br></br>
+    /// </summary>
+    /// <remarks>
+    /// <c>EventSubscriberMethod(<typeparamref name="T"/> <paramref name="action"/>) { }</c>
+    /// </remarks>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="action"></param>
     public delegate void GameActionEventHandler<T>(T action) where T : GameAction;
 
     /// <summary>

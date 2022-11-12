@@ -9,7 +9,9 @@ using UnityEngine;
 
 public abstract partial class GameAction
 {
-
+    /// <summary>
+    /// [ : ] <see cref="GameAction"/>
+    /// </summary>
     public class Move : GameAction
     {
         public static event GameActionEventHandler<Move> OnPerform;
@@ -198,6 +200,12 @@ public abstract partial class GameAction
 
         #endregion
 
+        /// <summary>
+        /// <b>abstract</b>
+        /// </summary>
+        /// <remarks>
+        /// (See <see cref="PathArgs"/>, <see cref="PositionalArgs"/>)
+        /// </remarks>
         public abstract class PromptArgs
         {
             /// <summary>
@@ -232,12 +240,22 @@ public abstract partial class GameAction
             /// </remarks>
             public virtual bool Forced { get; set; } = false;
 
+            /// <remarks>
+            /// - <see cref="CustomFinalRestrictions"/> <br></br>
+            /// - <see cref="CustomFinalOverrides"/> <br></br>
+            /// - <see cref="Forced"/>
+            /// </remarks>
+            /// <param name="performer"></param>
+            /// <param name="movingUnit"></param>
             protected PromptArgs(Player performer, Unit movingUnit)
             {
                 Performer = performer;
                 MovingUnit = movingUnit;
             }
         }
+        /// <summary>
+        /// <b>[ : ] <see cref="PromptArgs"/></b>
+        /// </summary>
         public class PathArgs : PromptArgs
         {
             /// <summary>
@@ -323,11 +341,31 @@ public abstract partial class GameAction
                 Away = 2,
                 Around = 4
             }
+
+            /// <summary>
+            /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> up to <paramref name="distance"/> hexes with a valid path. <br></br>
+            /// <i>(i.e. <see cref="PromptArgs"/> for a pathed, Basic or Directional Move)</i>
+            /// </summary>
+            /// <remarks>
+            /// Additional Properties: <br></br>
+            /// - <see cref="MinDistance"/> <br></br>
+            /// - <see cref="CollisionIgnores"/> <br></br>
+            /// - <see cref="Directionals"/> <br></br>
+            /// - <see cref="CustomPathingRestrictions"/> <br></br>
+            /// - <see cref="CustomPathingOverrides"/> <br></br>
+            /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
+            /// </remarks>
+            /// <param name="performer"></param>
+            /// <param name="movingUnit"></param>
+            /// <param name="distance"></param>
             public PathArgs(Player performer, Unit movingUnit, int distance) : base(performer, movingUnit)
             {
                 Distance = distance;
             }
         }
+        /// <summary>
+        /// [ : ] <see cref="PromptArgs"/>
+        /// </summary>
         public class PositionalArgs : PromptArgs
         {
             /// <summary>
@@ -365,14 +403,36 @@ public abstract partial class GameAction
             /// </remarks>
             public override bool Forced { get; set; } = true;
 
+            /// <summary>
+            /// <see cref="PositionalOffsets"/> preset that includes all positions adjacent to to the anchor.
+            /// </summary>
             public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
+            /// <summary>
+            /// <see cref="PositionalOffsets"/> preset that includes the single position that is in front of the anchor.
+            /// </summary>
             public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };
+            /// <summary>
+            /// <see cref="PositionalOffsets"/> preset that includes the single position that is behind the anchor.
+            /// </summary>
             public static IEnumerable<Vector3Int> BEHIND => new[] { -BoardCoords.up };
 
-            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffset, Player.ETeam teamRelativity) : base(performer, movingUnit)
+            /// <summary>
+            /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> to any position in <paramref name="positionalOffsets"/> relative to <paramref name="anchorPosition"/>, from the (rotational) perspective of <paramref name="teamRelativity"/>. <br></br>
+            /// <i>(i.e. <see cref="PromptArgs"/> for a Positional Move)</i>
+            /// </summary>
+            /// <remarks>
+            /// Additional Properties: <br></br>
+            /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
+            /// </remarks>
+            /// <param name="performer"></param>
+            /// <param name="movingUnit"></param>
+            /// <param name="anchorPosition"></param>
+            /// <param name="positionalOffsets"></param>
+            /// <param name="teamRelativity"></param>
+            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffsets, Player.ETeam teamRelativity) : base(performer, movingUnit)
             {
                 AnchorPosition = anchorPosition;
-                PositionalOffsets = new HashSet<Vector3Int>(positionalOffset);
+                PositionalOffsets = new HashSet<Vector3Int>(positionalOffsets);
                 TeamRelativity = teamRelativity;
             }
         }

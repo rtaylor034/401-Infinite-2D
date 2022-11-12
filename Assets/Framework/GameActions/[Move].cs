@@ -248,6 +248,10 @@ public abstract partial class GameAction
             /// Default: <c>0</c>
             /// </remarks>
             public int MinDistance { get; set; } = 0;
+
+            /// <summary>
+            /// This <see cref="Move"/> will these ignore collisions.
+            /// </summary>
             public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
             public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
 

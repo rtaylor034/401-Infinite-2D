@@ -209,21 +209,24 @@ public abstract partial class GameAction
             /// </summary>
             public Unit MovingUnit { get; set; }
             /// <summary>
-            /// Hexes that do not pass this condition will be excluded from the selection prompt.
+            /// Hexes must pass all of these conditions to be included in the selection prompt.
             /// </summary>
             /// <remarks>
-            /// Default: <c>{ return true; }</c>
+            /// Default if empty: <c>(Hex h) => { return true; }</c> <br></br>
             /// </remarks>
             public List<Board.FinalPathCondition> CustomFinalRestrictions { get; set; } = new();
 
             /// <summary>
-            /// Hexes that pass this condition will override the <see cref="Hex.IsOccupiable"/> check (and the CustomFinalRestriction). <br></br>
-            ///
+            /// Hexes that pass any of these conditions will override and pass the <see cref="Hex.IsOccupiable"/> check and CustomFinalRestrictions.
             /// </summary>
             /// <remarks>
-            /// Default: <c>{ return false; }</c>
+            /// Default if empty: <c>(Hex h) => { return false; }</c> <br></br>
             /// </remarks>
             public List<Board.FinalPathCondition> CustomFinalOverrides { get; set; } = new();
+
+            /// <summary>
+            /// If TRUE, This <see cref="Move"/> must be to one of the prompted hexes and cannot be cancelled.
+            /// </summary>
             public virtual bool Forced { get; set; } = false;
 
             protected PromptArgs(Player performer, Unit movingUnit)
@@ -234,7 +237,16 @@ public abstract partial class GameAction
         }
         public class PathArgs : PromptArgs
         {
+            /// <summary>
+            /// The (maximum) amount of Hexes that this Move can traverse.
+            /// </summary>
             public int Distance { get; set; }
+            /// <summary>
+            /// The minimum amount of Hexes this <see cref="Move"/> can traverse.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>0</c>
+            /// </remarks>
             public int MinDistance { get; set; } = 0;
             public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
             public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -85,7 +86,7 @@ public class GameManager : MonoBehaviour
             {
                 if (sel.Selection is not Unit u) return;
 
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4) { CustomPathingRestrictions = new() { (_, h) => h.Position.y < 0 } }, _ => Debug.Log("moved"));
+                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 4) { CustomFinalRestrictions = new() { (h) => h.Position.y % 2 == 0 } }, _ => Debug.Log("moved"));
             }
             
         };
@@ -102,7 +103,6 @@ public class GameManager : MonoBehaviour
     {
         if (!_gameActive) throw new Exception("Game is not active!");
         _gameActive = false;
-
         GameAction.Turn.OnPerform -= OnTurn;
     }
 

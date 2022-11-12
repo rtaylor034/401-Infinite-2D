@@ -4,7 +4,9 @@ using UnityEngine;
 
 public abstract partial class GameAction
 {
-
+    /// <summary>
+    /// <b>[ : ] <see cref="GameAction"/></b>
+    /// </summary>
     public class Turn : GameAction
     {
         /// <summary>

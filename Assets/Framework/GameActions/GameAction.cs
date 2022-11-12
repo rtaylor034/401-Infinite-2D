@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// <b>abstract</b>
+/// </summary>
 public abstract partial class GameAction
 {
     public delegate void GameActionEventHandler<T>(T action) where T : GameAction;

@@ -18,16 +18,46 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Selector selector;
 
+    /// <summary>
+    /// The <see cref="Player"/> that currently has control of the Turn.
+    /// </summary>
     public Player CurrentPlayer { get; private set; }
 
+    /// <summary>
+    /// Contains all <see cref="Player"/> objects that are participating in the game, in correct turn order.
+    /// </summary>
     private LinkedList<Player> _turnOrder;
+
+    /// <summary>
+    /// The stack of all <see cref="GameAction"/> objects that make up this game. <br></br>
+    /// <i>Every game of 401 can be represented by a sequence of actions.</i>
+    /// </summary>
+    /// <remarks>
+    /// <i>Referred to as the "main action stack" in docs.</i>
+    /// </remarks>
     private Stack<GameAction> _game;
+
+    /// <summary>
+    /// TRUE if there is a game currently happening.
+    /// </summary>
     private bool _gameActive = false;
 
 
     //Singleton instances
+    /// <summary>
+    /// [Singleton] <br></br>
+    /// Main <see cref="GameManager"/> object.
+    /// </summary>
     public static GameManager GAME;
+    /// <summary>
+    /// [Singleton] <br></br>
+    /// Main <see cref="Selector"/> object.
+    /// </summary>
     public static Selector SELECTOR;
+    /// <summary>
+    /// [Singleton] <br></br>
+    /// Main <see cref="Inputs"/> object.
+    /// </summary>
     public static Inputs INPUT;
 
     #region Setups

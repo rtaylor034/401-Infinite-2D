@@ -7,6 +7,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// [ : ] <see cref="MonoBehaviour"/>
+/// </summary>
 public class GameManager : MonoBehaviour
 {
 
@@ -118,8 +121,9 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// <b>[Event Subscriber]</b> - <see cref="GameAction.Turn.OnPerform"/> <br></br>
-    /// Called whenever a <see cref="GameAction.Turn"/> is declared.
+    /// Subscribed to <see cref="GameAction.Turn.OnPerform"/><br></br>
+    /// += from <see cref="StartGame"/> <br></br><br></br>
+    /// (<inheritdoc cref="GameAction.Turn.OnPerform"/>)
     /// </summary>
     /// <param name="action"></param>
     private void OnTurn(GameAction.Turn action)

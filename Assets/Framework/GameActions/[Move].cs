@@ -264,7 +264,7 @@ public abstract partial class GameAction
             }
         }
         /// <summary>
-        /// <b>[ : ] <see cref="PromptArgs"/></b>
+        /// [ : ] <see cref="PromptArgs"/>
         /// </summary>
         public class PathArgs : PromptArgs
         {

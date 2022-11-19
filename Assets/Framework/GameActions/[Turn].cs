@@ -49,7 +49,7 @@ public abstract partial class GameAction
         /// <param name="toPlayer"></param>
         public static void Declare(Player fromPlayer, Player toPlayer)
         {
-            FinalizeDeclare(new Turn(fromPlayer, toPlayer));
+            //FinalizeDeclare(new Turn(fromPlayer, toPlayer));
         }
 
         public override string ToString()

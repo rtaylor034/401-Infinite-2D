@@ -41,13 +41,7 @@ public abstract partial class GameAction
             Reciever.Energy = BeforeAmount;
         }
 
-        private EnergyChange(Player performer, Player reciever, int before, int after) : base(performer)
-        {
-            Reciever = reciever;
-            BeforeAmount = before;
-            AfterAmount = after;
-        }
-
+        //UPDATEDOC
         /// <summary>
         /// Change <paramref name="reciever"/>'s energy amount by the <paramref name="changeFunction"/>. <br></br>
         /// > This <see cref="EnergyChange"/> will be a resultant of <paramref name="resultOf"/>.
@@ -59,9 +53,11 @@ public abstract partial class GameAction
         /// <param name="resultOf"></param>
         /// <param name="reciever"></param>
         /// <param name="changeFunction"></param>
-        public static void DeclareAsResultant(GameAction resultOf, Player reciever, Func<int, int> changeFunction)
+        public EnergyChange(Player performer, Player reciever, Func<int, int> changeFunction) : base(performer)
         {
-            resultOf.AddResultant(new EnergyChange(resultOf.Performer, reciever, reciever.Energy, changeFunction(reciever.Energy)));
+            Reciever = reciever;
+            BeforeAmount = reciever.Energy;
+            AfterAmount = changeFunction(reciever.Energy);
         }
 
         public override string ToString()

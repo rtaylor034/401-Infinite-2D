@@ -81,24 +81,26 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
+    //UPDATEDOC: now public and part of the general workflow
     /// <summary>
     /// Adds <paramref name="action"/> to this GameAction's resultant actions and runs it's <see cref="InternalPerform"/>.
     /// </summary>
     /// <param name="action"></param>
     /// <returns></returns>
-    protected GameAction AddResultant(GameAction action)
+    public GameAction AddResultant(GameAction action)
     {
         _resultantActions.Add(action);
-        action.InternalPerform();
         return this;
     }
 
+    //UPDATEDOC: the Declare() method for all gameactions, adds to the main action stack and performs it.
     /// <summary>
     /// MUST be called at the end of all Declare() methods.
     /// </summary>
     /// <param name="action"></param>
-    private static void FinalizeDeclare(GameAction action)
+    public static void Declare(GameAction action)
     {
+        action.Perform();
         GameManager.GAME.PushGameAction(action);
         Debug.Log($"(Action Declare) {action}");
     }

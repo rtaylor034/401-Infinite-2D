@@ -158,12 +158,13 @@ public class GameManager : MonoBehaviour
     /// <param name="action"></param>
     private void OnTurn(GameAction.Turn action)
     {
-        GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
-        GameAction.EnergyChange.DeclareAsResultant(action, action.FromPlayer, e => 0);
+        action.AddResultant(new GameAction.EnergyChange(action.Performer, action.ToPlayer, e => e + 2));
+        action.AddResultant(new GameAction.EnergyChange(action.Performer, action.FromPlayer, e => e = 0));
     }
 
     #region GameActions
 
+    //UPDATEDOC: does not perform action
     /// <summary>
     /// Adds <paramref name="action"/> to the main action stack and performs it.<br></br>
     /// > Called by <see cref="GameAction.FinalizeDeclare(GameAction)"/>. <br></br>
@@ -175,8 +176,6 @@ public class GameManager : MonoBehaviour
     public void PushGameAction(GameAction action)
     {
         _game.Push(action);
-        action.Perform();
-
         if (action is GameAction.Turn turn) HandleTurnAction(turn);
     }
 

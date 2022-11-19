@@ -43,9 +43,21 @@ public abstract partial class GameAction
         public Vector3Int ToPos { get; private set; }
 
 
-        private Move(Player performer, Unit unit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
+        //UPDATEDOC
+        /// <summary>
+        /// Declare a <see cref="Move"/>, Moving <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
+        /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
+        /// </summary>
+        /// <remarks>
+        /// <i>Declare() is called within Prompt().</i>
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="movedUnit"></param>
+        /// <param name="fromPos"></param>
+        /// <param name="toPos"></param>
+        public Move(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
         {
-            MovedUnit = unit;
+            MovedUnit = movedUnit;
             FromPos = fromPos;
             ToPos = toPos;
         }
@@ -61,22 +73,7 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-        /// <summary>
-        /// Declare a <see cref="Move"/>, Moving <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
-        /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
-        /// </summary>
-        /// <remarks>
-        /// <i>Declare() is called within Prompt().</i>
-        /// </remarks>
-        /// <param name="performer"></param>
-        /// <param name="movedUnit"></param>
-        /// <param name="fromPos"></param>
-        /// <param name="toPos"></param>
-        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos)
-        {
-            FinalizeDeclare(new Move(performer, movedUnit, fromPos, toPos));
-        }
-
+        //TODO:
         /// <summary>
         /// Prompts a <see cref="Move"/> based on <paramref name="args"/>, and then runs <paramref name="confirmMethod"/> with the <see cref="Selector.SelectorArgs"/> of the selected Move position. <br></br>
         /// </summary>
@@ -100,7 +97,8 @@ public abstract partial class GameAction
             {
                 if (sel.Selection is Hex s)
                 {
-                    Declare(args.Performer, u, u.Position, s.Position);
+                    //RETURN THE ACTION IN A CONFIRM METHOD
+                    //Declare(args.Performer, u, u.Position, s.Position);
                 }
                 if (sel.WasCancelled && args.Forced)
                 {

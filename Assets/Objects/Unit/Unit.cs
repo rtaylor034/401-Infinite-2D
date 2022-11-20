@@ -19,6 +19,17 @@ public class Unit : Selectable
     private static int _idCount = 0;
     
     
+    /// <summary>
+    /// Updates this Unit's position on the board. (Should only be called from GameActions).
+    /// </summary>
+    /// <param name="pos"></param>
+    public void UpdatePosition(Vector3Int pos)
+    {
+        _board.HexAt(Position).Occupant = null;
+        Position = pos;
+        _board.HexAt(pos).Occupant = this;
+        transform.localPosition = _board.GetLocalTransformAt(Position, -1);
+    }
 
     public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
     {
@@ -35,18 +46,9 @@ public class Unit : Selectable
     {
         Debug.Log($"I am unit {ID} with {HP} HP.");
     }
-    #region Selectable Implementations
-    protected override void OnHover(bool state)
-    {
 
-    }
-    protected override void OnSelectable(bool state)
+    public override string ToString()
     {
-
+        return $"[U{ID}{Team.ToString()[0]}]";
     }
-    protected override void OnSelected()
-    {
-        TestMethod();
-    }
-    #endregion
 }

@@ -31,18 +31,5 @@ public abstract class Hex : Selectable
         Debug.Log($"I am a {GetType().Name} hex at coordinate {Position}.");
     }
 
-    #region Selectable Implementations
-    protected override void OnHover(bool state)
-    {
-
-    }
-    protected override void OnSelectable(bool state)
-    {
-
-    }
-    protected override void OnSelected()
-    {
-        TestMethod();
-    }
-    #endregion
+    
 }

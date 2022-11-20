@@ -94,9 +94,18 @@
             "id": "42d876d7-491b-4956-bb48-e9ed5cf003ea",
             "actions": [
                 {
-                    "name": "Testprompt",
+                    "name": "moveprompt",
                     "type": "Button",
                     "id": "f3ccd87c-cc83-4b3c-930a-45ae925d28b0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "undo",
+                    "type": "Button",
+                    "id": "c2023c06-d457-4543-8137-6c26a64ffbde",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -107,11 +116,22 @@
                 {
                     "name": "",
                     "id": "20b91085-9530-4594-a719-6f6c20b730fd",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
-                    "action": "Testprompt",
+                    "action": "moveprompt",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a4787e1-4273-4c89-848e-5ace1dea75d7",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "undo",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

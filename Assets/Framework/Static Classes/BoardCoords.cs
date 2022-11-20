@@ -21,6 +21,21 @@ public static class BoardCoords
     public static int[] Indicies => new int[] { 0, 1, 2 };
 
     /// <summary>
+    /// Index of the axis that remains unchanged when traversing vertically. <br></br>
+    /// <b>0</b>
+    /// </summary>
+    public static int UpAxis => 0;
+    /// <summary>
+    /// Index of the axis that remains unchanged when traversing right-upward. <br></br>
+    /// <b>1</b>
+    /// </summary>
+    public static int RightAxis => 1;
+    /// <summary>
+    /// Index of the axis that remains unchanged when traversing left-upward. <br></br>
+    /// <b>2</b>
+    /// </summary>
+    public static int Left => 2;
+    /// <summary>
     /// Rotates a board coordinate 60 degrees (1 axis) clockwise around another board coord, n times.
     /// </summary>
     /// <param name="coord"></param>
@@ -78,10 +93,7 @@ public static class BoardCoords
     {
         byte[] flips = OtherIndices(axis);
 
-        int swap = coord[flips[0]];
-        coord[flips[0]] = coord[flips[1]];
-        coord[flips[1]] = swap;
-
+        (coord[flips[1]], coord[flips[0]]) = (coord[flips[0]], coord[flips[1]]);
         return coord;
     }
 
@@ -307,6 +319,22 @@ public static class BoardCoords
         }
 
         return r / 2;
+    }
+
+    /// <summary>
+    /// Adds <paramref name="offset"/> to every coordinate of <paramref name="positions"/> and returns it.
+    /// </summary>
+    /// <param name="positions"></param>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    public static HashSet<Vector3Int> Offset(this IEnumerable<Vector3Int> positions, Vector3Int offset)
+    {
+        HashSet<Vector3Int> o = new();
+        foreach (var p in positions)
+        {
+            o.Add(p + offset);
+        }
+        return o;
     }
 
 

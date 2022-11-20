@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -27,7 +28,7 @@ public class Selector : MonoBehaviour
 
     #endregion
 
-
+    #region Unity Messages
     private void Awake()
     {
         enabled = false;
@@ -42,6 +43,7 @@ public class Selector : MonoBehaviour
     {
         SInputs(false);
     }
+    #endregion
 
     //TODO: add Player argument at some point
     /// <summary>
@@ -51,7 +53,7 @@ public class Selector : MonoBehaviour
     /// <param name="selectables"></param>
     /// <param name="confirmMethod"></param>
     /// <returns>
-    /// false if a prompt is already active (will do nothing). | true otherwise.
+    /// FALSE if a prompt is already active (will do nothing).
     /// </returns>
     public bool Prompt(IEnumerable<Selectable> selectables, SelectionConfirmMethod confirmMethod)
     {
@@ -66,14 +68,43 @@ public class Selector : MonoBehaviour
             s.EnableSelection(SelectionConfirm);
         }
 
-        if (_currentPrompt.Count() == 0) throw new ArgumentException("Empty select prompt given.");
+        if (_currentPrompt.Count() == 0) SelectionEmpty();
 
+        return true;
+    }
+
+    /// <summary>
+    /// Acts as Prompt(), but immediatly selects <paramref name="selection"/>.
+    /// </summary>
+    /// <param name="selection"></param>
+    /// <param name="confirmMethod"></param>
+    /// <remarks>
+    /// <i>DEVNOTE - May not call <see cref="Selectable.OnSelected"/> of <paramref name="selection"/>.</i>
+    /// </remarks>
+    public bool SpoofSelection(Selectable selection, SelectionConfirmMethod confirmMethod)
+    {
+        if (enabled) return false;
+
+        enabled = true;
+        _currentPrompt = new[] { selection };
+        _confirmMethod = confirmMethod;
+
+        selection.EnableSelection(SelectionConfirm);
+        SelectionConfirm(selection);
         return true;
     }
 
     private void SelectionConfirm(Selectable selection)
     {
-        FinalizeSelection(new SelectorArgs(selection, false));
+        FinalizeSelection(new SelectorArgs(selection));
+    }
+    private void SelectionCancel()
+    {
+        FinalizeSelection(new SelectorArgs(null, cancelled: true));
+    }
+    private void SelectionEmpty()
+    {
+        FinalizeSelection(new SelectorArgs(null, empty: true));
     }
 
     private void FinalizeSelection(SelectorArgs args)
@@ -84,14 +115,7 @@ public class Selector : MonoBehaviour
             s.DisableSelection();
         }
         _confirmMethod?.Invoke(args);
-
         
-        
-    }
-
-    private void SelectionCancel()
-    {
-        FinalizeSelection(new SelectorArgs(null, true));
     }
 
     /// <summary>
@@ -120,9 +144,11 @@ public class Selector : MonoBehaviour
     {
         public Selectable Selection { get; set; }
         public bool WasCancelled { get; set; }
+        public bool WasEmpty { get; set; }
 
-        public SelectorArgs(Selectable selection, bool cancelled)
+        public SelectorArgs(Selectable selection, bool cancelled = false, bool empty = false)
         {
+            WasEmpty = empty;
             Selection = selection;
             WasCancelled = cancelled;
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,8 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Experimental.AI;
+using UnityEngine.UIElements;
+using static UnityEditor.PlayerSettings;
 
 public class Board : MonoBehaviour
 {
@@ -41,8 +44,7 @@ public class Board : MonoBehaviour
             if (hex is not BaseHex b) continue;
 
             Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position);
-
+            u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
             b.Occupant = u;
             _units.Add(u);
         }
@@ -94,14 +96,35 @@ public class Board : MonoBehaviour
     /// Gets the Hex at the given coordinates.
     /// </summary>
     /// <remarks>
-    /// Returns null if there is not a Hex at the given coordinates.
+    /// If no hex is found at the coordinates: <br></br>
+    /// > <paramref name="strict"/> = true : throws an exception. (Default) <br></br>
+    /// > <paramref name="strict"/> = false : returns null.
     /// </remarks>
-    /// <param name="coords"></param>
+    /// <param name="position"></param>
     /// <returns></returns>
-    public Hex HexAt(Vector3Int coords)
+    public Hex HexAt(Vector3Int position, bool strict = false)
     {
-        if (!_hexDict.TryGetValue(coords, out Hex hex)) return null;
+        if (!_hexDict.TryGetValue(position, out Hex hex))
+        {
+            if (strict) throw new System.Exception($"No Hex found at {position} on board {name} | (strict was set true)");
+        }
         return hex;
+    }
+
+    public HashSet<Hex> HexesAt(IEnumerable<Vector3Int> positions, bool strict = false)
+    {
+        HashSet<Hex> o = new HashSet<Hex>();
+
+        foreach (Vector3Int pos in positions)
+        {
+            if (!_hexDict.TryGetValue(pos, out Hex hex))
+            {
+                if (strict) throw new System.Exception($"No Hex found at {pos} on board {name} | (strict was set true)");
+            }
+            else
+            o.Add(hex);
+        }
+        return o;
     }
 
     //ALL changing of a GameObject's in-world position should happen in Board or GameManager. (transform.position should not be used, use transform.localPosition).
@@ -114,6 +137,50 @@ public class Board : MonoBehaviour
     {
         Vector2 fpos = coords.CartesianCoordsOf() * _hexSpacing;
         return new Vector3(fpos.x, fpos.y, zPos);
+    }
+
+    public delegate bool ContinuePathCondition(Hex prev, Hex next);
+    public delegate bool FinalPathCondition(Hex hex);
+    //Not particularly effecient, but straightforward.
+    public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
+    {
+
+        HashSet<Hex> o = new() { HexAt(startPos) };
+
+        HashSet<Hex> traversed = new();
+        Recur(o, range.Item2);
+
+        void Recur(HashSet<Hex> roots, int r)
+        {
+            if (range.Item2 - range.Item1 > r) o.UnionWith(roots);
+            if (r == 0) return;
+
+            traversed.UnionWith(roots);
+
+            HashSet<Hex> branches = new();
+
+            foreach (Hex prev in roots)
+            {
+                foreach (Vector3Int nPos in prev.Position.GetAdjacent())
+                {
+                    Hex next = HexAt(nPos, false);
+                    if (next is null) continue;
+
+                    if (pathCondition(prev, next))
+                    {
+                        branches.Add(next);
+                    }
+                }
+                
+            }
+            branches.ExceptWith(traversed);
+            branches.ExceptWith(roots);
+            if (branches.Count > 0) Recur(branches, r - 1);
+        }
+
+        o.RemoveWhere(hex => !finalCondition(hex));
+
+        return o;
     }
 
 }

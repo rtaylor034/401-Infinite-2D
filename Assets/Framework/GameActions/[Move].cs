@@ -43,9 +43,20 @@ public abstract partial class GameAction
         public Vector3Int ToPos { get; private set; }
 
 
-        private Move(Player performer, Unit unit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
+        /// <summary>
+        /// Moves <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
+        /// > Unless you are creating a Move that already happened, use <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
+        /// </summary>
+        /// <remarks>
+        /// <i><see cref="GameAction"/> object is created within Prompt()</i>
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="movedUnit"></param>
+        /// <param name="fromPos"></param>
+        /// <param name="toPos"></param>
+        public Move(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
         {
-            MovedUnit = unit;
+            MovedUnit = movedUnit;
             FromPos = fromPos;
             ToPos = toPos;
         }
@@ -62,27 +73,16 @@ public abstract partial class GameAction
         }
 
         /// <summary>
-        /// Declare a <see cref="Move"/>, Moving <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
-        /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
+        /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
+        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.
         /// </summary>
         /// <remarks>
-        /// <i>Declare() is called within Prompt().</i>
+        /// <paramref name="confirmCallback"/> will not be called if no <see cref="Move"/> is created. <br></br>
+        /// <i>(Selection was cancelled or was invalid)</i>
         /// </remarks>
-        /// <param name="performer"></param>
-        /// <param name="movedUnit"></param>
-        /// <param name="fromPos"></param>
-        /// <param name="toPos"></param>
-        public static void Declare(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos)
-        {
-            FinalizeDeclare(new Move(performer, movedUnit, fromPos, toPos));
-        }
-
-        /// <summary>
-        /// Prompts a <see cref="Move"/> based on <paramref name="args"/>, and then runs <paramref name="confirmMethod"/> with the <see cref="Selector.SelectorArgs"/> of the selected Move position. <br></br>
-        /// </summary>
         /// <param name="args"></param>
-        /// <param name="confirmMethod"></param>
-        public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
+        /// <param name="confirmCallback"></param>
+        public static void Prompt(PromptArgs args, Action<GameAction.Move> confirmCallback)
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
@@ -100,14 +100,14 @@ public abstract partial class GameAction
             {
                 if (sel.Selection is Hex s)
                 {
-                    Declare(args.Performer, u, u.Position, s.Position);
+                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
                 }
                 if (sel.WasCancelled && args.Forced)
                 {
                     if (!sel.WasEmpty)
                     {
                         Debug.Log("you cannot cancel a forced move");
-                        Prompt(args, confirmMethod);
+                        Prompt(args, confirmCallback);
                         return;
                     }
                     //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
@@ -115,7 +115,6 @@ public abstract partial class GameAction
                     Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
                 }
 
-                confirmMethod?.Invoke(sel);
             }
         }
 
@@ -263,6 +262,7 @@ public abstract partial class GameAction
                 MovingUnit = movingUnit;
             }
         }
+
         /// <summary>
         /// [ : ] <see cref="PromptArgs"/>
         /// </summary>
@@ -373,6 +373,7 @@ public abstract partial class GameAction
                 Distance = distance;
             }
         }
+
         /// <summary>
         /// [ : ] <see cref="PromptArgs"/>
         /// </summary>

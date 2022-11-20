@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static System.Collections.Specialized.BitVector32;
 
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
@@ -102,7 +103,6 @@ public class GameManager : MonoBehaviour
         _turnOrder.AddLast(new Player(Player.ETeam.Red));
 
         CurrentPlayer = Player.DummyPlayer;
-        GameAction.Turn.OnPerform += OnTurn;
 
         board.CreateBoard();
 
@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
                 //funny lazer movement
                 GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10) { CustomPathingRestrictions = new() { (prev, next) 
                     => { foreach (var i in BoardCoords.Indicies) if (next.Position[i] == u.Position[i]) return true; return false; } 
-                }, MinDistance = 1}, _ => Debug.Log("moved"));
+                }, MinDistance = 1}, a => GameAction.Declare(a));
             }
             
         };
@@ -138,45 +138,35 @@ public class GameManager : MonoBehaviour
     {
         if (!_gameActive) throw new Exception("Game is not active!");
         _gameActive = false;
-        GameAction.Turn.OnPerform -= OnTurn;
     }
-
+    
     /// <summary>
-    /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation.
+    /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation. <br></br>
+    /// > Also declares <see cref="GameAction.EnergyChange"/> resultant actions for standard energy gain.
     /// </summary>
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
-        GameAction.Turn.Declare(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value);
-    }
+        var nextPlayer = (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
-    /// <summary>
-    /// Subscribed to <see cref="GameAction.Turn.OnPerform"/><br></br>
-    /// += from <see cref="StartGame"/> <br></br><br></br>
-    /// (<inheritdoc cref="GameAction.Turn.OnPerform"/>)
-    /// </summary>
-    /// <param name="action"></param>
-    private void OnTurn(GameAction.Turn action)
-    {
-        GameAction.EnergyChange.DeclareAsResultant(action, action.ToPlayer, e => e + 2);
-        GameAction.EnergyChange.DeclareAsResultant(action, action.FromPlayer, e => 0);
+        GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
+            .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
+            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0))
+            );
     }
 
     #region GameActions
 
     /// <summary>
-    /// Adds <paramref name="action"/> to the main action stack and performs it.<br></br>
-    /// > Called by <see cref="GameAction.FinalizeDeclare(GameAction)"/>. <br></br>
+    /// Adds <paramref name="action"/> to the main action stack.<br></br>
     /// </summary>
     /// <param name="action"></param>
     /// <remarks>
-    /// <i>All static Declare() methods of GameActions call FinalizeDeclare(). </i>
+    /// <b>SAFETY:</b> Only should be called by <see cref="GameAction.Declare(GameAction)"/>.
     /// </remarks>
     public void PushGameAction(GameAction action)
     {
         _game.Push(action);
-        action.Perform();
-
         if (action is GameAction.Turn turn) HandleTurnAction(turn);
     }
 
@@ -201,7 +191,6 @@ public class GameManager : MonoBehaviour
         _game.Pop();
         return true;
     }
-
     /// <summary>
     /// Acts as a <see cref="GameAction.Turn"/>'s Perform() method. <br></br>
     /// ><i> This method exists because <see cref="GameAction"/> does not have access to turn order.</i>

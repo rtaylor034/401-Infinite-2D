@@ -73,13 +73,13 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-        //TODO:
+        //UPDATEDOC
         /// <summary>
         /// Prompts a <see cref="Move"/> based on <paramref name="args"/>, and then runs <paramref name="confirmMethod"/> with the <see cref="Selector.SelectorArgs"/> of the selected Move position. <br></br>
         /// </summary>
         /// <param name="args"></param>
         /// <param name="confirmMethod"></param>
-        public static void Prompt(PromptArgs args, Selector.SelectionConfirmMethod confirmMethod)
+        public static void Prompt(PromptArgs args, Action<GameAction.Move> confirmCallback)
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;
@@ -97,15 +97,14 @@ public abstract partial class GameAction
             {
                 if (sel.Selection is Hex s)
                 {
-                    //RETURN THE ACTION IN A CONFIRM METHOD
-                    //Declare(args.Performer, u, u.Position, s.Position);
+                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
                 }
                 if (sel.WasCancelled && args.Forced)
                 {
                     if (!sel.WasEmpty)
                     {
                         Debug.Log("you cannot cancel a forced move");
-                        Prompt(args, confirmMethod);
+                        Prompt(args, confirmCallback);
                         return;
                     }
                     //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
@@ -113,7 +112,6 @@ public abstract partial class GameAction
                     Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
                 }
 
-                confirmMethod?.Invoke(sel);
             }
         }
 

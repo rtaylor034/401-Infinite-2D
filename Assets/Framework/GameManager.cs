@@ -151,7 +151,8 @@ public class GameManager : MonoBehaviour
 
         GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
             .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
-            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0)));
+            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0))
+            );
     }
 
     #region GameActions

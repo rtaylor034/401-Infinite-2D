@@ -72,12 +72,16 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-        //UPDATEDOC
         /// <summary>
-        /// Prompts a <see cref="Move"/> based on <paramref name="args"/>, and then runs <paramref name="confirmMethod"/> with the <see cref="Selector.SelectorArgs"/> of the selected Move position. <br></br>
+        /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
+        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.
         /// </summary>
+        /// <remarks>
+        /// <paramref name="confirmCallback"/> will not be called if no <see cref="Move"/> is created. <br></br>
+        /// <i>(Selection was cancelled or was invalid)</i>
+        /// </remarks>
         /// <param name="args"></param>
-        /// <param name="confirmMethod"></param>
+        /// <param name="confirmCallback"></param>
         public static void Prompt(PromptArgs args, Action<GameAction.Move> confirmCallback)
         {
             OnPrompt?.Invoke(args);

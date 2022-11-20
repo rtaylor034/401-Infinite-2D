@@ -36,12 +36,30 @@ public abstract partial class GameAction
             //Handled by GameManager
         }
 
+        /// <summary>
+        /// Transfers the turn from <paramref name="fromPlayer"/> to <paramref name="toPlayer"/>.
+        /// </summary>
+        /// <remarks>
+        /// Performer is set to <paramref name="toPlayer"/>.
+        /// </remarks>
+        /// <param name="fromPlayer"></param>
+        /// <param name="toPlayer"></param>
         public Turn(Player fromPlayer, Player toPlayer) : base(toPlayer)
         {
             FromPlayer = fromPlayer;
             ToPlayer = toPlayer;
         }
-
+        /// <summary>
+        /// <inheritdoc cref="Turn.Turn(Player, Player)"/> (by <paramref name="performer"/>)
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="fromPlayer"></param>
+        /// <param name="toPlayer"></param>
+        public Turn(Player performer, Player fromPlayer, Player toPlayer) : base(performer)
+        {
+            FromPlayer = fromPlayer;
+            ToPlayer = toPlayer;
+        }
         public override string ToString()
         {
             return $"<TURN>: {FromPlayer} -> {ToPlayer}" + base.ToString();

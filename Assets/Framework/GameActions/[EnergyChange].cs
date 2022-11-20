@@ -41,16 +41,13 @@ public abstract partial class GameAction
             Reciever.Energy = BeforeAmount;
         }
 
-        //UPDATEDOC
         /// <summary>
-        /// Change <paramref name="reciever"/>'s energy amount by the <paramref name="changeFunction"/>. <br></br>
-        /// > This <see cref="EnergyChange"/> will be a resultant of <paramref name="resultOf"/>.
+        /// Changes <paramref name="reciever"/>'s Energy amount by the <paramref name="changeFunction"/>. (by <paramref name="performer"/>)
         /// </summary>
         /// <remarks>
         /// <i>Ex: <c><paramref name="changeFunction"/> = (e) => { return e + 1; }</c> <br></br>
         /// This would add 1 to <paramref name="reciever"/>'s energy amount.</i>
         /// </remarks>
-        /// <param name="resultOf"></param>
         /// <param name="reciever"></param>
         /// <param name="changeFunction"></param>
         public EnergyChange(Player performer, Player reciever, Func<int, int> changeFunction) : base(performer)

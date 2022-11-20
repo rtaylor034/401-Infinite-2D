@@ -43,13 +43,12 @@ public abstract partial class GameAction
         public Vector3Int ToPos { get; private set; }
 
 
-        //UPDATEDOC
         /// <summary>
-        /// Declare a <see cref="Move"/>, Moving <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
-        /// > Unless you are declaring a Move that already happened, use <b><see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/></b>.
+        /// Moves <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
+        /// > Unless you are creating a Move that already happened, use <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
         /// </summary>
         /// <remarks>
-        /// <i>Declare() is called within Prompt().</i>
+        /// <i><see cref="GameAction"/> object is created within Prompt()</i>
         /// </remarks>
         /// <param name="performer"></param>
         /// <param name="movedUnit"></param>

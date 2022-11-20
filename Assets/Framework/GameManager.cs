@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static System.Collections.Specialized.BitVector32;
 
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
@@ -102,7 +103,6 @@ public class GameManager : MonoBehaviour
         _turnOrder.AddLast(new Player(Player.ETeam.Red));
 
         CurrentPlayer = Player.DummyPlayer;
-        GameAction.Turn.OnPerform += OnTurn;
 
         board.CreateBoard();
 
@@ -138,40 +138,30 @@ public class GameManager : MonoBehaviour
     {
         if (!_gameActive) throw new Exception("Game is not active!");
         _gameActive = false;
-        GameAction.Turn.OnPerform -= OnTurn;
     }
     
     /// <summary>
-    /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation.
+    /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation. <br></br>
+    /// > Also declares <see cref="GameAction.EnergyChange"/> resultant actions for standard energy gain.
     /// </summary>
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
-        GameAction.Declare(new GameAction.Turn(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value));
-    }
+        var nextPlayer = (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
-    /// <summary>
-    /// Subscribed to <see cref="GameAction.Turn.OnPerform"/><br></br>
-    /// += from <see cref="StartGame"/> <br></br><br></br>
-    /// (<inheritdoc cref="GameAction.Turn.OnPerform"/>)
-    /// </summary>
-    /// <param name="action"></param>
-    private void OnTurn(GameAction.Turn action)
-    {
-        action.AddResultant(new GameAction.EnergyChange(action.Performer, action.ToPlayer, e => e + 2));
-        action.AddResultant(new GameAction.EnergyChange(action.Performer, action.FromPlayer, e => e = 0));
+        GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
+            .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
+            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0)));
     }
 
     #region GameActions
 
-    //UPDATEDOC: does not perform action
     /// <summary>
-    /// Adds <paramref name="action"/> to the main action stack and performs it.<br></br>
-    /// > Called by <see cref="GameAction.FinalizeDeclare(GameAction)"/>. <br></br>
+    /// Adds <paramref name="action"/> to the main action stack.<br></br>
     /// </summary>
     /// <param name="action"></param>
     /// <remarks>
-    /// <i>All static Declare() methods of GameActions call FinalizeDeclare(). </i>
+    /// <b>SAFETY:</b> Only should be called by <see cref="GameAction.Declare(GameAction)"/>.
     /// </remarks>
     public void PushGameAction(GameAction action)
     {

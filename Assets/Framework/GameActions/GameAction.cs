@@ -19,11 +19,11 @@ public abstract partial class GameAction
     public delegate void GameActionEventHandler<T>(T action) where T : GameAction;
 
     /// <summary>
-    /// GameActions that were declared as a result of this <see cref="GameAction"/>. <br></br>
+    /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
     /// > Resultant GameActions will be performed and undone whenever this <see cref="GameAction"/> is.
     /// </summary>
     /// <remarks>
-    /// <i>Only GameActions that have a DeclareAsResultant() method can be resultant actions.</i>
+    /// <i>See <see cref="AddResultant(GameAction)"/></i>
     /// </remarks>
     public List<GameAction> ResultantActions => new(_resultantActions);
 
@@ -39,7 +39,7 @@ public abstract partial class GameAction
     /// Performs this <see cref="GameAction"/> and all resultant GameActions.
     /// </summary>
     /// <remarks>
-    /// SAFETY: Only be called by <see cref="GameManager"/>.
+    /// <b>SAFETY:</b> Only should be called by <see cref="GameManager"/>.
     /// </remarks>
     public void Perform()
     {
@@ -50,7 +50,7 @@ public abstract partial class GameAction
     /// Undoes this <see cref="GameAction"/> and all resultant GameActions.
     /// </summary>
     /// <remarks>
-    /// SAFETY: Only be called by <see cref="GameManager"/>.
+    /// <b>SAFETY:</b> Only should be called by <see cref="GameManager"/>.
     /// </remarks>
     public void Undo()
     {
@@ -81,22 +81,26 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
-    //UPDATEDOC: now public and part of the general workflow
     /// <summary>
-    /// Adds <paramref name="action"/> to this GameAction's resultant actions and runs it's <see cref="InternalPerform"/>.
+    /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
+    /// <i>(See <see cref="ResultantActions"/>)</i>
     /// </summary>
     /// <param name="action"></param>
-    /// <returns></returns>
+    /// <remarks>
+    /// Returns: <see langword="this"/>.
+    /// </remarks>
     public GameAction AddResultant(GameAction action)
     {
         _resultantActions.Add(action);
         return this;
     }
 
-    //UPDATEDOC: the Declare() method for all gameactions, adds to the main action stack and performs it.
     /// <summary>
-    /// MUST be called at the end of all Declare() methods.
+    /// Adds <paramref name="action"/> to the main action stack, finalizing and performing it.
     /// </summary>
+    /// <remarks>
+    /// Primary method for making GameActions part of the game.
+    /// </remarks>
     /// <param name="action"></param>
     public static void Declare(GameAction action)
     {

@@ -83,11 +83,6 @@ public class GameManager : MonoBehaviour
     {
         StartGame();
     }
-
-    private void Update()
-    {
-
-    }
     #endregion
 
     private void StartGame()
@@ -108,7 +103,6 @@ public class GameManager : MonoBehaviour
 
         NextTurn();
 
-        
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += c =>
         {
@@ -118,10 +112,17 @@ public class GameManager : MonoBehaviour
             void Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
-                //funny lazer movement
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10) { CustomPathingRestrictions = new() { (prev, next) 
-                    => { foreach (var i in BoardCoords.Indicies) if (next.Position[i] == u.Position[i]) return true; return false; } 
-                }, MinDistance = 1}, a => GameAction.Declare(a));
+                //funny lazer  test
+                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10)
+                { CustomPathingRestrictions = new() {
+                    (prev, next) => 
+                    { 
+                        foreach (var i in BoardCoords.Indicies)
+                            if (next.Position[i] == u.Position[i]) return true;
+                        return false;
+                    }
+                }
+                ,MinDistance = 0}, a => GameAction.Declare(a));
             }
             
         };

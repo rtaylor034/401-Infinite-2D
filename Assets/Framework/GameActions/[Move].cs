@@ -259,6 +259,7 @@ public abstract partial class GameAction
                 MovingUnit = movingUnit;
             }
         }
+
         /// <summary>
         /// [ : ] <see cref="PromptArgs"/>
         /// </summary>
@@ -369,6 +370,7 @@ public abstract partial class GameAction
                 Distance = distance;
             }
         }
+
         /// <summary>
         /// [ : ] <see cref="PromptArgs"/>
         /// </summary>

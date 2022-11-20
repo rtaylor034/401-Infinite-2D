@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
                 //funny lazer movement
                 GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10) { CustomPathingRestrictions = new() { (prev, next) 
                     => { foreach (var i in BoardCoords.Indicies) if (next.Position[i] == u.Position[i]) return true; return false; } 
-                }, MinDistance = 1}, _ => Debug.Log("moved"));
+                }, MinDistance = 1}, a => GameAction.Declare(a));
             }
             
         };
@@ -140,14 +140,14 @@ public class GameManager : MonoBehaviour
         _gameActive = false;
         GameAction.Turn.OnPerform -= OnTurn;
     }
-
+    
     /// <summary>
     /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation.
     /// </summary>
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
-        GameAction.Turn.Declare(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value);
+        GameAction.Declare(new GameAction.Turn(CurrentPlayer, (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value));
     }
 
     /// <summary>
@@ -200,7 +200,6 @@ public class GameManager : MonoBehaviour
         _game.Pop();
         return true;
     }
-
     /// <summary>
     /// Acts as a <see cref="GameAction.Turn"/>'s Perform() method. <br></br>
     /// ><i> This method exists because <see cref="GameAction"/> does not have access to turn order.</i>

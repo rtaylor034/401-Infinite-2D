@@ -4,7 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using UnityEngine;
 
-public class ConstructorTemplate<Base>
+public class ConstructorTemplate<T>
 {
 
     private readonly System.Type _type;
@@ -21,17 +21,18 @@ public class ConstructorTemplate<Base>
 
         _constructor = _type.GetConstructor(types);
 
+        //exceptions
         if (_constructor == null)
             throw new System.ArgumentException($"{derivedType.Name} does not have a constructor with that takes parameters: ({string.Join(",", types.ToList())})");
 
-        if (!derivedType.BaseType.IsEquivalentTo(typeof(Base)))
-            throw new System.Exception($"{derivedType.Name} does not inherit from {typeof(Base).Name}");
+        if (!derivedType.BaseType.IsEquivalentTo(typeof(T)))
+            throw new System.Exception($"{derivedType.Name} does not inherit from {typeof(T).Name}");
 
     }
 
-    public Base CreateInstance()
+    public T CreateInstance()
     {
-        return (Base)_constructor.Invoke(_params);
+        return (T)_constructor.Invoke(_params);
     }
 
 }

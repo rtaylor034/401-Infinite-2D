@@ -20,7 +20,7 @@ public abstract partial class GameAction
         public static event GameActionEventHandler<Move> OnPerform;
 
         /// <summary>
-        /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Selector.SelectionConfirmMethod)"/>. <br></br>
+        /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Action{Move})"/>. <br></br>
         /// </summary>
         /// <remarks>
         /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
@@ -48,7 +48,7 @@ public abstract partial class GameAction
         /// > Unless you are creating a Move that already happened, use <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
         /// </summary>
         /// <remarks>
-        /// <i><see cref="GameAction"/> object is created within Prompt()</i>
+        /// <i><see cref="Move"/> object is created within Prompt()</i>
         /// </remarks>
         /// <param name="performer"></param>
         /// <param name="movedUnit"></param>
@@ -60,13 +60,11 @@ public abstract partial class GameAction
             FromPos = fromPos;
             ToPos = toPos;
         }
-
         protected override void InternalPerform()
         {
             MovedUnit.UpdatePosition(ToPos);
             OnPerform?.Invoke(this);
         }
-
         protected override void InternalUndo()
         {
             MovedUnit.UpdatePosition(FromPos);

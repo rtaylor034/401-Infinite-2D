@@ -8,7 +8,7 @@ public partial class GameAction
     /// <summary>
     /// [ : ] <see cref="GameAction"/>
     /// </summary>
-    public class InflictEffect : GameAction
+    public class Effect : GameAction
     {
         protected override void InternalPerform()
         {
@@ -20,7 +20,7 @@ public partial class GameAction
             throw new System.NotImplementedException();
         }
 
-        public InflictEffect(Player performer, Unit inflictedUnit, UnitEffect effect) : base(performer)
+        public Effect(Player performer, Unit inflictedUnit, UnitEffect effect) : base(performer)
         {
 
         }

@@ -11,6 +11,12 @@ public class ConstructorTemplate<T>
     private readonly object[] _params;
     private readonly System.Reflection.ConstructorInfo _constructor;
 
+    /// <summary>
+    /// </summary>
+    /// <param name="derivedType"></param>
+    /// <param name="parameters"></param>
+    /// <exception cref="System.ArgumentException"></exception>
+    /// <exception cref="System.Exception"></exception>
     public ConstructorTemplate(System.Type derivedType, params object[] parameters)
     {
         _type = derivedType;
@@ -21,15 +27,18 @@ public class ConstructorTemplate<T>
 
         _constructor = _type.GetConstructor(types);
 
-        //exceptions
+        //exceptions 
         if (_constructor == null)
             throw new System.ArgumentException($"{derivedType.Name} does not have a constructor with that takes parameters: ({string.Join(",", types.ToList())})");
 
-        if (!derivedType.BaseType.IsEquivalentTo(typeof(T)))
+        if (!typeof(T).IsAssignableFrom(_type))
             throw new System.Exception($"{derivedType.Name} does not inherit from {typeof(T).Name}");
 
     }
 
+    /// <summary>
+    /// Constructs a <typeparamref name="T"/> object based on this template.
+    /// </summary>
     public T CreateInstance()
     {
         return (T)_constructor.Invoke(_params);

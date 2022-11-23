@@ -6,20 +6,26 @@ using UnityEngine;
 
 public class ConstructorTemplate<T>
 {
-
+    public System.Type ConstructionType => _type;
+    public System.Type ReturnType => typeof(T);
     private readonly System.Type _type;
     private readonly object[] _params;
     private readonly System.Reflection.ConstructorInfo _constructor;
 
     /// <summary>
+    /// A template for a constructor of type <paramref name="constructionType"/> with specified <paramref name="parameters"/>.
     /// </summary>
-    /// <param name="derivedType"></param>
+    /// <remarks>
+    /// A new instance can be created with this constructor using <see cref="CreateInstance"/>. <br></br>
+    /// The new instance will be cast to <typeparamref name="T"/>.
+    /// </remarks>
+    /// <param name="constructionType"></param>
     /// <param name="parameters"></param>
     /// <exception cref="System.ArgumentException"></exception>
     /// <exception cref="System.Exception"></exception>
-    public ConstructorTemplate(System.Type derivedType, params object[] parameters)
+    public ConstructorTemplate(System.Type constructionType, params object[] parameters)
     {
-        _type = derivedType;
+        _type = constructionType;
         _params = parameters;
 
         System.Type[] types = new System.Type[_params.Length];
@@ -29,16 +35,18 @@ public class ConstructorTemplate<T>
 
         //exceptions 
         if (_constructor == null)
-            throw new System.ArgumentException($"{derivedType.Name} does not have a constructor with that takes parameters: ({string.Join(",", types.ToList())})");
-
+            throw new System.ArgumentException($"{constructionType.Name} does not have a constructor with that takes parameters: ({string.Join(",", types.ToList())})");
         if (!typeof(T).IsAssignableFrom(_type))
-            throw new System.Exception($"{derivedType.Name} does not inherit from {typeof(T).Name}");
+            throw new System.Exception($"{constructionType.Name} cannot be converted to {typeof(T).Name}");
 
     }
 
     /// <summary>
-    /// Constructs a <typeparamref name="T"/> object based on this template.
+    /// Constructs an object based on this constructor template.
     /// </summary>
+    /// <remarks>
+    /// <c>new (<typeparamref name="T"/>)&lt;ConstructionType&gt;(&lt;params&gt;);</c>
+    /// </remarks>
     public T CreateInstance()
     {
         return (T)_constructor.Invoke(_params);

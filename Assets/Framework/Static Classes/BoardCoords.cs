@@ -124,7 +124,7 @@ public static class BoardCoords
     /// <remarks>
     /// <i>out </i><paramref name="exactEdgePairs"/>: Space-pairs that the line goes exactly in-between. (null if none)
     /// </remarks>
-    public static List<Vector3Int> GetLineIntersections(this Vector3Int pos1, Vector3Int pos2, out List<Vector3Int[]> exactEdgePairs)
+    public static List<Vector3Int> LineIntersections(this Vector3Int pos1, Vector3Int pos2, out List<Vector3Int[]> exactEdgePairs)
     {
         //find maxindex AND check for exact straight.
         List<byte> ind = new List<byte> { 0, 1, 2 };

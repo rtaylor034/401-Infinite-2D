@@ -80,7 +80,7 @@ public abstract partial class GameAction
         /// </remarks>
         /// <param name="args"></param>
         /// <param name="confirmCallback"></param>
-        public static void Prompt(PromptArgs args, Action<GameAction.Move> confirmCallback)
+        public static void Prompt(PromptArgs args, Action<Move> confirmCallback)
         {
             OnPrompt?.Invoke(args);
             Unit u = args.MovingUnit;

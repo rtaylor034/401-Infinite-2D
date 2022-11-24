@@ -1,13 +1,15 @@
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
+using UnityEditor;
 using UnityEngine;
 
-public class Ability
+public abstract class Ability
 {
-
+    
     public string Name { get; set; }
     public EAbilityType TypeIdentity { get; set; }
-    
 
     public enum EAbilityType
     {
@@ -27,23 +29,19 @@ public class Ability
         public delegate bool TargetCondition(Player user, Unit previousTarget, Unit currentTarget);
         public delegate bool SingleTargetCondition(Player user, Unit target);
         public List<TargetCondition> TargetConditions { get; set; }
-        public Unsourced(string name, EAbilityType typeIdentity, SingleTargetCondition initialTargetCondition, IList<TargetCondition> followingTargetConditions = null)
-            : this(name, typeIdentity, followingTargetConditions)
-        {
-            TargetConditions.Insert(0, (p, _, u) => initialTargetCondition(p, u));
-        }
+        public Action<GameAction.PlayAbility> ActionMethod { get; set; }
 
-        private Unsourced(string name, EAbilityType typeIdentity, IList<TargetCondition> targetConditions)
+        public Unsourced(string name, EAbilityType typeIdentity, IList<TargetCondition> targetConditions, Action<GameAction.PlayAbility> actionMethod)
             : base(name, typeIdentity)
         {
             Name = name;
             TypeIdentity = typeIdentity;
             TargetConditions = (targetConditions is null) ?
                 new List<TargetCondition>() : new List<TargetCondition>(targetConditions);
+            ActionMethod = actionMethod;
         }
     }
     
-
 
     public class Sourced : Ability
     {
@@ -51,9 +49,32 @@ public class Ability
         public HashSet<Vector3Int> HitArea { get; set; }
         public List<ConstructorTemplate<UnitEffect>> TargetEffects { get; set; }
         public TargetingCondition TargetCondition { get; set; }
+        public Action<GameAction.PlayAbility> FollowUpMethod { get; set; }
 
         public static readonly TargetingCondition STANDARD_ATTACK = (p, _, t) => p.Team != t.Team;
         public static readonly TargetingCondition STANDARD_DEFENSE = (p, _, t) => p.Team == t.Team;
+        public static readonly TargetingCondition STANDARD_COLLISION = (_, s, t) =>
+        {
+            bool IsCollision(Hex h)
+            {
+                return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == s.Team);
+            }
+            List<Vector3Int[]> edges;
+            foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))
+            {
+                if (IsCollision(hex)) return false;
+            }
+            foreach(var edgePair in edges)
+            {
+                foreach (var edge in edgePair)
+                {
+                    if (!IsCollision(s.Board.HexAt(edge))) continue;
+                    return false;
+                }
+                    
+            }
+            return true;
+        };
 
         public Sourced(string name, EAbilityType typeIdentity, IList<ConstructorTemplate<UnitEffect>> targetEffects, IEnumerable<Vector3Int> hitArea, TargetingCondition targetCondition) :
             base(name, typeIdentity)

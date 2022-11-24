@@ -15,7 +15,7 @@ public partial class GameAction
         {
             if (PlayedAbility is Ability.Sourced sourced)
             {
-                //inflict target effects
+                //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
                 foreach(var effectC in sourced.TargetEffects)
                 {
                     AddResultant(new InflictEffect(Performer, effectC.CreateInstance()));

@@ -53,11 +53,11 @@ public abstract class Ability
 
         public static readonly TargetingCondition STANDARD_ATTACK = (p, _, t) => p.Team != t.Team;
         public static readonly TargetingCondition STANDARD_DEFENSE = (p, _, t) => p.Team == t.Team;
-        public static readonly TargetingCondition STANDARD_COLLISION = (_, s, t) =>
+        public static readonly TargetingCondition STANDARD_COLLISION = (p, s, t) =>
         {
             bool IsCollision(Hex h)
             {
-                return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == s.Team);
+                return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == p.Team);
             }
             List<Vector3Int[]> edges;
             foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))

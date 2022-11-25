@@ -35,6 +35,23 @@ public abstract partial class GameAction
     /// <inheritdoc cref="ResultantActions"/>
     private readonly List<GameAction> _resultantActions = new();
 
+    #region Quick Documentation Inherits
+#pragma warning disable IDE0052
+#pragma warning disable IDE1006
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// Primarily used to add resultants to this <see cref="GameAction"/>. <br></br>
+    /// <i>> See <see cref="AddResultant(GameAction)"/></i>
+    /// </remarks>
+    private readonly bool __DOC__ExternalResultantEvent;
+
+#pragma warning restore IDE1006
+#pragma warning restore IDE0052
+    #endregion
+
     /// <summary>
     /// Performs this <see cref="GameAction"/> and all resultant GameActions.
     /// </summary>

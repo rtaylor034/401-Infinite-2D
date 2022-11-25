@@ -5,6 +5,7 @@ using UnityEngine;
 public partial class GameAction
 {
 
+    //READPLEASE: OnPerform needs be changed on OnConstruct (triggers when GameAction is created) if GameActions are to be fully undo/redo safe. As it stands, if a GameAction is performed multiple times, duplicate GameActions will be declared as resultants every time the parent GameAction is performed past the first time.
     public class PlayAbility : GameAction
     {
         public Ability PlayedAbility { get; private set; }

@@ -11,7 +11,7 @@ public partial class GameAction
         public Ability PlayedAbility { get; private set; }
         public Unit[] ParticipatingUnits { get; private set; }
 
-        public static event GameActionEventHandler<PlayAbility> OnPerform;
+        public static event GameActionEventHandler<PlayAbility> ExternalResultantEvent;
         protected override void InternalPerform()
         {
             if (PlayedAbility is Ability.Sourced sourced)
@@ -28,8 +28,6 @@ public partial class GameAction
             {
                 unsourced.ActionMethod?.Invoke(this);
             }
-
-            OnPerform?.Invoke(this);
         }
 
         protected override void InternalUndo()
@@ -42,6 +40,7 @@ public partial class GameAction
             PlayedAbility = ability;
             ParticipatingUnits = new Unit[participants.Count];
             for (int i = 0; i < participants.Count; i++) ParticipatingUnits[i] = participants[i];
+            ExternalResultantEvent?.Invoke(this);
         }
 
         public void Prompt()

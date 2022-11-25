@@ -13,7 +13,7 @@ public abstract partial class GameAction
         /// <summary>
         /// Occurs when any <see cref="EnergyChange"/> is performed.
         /// </summary>
-        public static event GameActionEventHandler<EnergyChange> OnPerform;
+        public static event GameActionEventHandler<EnergyChange> ExternalResultantEvent;
 
         /// <summary>
         /// The <see cref="Player"/> that recieved the change in energy on this action.
@@ -33,7 +33,6 @@ public abstract partial class GameAction
         protected override void InternalPerform()
         {
             Reciever.Energy = AfterAmount;
-            OnPerform?.Invoke(this);
         }
 
         protected override void InternalUndo()
@@ -55,6 +54,7 @@ public abstract partial class GameAction
             Reciever = reciever;
             BeforeAmount = reciever.Energy;
             AfterAmount = changeFunction(reciever.Energy);
+            ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()

@@ -17,7 +17,7 @@ public abstract partial class GameAction
         /// <summary>
         /// Occurs when any <see cref="Move"/> is performed. <br></br>
         /// </summary>
-        public static event GameActionEventHandler<Move> OnPerform;
+        public static event GameActionEventHandler<Move> ExternalResultantEvent;
 
         /// <summary>
         /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Action{Move})"/>. <br></br>
@@ -59,11 +59,11 @@ public abstract partial class GameAction
             MovedUnit = movedUnit;
             FromPos = fromPos;
             ToPos = toPos;
+            ExternalResultantEvent?.Invoke(this);
         }
         protected override void InternalPerform()
         {
             MovedUnit.UpdatePosition(ToPos);
-            OnPerform?.Invoke(this);
         }
         protected override void InternalUndo()
         {

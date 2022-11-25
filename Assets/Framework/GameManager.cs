@@ -182,16 +182,17 @@ public class GameManager : MonoBehaviour
     private bool UndoLastGameAction(bool canUndoTurns)
     {
         GameAction action = _game.Peek();
-        if (action is GameAction.Turn turn)
+        if (action is GameAction.Turn)
         {
             if (!canUndoTurns) return false;
-            HandleTurnAction(turn, true);
         }
 
         action.Undo();
         _game.Pop();
         return true;
     }
+
+
     /// <summary>
     /// Acts as a <see cref="GameAction.Turn"/>'s Perform() method. <br></br>
     /// ><i> This method exists because <see cref="GameAction"/> does not have access to turn order.</i>
@@ -201,7 +202,7 @@ public class GameManager : MonoBehaviour
     /// <remarks>
     /// If <paramref name="undo"/> is TRUE, this acts as its Undo() method.
     /// </remarks>
-    private void HandleTurnAction(GameAction.Turn turn, bool undo = false)
+    public void HandleTurnAction(GameAction.Turn turn, bool undo = false)
     {
         if (undo)
         {

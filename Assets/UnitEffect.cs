@@ -19,11 +19,11 @@ public abstract class UnitEffect
         InternalSetup(val);
         if (val)
         {
-            GameAction.Turn.OnPerform += TickDown;
+            GameAction.Turn.ExternalResultantEvent += TickDown;
         } 
         else
         {
-            GameAction.Turn.OnPerform -= TickDown;
+            GameAction.Turn.ExternalResultantEvent -= TickDown;
         }
         
     }
@@ -38,7 +38,7 @@ public abstract class UnitEffect
     public class DurationTick : GameAction
     {
         public UnitEffect TickingEffect { get; private set; }
-        public static event GameActionEventHandler<DurationTick> OnPerform;
+        public static event GameActionEventHandler<DurationTick> ExternalResultantEvent;
         public DurationTick(Player performer, UnitEffect effect) : base(performer)
         {
             TickingEffect = effect;
@@ -48,13 +48,13 @@ public abstract class UnitEffect
         {
             if (TickingEffect.Duration <= 0) TickingEffect.SetActive(false);
             TickingEffect.Duration--;
-            OnPerform?.Invoke(this);
         }
 
         protected override void InternalUndo()
         {
             TickingEffect.Duration++;
             if (TickingEffect.Duration > 0) TickingEffect.SetActive(true);
+            ExternalResultantEvent?.Invoke(this);
         }
     }
 

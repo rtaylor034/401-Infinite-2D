@@ -15,8 +15,9 @@ public abstract partial class GameAction
     public class Move : GameAction
     {
         /// <summary>
-        /// Occurs when any <see cref="Move"/> is performed. <br></br>
+        /// Occurs when any <see cref="Move"/> is created.
         /// </summary>
+        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<Move> ExternalResultantEvent;
 
         /// <summary>

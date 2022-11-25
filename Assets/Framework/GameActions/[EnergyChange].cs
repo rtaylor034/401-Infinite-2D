@@ -11,8 +11,9 @@ public abstract partial class GameAction
     public class EnergyChange : GameAction
     {
         /// <summary>
-        /// Occurs when any <see cref="EnergyChange"/> is performed.
+        /// Occurs when any <see cref="EnergyChange"/> is created.
         /// </summary>
+        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<EnergyChange> ExternalResultantEvent;
 
         /// <summary>

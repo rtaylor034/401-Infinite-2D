@@ -38,6 +38,11 @@ public abstract class UnitEffect
     public class DurationTick : GameAction
     {
         public UnitEffect TickingEffect { get; private set; }
+
+        /// <summary>
+        /// Occurs when any <see cref="DurationTick"/> is created.
+        /// </summary>
+        /// <remarks><inheritdoc cref="GameAction.__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<DurationTick> ExternalResultantEvent;
         public DurationTick(Player performer, UnitEffect effect) : base(performer)
         {

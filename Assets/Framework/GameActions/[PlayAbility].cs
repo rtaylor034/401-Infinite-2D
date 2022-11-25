@@ -11,6 +11,10 @@ public partial class GameAction
         public Ability PlayedAbility { get; private set; }
         public Unit[] ParticipatingUnits { get; private set; }
 
+        /// <summary>
+        /// Occurs when any <see cref="PlayAbility"/> is created.
+        /// </summary>
+        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<PlayAbility> ExternalResultantEvent;
         protected override void InternalPerform()
         {

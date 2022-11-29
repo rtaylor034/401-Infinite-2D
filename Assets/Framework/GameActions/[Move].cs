@@ -71,6 +71,7 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
+        //DEVNOTE: Consider making Prompt() async. this might fix the Multi-prompt problem, aswell as the fact that if Prompt() is called in ExternalResultantEvent with AddResultant(), the created Move action will not be performed due the Perform() chain being immediate, and prompt having a delay.
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.

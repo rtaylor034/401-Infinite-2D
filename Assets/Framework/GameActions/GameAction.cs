@@ -98,9 +98,12 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
+    //BAD DOC, UPDATE
     /// <summary>
     /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
-    /// <i>(See <see cref="ResultantActions"/>)</i>
+    /// <i>(See <see cref="ResultantActions"/>)</i> <br></br> <br></br>
+    /// USE <see cref="AddLateResultant(GameAction)"/> IF: <br></br>
+    /// Resultant is being added anytime after immediate construction of this <see cref="GameAction"/>.
     /// </summary>
     /// <param name="action"></param>
     /// <remarks>
@@ -109,6 +112,14 @@ public abstract partial class GameAction
     public GameAction AddResultant(GameAction action)
     {
         _resultantActions.Add(action);
+        return this;
+    }
+
+    //NEED DOC
+    public GameAction AddLateResultant(GameAction action)
+    {
+        AddResultant(action);
+        action.Perform();
         return this;
     }
 

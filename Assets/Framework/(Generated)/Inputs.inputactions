@@ -119,6 +119,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "turn",
+                    "type": "Button",
+                    "id": "b4aff0dd-b362-44c5-8043-5046a8a0a709",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -152,6 +161,17 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "effect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e96bab96-8d52-4918-9652-1061cc0da5e0",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "turn",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

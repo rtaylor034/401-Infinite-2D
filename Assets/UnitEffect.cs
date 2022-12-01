@@ -36,7 +36,7 @@ public abstract partial class UnitEffect
 
     private void TickDown(GameAction.Turn action)
     {
-        action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d--));
+        action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
     }
 
 

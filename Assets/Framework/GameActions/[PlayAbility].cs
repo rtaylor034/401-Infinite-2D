@@ -49,20 +49,36 @@ public partial class GameAction
             ExternalResultantEvent?.Invoke(this);
         }
 
-        public void Prompt(PromptArgs args, Action<GameAction.PlayAbility> confirmCallback)
+        public static void Prompt(PromptArgs args, Action<GameAction.PlayAbility> confirmCallback)
         {
             
         }
 
-        public class PromptArgs
+        public abstract class PromptArgs
         {
             public Player Performer { get; set; }
-            public Ability Ability { get; set; }
 
-            public PromptArgs(Player performer, Ability ability)
+            public PromptArgs(Player performer)
             {
                 Performer = performer;
-                Ability = ability;
+            }
+
+            public class Sourced : PromptArgs
+            {
+                public Ability.Sourced Ability { get; set; }
+                public Sourced(Player performer, Ability.Sourced ability) : base(performer)
+                {
+                    Ability = ability;
+                }
+            }
+
+            public class Unsourced : PromptArgs
+            {
+                public Ability.Unsourced Ability { get; set; }
+                public Unsourced(Player performer, Ability.Unsourced ability) : base(performer)
+                {
+                    Ability = ability;
+                }
             }
         }
 

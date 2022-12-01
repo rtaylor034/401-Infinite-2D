@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -103,11 +104,12 @@ public class GameManager : MonoBehaviour
 
         NextTurn();
 
+
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += _ =>
         {
             Debug.Log("moveprompted");
-            SELECTOR.Prompt(board.Units, Confirm);
+            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), Confirm);
 
             void Confirm(Selector.SelectorArgs sel)
             {
@@ -126,13 +128,14 @@ public class GameManager : MonoBehaviour
             }
             
         };
-        //test undo
+        //TEST UNDO
         INPUT.Test.undo.performed += _ =>
         {
             Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(false)}");
             
         };
 
+        //TEST EFFECT
         INPUT.Test.effect.performed += _ =>
         {
             Debug.Log("effectprompted");
@@ -143,6 +146,13 @@ public class GameManager : MonoBehaviour
                 if (sel.Selection is not Unit u) return;
                 GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Slowed(1), u));
             }
+        };
+
+        //TEST TURN
+        INPUT.Test.turn.performed += _ =>
+        {
+            Debug.Log("turntested");
+            NextTurn();
         };
     }
 
@@ -160,7 +170,7 @@ public class GameManager : MonoBehaviour
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
-        var nextPlayer = (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value;
+        var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
         GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
             .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))

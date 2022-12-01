@@ -26,7 +26,7 @@ public abstract partial class GameAction
         /// <remarks>
         /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
         /// </remarks>
-        public static event Action<PromptArgs> OnPrompt;
+        public static event Action<PromptArgs> OnPromptEvent;
 
         /// <summary>
         /// The <see cref="Unit"/> that is Moved by this action.
@@ -83,7 +83,7 @@ public abstract partial class GameAction
         /// <param name="confirmCallback"></param>
         public static void Prompt(PromptArgs args, Action<Move> confirmCallback)
         {
-            OnPrompt?.Invoke(args);
+            OnPromptEvent?.Invoke(args);
             Unit u = args.MovingUnit;
             bool FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
 

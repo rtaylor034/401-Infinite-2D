@@ -16,6 +16,8 @@ public partial class GameAction
         /// </summary>
         /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<PlayAbility> ExternalResultantEvent;
+
+        public static event Action<Ability> OnPromptEvent;
         protected override void InternalPerform()
         {
             if (PlayedAbility is Ability.Sourced sourced)
@@ -49,37 +51,10 @@ public partial class GameAction
             ExternalResultantEvent?.Invoke(this);
         }
 
-        public static void Prompt(PromptArgs args, Action<GameAction.PlayAbility> confirmCallback)
+        public static void Prompt(ConstructorTemplate<Ability> abilityConstruction, Action<PlayAbility> confirmCallback)
         {
-            
-        }
-
-        public abstract class PromptArgs
-        {
-            public Player Performer { get; set; }
-
-            public PromptArgs(Player performer)
-            {
-                Performer = performer;
-            }
-
-            public class Sourced : PromptArgs
-            {
-                public Ability.Sourced Ability { get; set; }
-                public Sourced(Player performer, Ability.Sourced ability) : base(performer)
-                {
-                    Ability = ability;
-                }
-            }
-
-            public class Unsourced : PromptArgs
-            {
-                public Ability.Unsourced Ability { get; set; }
-                public Unsourced(Player performer, Ability.Unsourced ability) : base(performer)
-                {
-                    Ability = ability;
-                }
-            }
+            var ability = abilityConstruction.CreateInstance();
+            OnPromptEvent?.Invoke(ability);
         }
 
         

@@ -49,7 +49,7 @@ public partial class GameAction
             ExternalResultantEvent?.Invoke(this);
         }
 
-        public void Prompt(Player performer, Ability ability)
+        public void Prompt(PromptArgs args, Action<GameAction.PlayAbility> confirmCallback)
         {
             
         }
@@ -58,6 +58,12 @@ public partial class GameAction
         {
             public Player Performer { get; set; }
             public Ability Ability { get; set; }
+
+            public PromptArgs(Player performer, Ability ability)
+            {
+                Performer = performer;
+                Ability = ability;
+            }
         }
 
         

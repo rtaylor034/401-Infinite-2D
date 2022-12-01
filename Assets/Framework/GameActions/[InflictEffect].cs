@@ -31,13 +31,13 @@ public partial class GameAction
         public InflictEffect(Player performer, UnitEffect inflictedEffect, Unit affectedUnit) : base(performer)
         {
             Effect = inflictedEffect;
-            ExternalResultantEvent?.Invoke(this);
             AffectedUnit = affectedUnit;
+            ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()
         {
-            return $"<INFLICT EFFECT> {Effect} -> {AffectedUnit}";
+            return $"<INFLICT EFFECT> {Effect} -> {AffectedUnit}" + base.ToString();
         }
     }
 

@@ -10,7 +10,7 @@ public abstract partial class UnitEffect
     public Unit AffectedUnit { get; private set; }
     
     //EVERY Turn counts as a Duration tick. by default Duration = 1, meaning the effect will only last for the following Turn after it is inflicted (opponents turn), and wears off on your next Turn.
-    public int Duration { get; private set; }
+    public int Duration { get; set; }
 
     protected UnitEffect(int duration)
     {
@@ -36,41 +36,9 @@ public abstract partial class UnitEffect
 
     private void TickDown(GameAction.Turn action)
     {
-        action.AddResultant(new DurationTick(action.Performer, this));
+        action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d--));
     }
 
-    public class DurationTick : GameAction
-    {
-        public UnitEffect TickingEffect { get; private set; }
-
-        /// <summary>
-        /// Occurs when any <see cref="DurationTick"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="GameAction.__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<DurationTick> ExternalResultantEvent;
-        public DurationTick(Player performer, UnitEffect effect) : base(performer)
-        {
-            TickingEffect = effect;
-        }
-
-        protected override void InternalPerform()
-        {
-            if (TickingEffect.Duration <= 0) TickingEffect.SetActive(false, TickingEffect.AffectedUnit);
-            TickingEffect.Duration--;
-        }
-
-        protected override void InternalUndo()
-        {
-            TickingEffect.Duration++;
-            if (TickingEffect.Duration > 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit);
-            ExternalResultantEvent?.Invoke(this);
-        }
-
-        public override string ToString()
-        {
-            return $"<EFFECT TICK> {TickingEffect}--";
-        }
-    }
 
     public override string ToString()
     {

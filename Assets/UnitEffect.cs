@@ -65,6 +65,15 @@ public abstract partial class UnitEffect
             if (TickingEffect.Duration > 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit);
             ExternalResultantEvent?.Invoke(this);
         }
+
+        public override string ToString()
+        {
+            return $"<EFFECT TICK> {TickingEffect}--";
+        }
     }
 
+    public override string ToString()
+    {
+        return $"({GetType().Name} {Duration})";
+    }
 }

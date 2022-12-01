@@ -23,7 +23,8 @@ public partial class UnitEffect
 
         private void SlowEffect(GameAction.Move.PromptArgs args)
         {
-            if (args is not GameAction.Move.PathArgs move) return;
+            if (args.MovingUnit != AffectedUnit) return;
+            if (args is not GameAction.Move.PromptArgs.Pathed move) return;
 
             //Rounded Down
             move.Distance /= 2;

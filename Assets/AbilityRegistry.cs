@@ -61,7 +61,7 @@ public static class AbilityRegistry
 
                 new Action<GameAction.PlayAbility>(a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PathArgs(a.Performer, a.ParticipatingUnits[0], 8),
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(a.Performer, a.ParticipatingUnits[0], 8),
                         move => a.AddLateResultant(move));
                 }),
 

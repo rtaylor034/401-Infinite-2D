@@ -28,13 +28,18 @@ public partial class GameAction
             Effect.SetActive(false, AffectedUnit);
         }
 
-        public InflictEffect(Player performer, UnitEffect inflictedUnit, Unit affectedUnit) : base(performer)
+        public InflictEffect(Player performer, UnitEffect inflictedEffect, Unit affectedUnit) : base(performer)
         {
-            Effect = inflictedUnit;
+            Effect = inflictedEffect;
             ExternalResultantEvent?.Invoke(this);
             AffectedUnit = affectedUnit;
         }
+
+        public override string ToString()
+        {
+            return $"<INFLICT EFFECT> {Effect} -> {AffectedUnit}";
+        }
     }
 
-
+    
 }

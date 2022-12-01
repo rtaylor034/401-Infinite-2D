@@ -132,6 +132,15 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""effect"",
+                    ""type"": ""Button"",
+                    ""id"": ""43eecebc-0188-4b84-875a-26c5c28df90c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -154,6 +163,17 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""undo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5c6cb82d-f805-4a46-9cd3-379877190f23"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""effect"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -233,6 +253,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         m_Test = asset.FindActionMap("Test", throwIfNotFound: true);
         m_Test_moveprompt = m_Test.FindAction("moveprompt", throwIfNotFound: true);
         m_Test_undo = m_Test.FindAction("undo", throwIfNotFound: true);
+        m_Test_effect = m_Test.FindAction("effect", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -351,12 +372,14 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     private ITestActions m_TestActionsCallbackInterface;
     private readonly InputAction m_Test_moveprompt;
     private readonly InputAction m_Test_undo;
+    private readonly InputAction m_Test_effect;
     public struct TestActions
     {
         private @Inputs m_Wrapper;
         public TestActions(@Inputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @moveprompt => m_Wrapper.m_Test_moveprompt;
         public InputAction @undo => m_Wrapper.m_Test_undo;
+        public InputAction @effect => m_Wrapper.m_Test_effect;
         public InputActionMap Get() { return m_Wrapper.m_Test; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -372,6 +395,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @undo.started -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
                 @undo.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
                 @undo.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
+                @effect.started -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
+                @effect.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
+                @effect.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
             }
             m_Wrapper.m_TestActionsCallbackInterface = instance;
             if (instance != null)
@@ -382,6 +408,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @undo.started += instance.OnUndo;
                 @undo.performed += instance.OnUndo;
                 @undo.canceled += instance.OnUndo;
+                @effect.started += instance.OnEffect;
+                @effect.performed += instance.OnEffect;
+                @effect.canceled += instance.OnEffect;
             }
         }
     }
@@ -442,5 +471,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     {
         void OnMoveprompt(InputAction.CallbackContext context);
         void OnUndo(InputAction.CallbackContext context);
+        void OnEffect(InputAction.CallbackContext context);
     }
 }

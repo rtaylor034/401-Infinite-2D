@@ -104,7 +104,7 @@ public class GameManager : MonoBehaviour
         NextTurn();
 
         //TEST MOVEMENT
-        INPUT.Test.moveprompt.performed += c =>
+        INPUT.Test.moveprompt.performed += _ =>
         {
             Debug.Log("moveprompted");
             SELECTOR.Prompt(board.Units, Confirm);
@@ -113,7 +113,7 @@ public class GameManager : MonoBehaviour
             {
                 if (sel.Selection is not Unit u) return;
                 //funny lazer  test
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10)
+                GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
                 { CustomPathingRestrictions = new() {
                     (prev, next) => 
                     { 
@@ -127,10 +127,22 @@ public class GameManager : MonoBehaviour
             
         };
         //test undo
-        INPUT.Test.undo.performed += c =>
+        INPUT.Test.undo.performed += _ =>
         {
             Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(false)}");
             
+        };
+
+        INPUT.Test.effect.performed += _ =>
+        {
+            Debug.Log("effectprompted");
+            SELECTOR.Prompt(board.Units, Confirm);
+
+            void Confirm(Selector.SelectorArgs sel)
+            {
+                if (sel.Selection is not Unit u) return;
+                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Slowed(1), u));
+            }
         };
     }
 

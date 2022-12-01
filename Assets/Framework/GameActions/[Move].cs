@@ -88,8 +88,8 @@ public abstract partial class GameAction
             bool FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
 
             IEnumerable<Selectable> possibleHexes = 
-                (args is PathArgs p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), FinalCondition):
-                (args is PositionalArgs a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(FinalCondition):
+                (args is PromptArgs.Pathed p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), FinalCondition):
+                (args is PromptArgs.Positional a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(FinalCondition):
                 throw new ArgumentException("PromptArgs not recognized?");
 
             if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
@@ -117,21 +117,21 @@ public abstract partial class GameAction
             }
         }
 
-        private static Board.ContinuePathCondition GetCombinedPathingCondition(PathArgs args)
+        private static Board.ContinuePathCondition GetCombinedPathingCondition(PromptArgs.Pathed args)
         {
             Unit u = args.MovingUnit;
-            PathArgs.ECollisionIgnoresF ci = args.CollisionIgnores;
-            (PathArgs.EDirectionalsF, Vector3Int) dir = args.Directionals;
+            PromptArgs.Pathed.ECollisionIgnoresF ci = args.CollisionIgnores;
+            (PromptArgs.Pathed.EDirectionalsF, Vector3Int) dir = args.Directionals;
             var dpos = dir.Item2;
 
             return (p, n) =>
-            ((ci.HasFlag(PathArgs.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
-            (ci.HasFlag(PathArgs.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
+            ((ci.HasFlag(PromptArgs.Pathed.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
+            (ci.HasFlag(PromptArgs.Pathed.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
             &&
-            ((dir.Item1 == PathArgs.EDirectionalsF.None) ||
-            (dir.Item1.HasFlag(PathArgs.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
-            (dir.Item1.HasFlag(PathArgs.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
-            dir.Item1.HasFlag(PathArgs.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
+            ((dir.Item1 == PromptArgs.Pathed.EDirectionalsF.None) ||
+            (dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
+            (dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
+            dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
             &&
             Combined(args.CustomPathingRestrictions)(p, n))
             ||
@@ -178,7 +178,7 @@ public abstract partial class GameAction
             }
 
         }
-        private static HashSet<Vector3Int> GetPositionalPositions(PositionalArgs args)
+        private static HashSet<Vector3Int> GetPositionalPositions(PromptArgs.Positional args)
         {
             HashSet<Vector3Int> o = new HashSet<Vector3Int>();
             foreach (var pos in args.PositionalOffsets)
@@ -212,7 +212,7 @@ public abstract partial class GameAction
         /// <b>abstract</b>
         /// </summary>
         /// <remarks>
-        /// (See <see cref="PathArgs"/>, <see cref="PositionalArgs"/>)
+        /// (See <see cref="PromptArgs.Pathed"/>, <see cref="PromptArgs.Positional"/>)
         /// </remarks>
         public abstract class PromptArgs
         {
@@ -260,192 +260,194 @@ public abstract partial class GameAction
                 Performer = performer;
                 MovingUnit = movingUnit;
             }
+
+            /// <summary>
+            /// [ : ] <see cref="PromptArgs"/>
+            /// </summary>
+            public class Pathed : PromptArgs
+            {
+                /// <summary>
+                /// The (maximum) amount of Hexes that this Move can traverse.
+                /// </summary>
+                public int Distance { get; set; }
+                /// <summary>
+                /// The minimum amount of Hexes this <see cref="Move"/> can traverse.
+                /// </summary>
+                /// <remarks>
+                /// Default: <c>0</c>
+                /// </remarks>
+                public int MinDistance { get; set; } = 0;
+
+                /// <summary>
+                /// This <see cref="Move"/> will ignore these collisions. <br></br>
+                /// </summary>
+                /// <remarks>
+                /// Default: <c><see cref="ECollisionIgnoresF.None"/></c> <br></br>
+                /// <i>Walls, Guarded Bases, and enemy Units will have collision (block pathing) by default. <br></br>
+                /// (Wall Hexes and enemy Units are grouped as <see cref="ECollisionIgnoresF.Walls"/>) </i>
+                /// </remarks>
+                public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
+
+                /// <summary>
+                /// This <see cref="Move"/> must respect (one of) the <see cref="EDirectionalsF"/> flags, relative to the <see cref="Vector3Int"/> position given. <br></br>
+                /// </summary>
+                /// <remarks>
+                /// Default: <c>(<see cref="EDirectionalsF.None"/>, <see cref="Vector3Int.zero"/>)</c>
+                /// </remarks>
+                public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
+
+                /// <summary>
+                /// Each step of this <see cref="Move"/> (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) must pass all of these conditions to be a valid path. <br></br>
+                /// <i>Ex: <c>(p, n) => p.Position.x &lt; n.Position.x;</c> <br></br>
+                /// Every single step of this Move would need to be to a hex with a greater x coordinate.</i>
+                /// </summary>
+                /// <remarks>
+                /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return true; }</c> <br></br>
+                /// </remarks>
+                public List<Board.ContinuePathCondition> CustomPathingRestrictions { get; set; } = new();
+
+                /// <summary>
+                /// Steps (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) in this <see cref="Move"/> that pass this condition will always be a valid path, overriding all restrictions/collision. <br></br>
+                /// <i>Ex: <c>(p, n) => p is <see cref="ControlHex"/>;</c> <br></br>
+                /// Any step off of a Control Hex would be a valid path, ignoring all collision/restrictions.</i>
+                /// </summary>
+                /// <remarks>
+                /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return false; }</c> <br></br>
+                /// </remarks>
+                public List<Board.ContinuePathCondition> CustomPathingOverrides { get; set; } = new();
+
+                /// <summary>
+                /// Flags for ignoring standard collision (Used in <see cref="CollisionIgnores"/>).
+                /// </summary>
+                /// <remarks>
+                /// <c>None</c> : Does not ignore any collision, standard pathing. <br></br>
+                /// <c>Walls</c> : Ignores <see cref="Hex.BlocksPathing"/> (treats as FALSE for all hexes), and ignores enemy Unit collision. <br></br>
+                /// <c>Bases</c> : Ignores <see cref="BaseHex.IsGuarded"/> (treats as FALSE for all hexes). <i>(Not recommended for use)</i>
+                /// </remarks>
+                [Flags]
+                public enum ECollisionIgnoresF : byte
+                {
+                    None = 0,
+                    Walls = 1,
+                    Bases = 2,
+                }
+                /// <summary>
+                /// Flags for directional Moves (used in <see cref="Directionals"/>). <br></br>
+                /// > Accompanied by a respected coordinate (<see cref="Vector3Int"/> <b>pos</b>).
+                /// </summary>
+                /// <remarks>
+                /// <c>None</c> : This <see cref="Move"/> may be in any direction. <br></br>
+                /// <c>Toward</c> : All steps in this <see cref="Move"/> must decrease the distance to <b>pos</b>. <br></br>
+                /// <c>Away</c> : All steps in this <see cref="Move"/> must increase the distance to <b>pos</b>. <br></br>
+                /// <c>Around</c> : All steps in this <see cref="Move"/> must not change the distance to <b>pos</b>.
+                /// </remarks>
+                [Flags]
+                public enum EDirectionalsF : byte
+                {
+                    None = 0,
+                    Toward = 1,
+                    Away = 2,
+                    Around = 4
+                }
+
+                /// <summary>
+                /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> up to <paramref name="distance"/> hexes with a valid path. <br></br>
+                /// <i>(i.e. <see cref="PromptArgs"/> for a pathed, Basic or Directional Move)</i>
+                /// </summary>
+                /// <remarks>
+                /// Additional Properties: <br></br>
+                /// - <see cref="MinDistance"/> <br></br>
+                /// - <see cref="CollisionIgnores"/> <br></br>
+                /// - <see cref="Directionals"/> <br></br>
+                /// - <see cref="CustomPathingRestrictions"/> <br></br>
+                /// - <see cref="CustomPathingOverrides"/> <br></br>
+                /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
+                /// </remarks>
+                /// <param name="performer"></param>
+                /// <param name="movingUnit"></param>
+                /// <param name="distance"></param>
+                public Pathed(Player performer, Unit movingUnit, int distance) : base(performer, movingUnit)
+                {
+                    Distance = distance;
+                }
+            }
+
+            /// <summary>
+            /// [ : ] <see cref="PromptArgs"/>
+            /// </summary>
+            public class Positional : PromptArgs
+            {
+                /// <summary>
+                /// The position that PositionalOffsets will offset to get the final prompted positions. <br></br>
+                /// <i>Ex: If moving BEHIND a <see cref="Unit"/> (<b>u</b>), <b>u</b>.Position would be the AnchorPosition.</i>
+                /// </summary>
+                /// <remarks>
+                /// (See <see cref="PositionalOffsets"/>)
+                /// </remarks>
+                public Vector3Int AnchorPosition { get; set; }
+
+                /// <summary>
+                /// The set of offsets that are added to AnchorPosition to get the final prompted positions. <br></br>
+                /// <i>Ex: If moving BEHIND a position, -<see cref="BoardCoords.up"/> would be the single element of PositionalOffsets.</i>
+                /// </summary>
+                /// <remarks>
+                /// (See <see cref="AnchorPosition"/>)
+                /// </remarks>
+                public HashSet<Vector3Int> PositionalOffsets { get; set; }
+
+                /// <summary>
+                /// PositionalOffsets are rotated to this Team to match their perspective. <br></br>
+                /// <i> Ex: If moving BEHIND a Red Unit, set this to <see cref="Player.ETeam.Red"/> so that the offset is rotated to match a Red Unit's view of behind.</i> <br></br>
+                /// </summary>
+                /// <remarks>
+                /// <i>IN_FRONT/BEHIND are perspective dependent, what is one to Blue, is the other to Red.</i>
+                /// </remarks>
+                public Player.ETeam TeamRelativity { get; set; }
+
+                /// <summary>
+                /// <inheritdoc cref="PromptArgs.Forced"/>
+                /// </summary>
+                /// <remarks>
+                /// Default: <c>true</c>
+                /// </remarks>
+                public override bool Forced { get; set; } = true;
+
+                /// <summary>
+                /// <see cref="PositionalOffsets"/> preset that includes all positions adjacent to to the anchor.
+                /// </summary>
+                public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
+                /// <summary>
+                /// <see cref="PositionalOffsets"/> preset that includes the single position that is in front of the anchor.
+                /// </summary>
+                public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };
+                /// <summary>
+                /// <see cref="PositionalOffsets"/> preset that includes the single position that is behind the anchor.
+                /// </summary>
+                public static IEnumerable<Vector3Int> BEHIND => new[] { -BoardCoords.up };
+
+                /// <summary>
+                /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> to any position in <paramref name="positionalOffsets"/> relative to <paramref name="anchorPosition"/>, from the (rotational) perspective of <paramref name="teamRelativity"/>. <br></br>
+                /// <i>(i.e. <see cref="PromptArgs"/> for a Positional Move)</i>
+                /// </summary>
+                /// <remarks>
+                /// Additional Properties: <br></br>
+                /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
+                /// </remarks>
+                /// <param name="performer"></param>
+                /// <param name="movingUnit"></param>
+                /// <param name="anchorPosition"></param>
+                /// <param name="positionalOffsets"></param>
+                /// <param name="teamRelativity"></param>
+                public Positional(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffsets, Player.ETeam teamRelativity) : base(performer, movingUnit)
+                {
+                    AnchorPosition = anchorPosition;
+                    PositionalOffsets = new HashSet<Vector3Int>(positionalOffsets);
+                    TeamRelativity = teamRelativity;
+                }
+            }
         }
 
-        /// <summary>
-        /// [ : ] <see cref="PromptArgs"/>
-        /// </summary>
-        public class PathArgs : PromptArgs
-        {
-            /// <summary>
-            /// The (maximum) amount of Hexes that this Move can traverse.
-            /// </summary>
-            public int Distance { get; set; }
-            /// <summary>
-            /// The minimum amount of Hexes this <see cref="Move"/> can traverse.
-            /// </summary>
-            /// <remarks>
-            /// Default: <c>0</c>
-            /// </remarks>
-            public int MinDistance { get; set; } = 0;
 
-            /// <summary>
-            /// This <see cref="Move"/> will ignore these collisions. <br></br>
-            /// </summary>
-            /// <remarks>
-            /// Default: <c><see cref="ECollisionIgnoresF.None"/></c> <br></br>
-            /// <i>Walls, Guarded Bases, and enemy Units will have collision (block pathing) by default. <br></br>
-            /// (Wall Hexes and enemy Units are grouped as <see cref="ECollisionIgnoresF.Walls"/>) </i>
-            /// </remarks>
-            public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
-
-            /// <summary>
-            /// This <see cref="Move"/> must respect (one of) the <see cref="EDirectionalsF"/> flags, relative to the <see cref="Vector3Int"/> position given. <br></br>
-            /// </summary>
-            /// <remarks>
-            /// Default: <c>(<see cref="EDirectionalsF.None"/>, <see cref="Vector3Int.zero"/>)</c>
-            /// </remarks>
-            public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
-
-            /// <summary>
-            /// Each step of this <see cref="Move"/> (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) must pass all of these conditions to be a valid path. <br></br>
-            /// <i>Ex: <c>(p, n) => p.Position.x &lt; n.Position.x;</c> <br></br>
-            /// Every single step of this Move would need to be to a hex with a greater x coordinate.</i>
-            /// </summary>
-            /// <remarks>
-            /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return true; }</c> <br></br>
-            /// </remarks>
-            public List<Board.ContinuePathCondition> CustomPathingRestrictions { get; set; } = new();
-
-            /// <summary>
-            /// Steps (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) in this <see cref="Move"/> that pass this condition will always be a valid path, overriding all restrictions/collision. <br></br>
-            /// <i>Ex: <c>(p, n) => p is <see cref="ControlHex"/>;</c> <br></br>
-            /// Any step off of a Control Hex would be a valid path, ignoring all collision/restrictions.</i>
-            /// </summary>
-            /// <remarks>
-            /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return false; }</c> <br></br>
-            /// </remarks>
-            public List<Board.ContinuePathCondition> CustomPathingOverrides { get; set; } = new();
-
-            /// <summary>
-            /// Flags for ignoring standard collision (Used in <see cref="CollisionIgnores"/>).
-            /// </summary>
-            /// <remarks>
-            /// <c>None</c> : Does not ignore any collision, standard pathing. <br></br>
-            /// <c>Walls</c> : Ignores <see cref="Hex.BlocksPathing"/> (treats as FALSE for all hexes), and ignores enemy Unit collision. <br></br>
-            /// <c>Bases</c> : Ignores <see cref="BaseHex.IsGuarded"/> (treats as FALSE for all hexes). <i>(Not recommended for use)</i>
-            /// </remarks>
-            [Flags]
-            public enum ECollisionIgnoresF : byte
-            {
-                None = 0,
-                Walls = 1,
-                Bases = 2,
-            }
-            /// <summary>
-            /// Flags for directional Moves (used in <see cref="Directionals"/>). <br></br>
-            /// > Accompanied by a respected coordinate (<see cref="Vector3Int"/> <b>pos</b>).
-            /// </summary>
-            /// <remarks>
-            /// <c>None</c> : This <see cref="Move"/> may be in any direction. <br></br>
-            /// <c>Toward</c> : All steps in this <see cref="Move"/> must decrease the distance to <b>pos</b>. <br></br>
-            /// <c>Away</c> : All steps in this <see cref="Move"/> must increase the distance to <b>pos</b>. <br></br>
-            /// <c>Around</c> : All steps in this <see cref="Move"/> must not change the distance to <b>pos</b>.
-            /// </remarks>
-            [Flags]
-            public enum EDirectionalsF : byte
-            {
-                None = 0,
-                Toward = 1,
-                Away = 2,
-                Around = 4
-            }
-
-            /// <summary>
-            /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> up to <paramref name="distance"/> hexes with a valid path. <br></br>
-            /// <i>(i.e. <see cref="PromptArgs"/> for a pathed, Basic or Directional Move)</i>
-            /// </summary>
-            /// <remarks>
-            /// Additional Properties: <br></br>
-            /// - <see cref="MinDistance"/> <br></br>
-            /// - <see cref="CollisionIgnores"/> <br></br>
-            /// - <see cref="Directionals"/> <br></br>
-            /// - <see cref="CustomPathingRestrictions"/> <br></br>
-            /// - <see cref="CustomPathingOverrides"/> <br></br>
-            /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
-            /// </remarks>
-            /// <param name="performer"></param>
-            /// <param name="movingUnit"></param>
-            /// <param name="distance"></param>
-            public PathArgs(Player performer, Unit movingUnit, int distance) : base(performer, movingUnit)
-            {
-                Distance = distance;
-            }
-        }
-
-        /// <summary>
-        /// [ : ] <see cref="PromptArgs"/>
-        /// </summary>
-        public class PositionalArgs : PromptArgs
-        {
-            /// <summary>
-            /// The position that PositionalOffsets will offset to get the final prompted positions. <br></br>
-            /// <i>Ex: If moving BEHIND a <see cref="Unit"/> (<b>u</b>), <b>u</b>.Position would be the AnchorPosition.</i>
-            /// </summary>
-            /// <remarks>
-            /// (See <see cref="PositionalOffsets"/>)
-            /// </remarks>
-            public Vector3Int AnchorPosition { get; set; }
-
-            /// <summary>
-            /// The set of offsets that are added to AnchorPosition to get the final prompted positions. <br></br>
-            /// <i>Ex: If moving BEHIND a position, -<see cref="BoardCoords.up"/> would be the single element of PositionalOffsets.</i>
-            /// </summary>
-            /// <remarks>
-            /// (See <see cref="AnchorPosition"/>)
-            /// </remarks>
-            public HashSet<Vector3Int> PositionalOffsets { get; set; }
-
-            /// <summary>
-            /// PositionalOffsets are rotated to this Team to match their perspective. <br></br>
-            /// <i> Ex: If moving BEHIND a Red Unit, set this to <see cref="Player.ETeam.Red"/> so that the offset is rotated to match a Red Unit's view of behind.</i> <br></br>
-            /// </summary>
-            /// <remarks>
-            /// <i>IN_FRONT/BEHIND are perspective dependent, what is one to Blue, is the other to Red.</i>
-            /// </remarks>
-            public Player.ETeam TeamRelativity { get; set; }
-
-            /// <summary>
-            /// <inheritdoc cref="PromptArgs.Forced"/>
-            /// </summary>
-            /// <remarks>
-            /// Default: <c>true</c>
-            /// </remarks>
-            public override bool Forced { get; set; } = true;
-
-            /// <summary>
-            /// <see cref="PositionalOffsets"/> preset that includes all positions adjacent to to the anchor.
-            /// </summary>
-            public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
-            /// <summary>
-            /// <see cref="PositionalOffsets"/> preset that includes the single position that is in front of the anchor.
-            /// </summary>
-            public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };
-            /// <summary>
-            /// <see cref="PositionalOffsets"/> preset that includes the single position that is behind the anchor.
-            /// </summary>
-            public static IEnumerable<Vector3Int> BEHIND => new[] { -BoardCoords.up };
-
-            /// <summary>
-            /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> to any position in <paramref name="positionalOffsets"/> relative to <paramref name="anchorPosition"/>, from the (rotational) perspective of <paramref name="teamRelativity"/>. <br></br>
-            /// <i>(i.e. <see cref="PromptArgs"/> for a Positional Move)</i>
-            /// </summary>
-            /// <remarks>
-            /// Additional Properties: <br></br>
-            /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
-            /// </remarks>
-            /// <param name="performer"></param>
-            /// <param name="movingUnit"></param>
-            /// <param name="anchorPosition"></param>
-            /// <param name="positionalOffsets"></param>
-            /// <param name="teamRelativity"></param>
-            public PositionalArgs(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffsets, Player.ETeam teamRelativity) : base(performer, movingUnit)
-            {
-                AnchorPosition = anchorPosition;
-                PositionalOffsets = new HashSet<Vector3Int>(positionalOffsets);
-                TeamRelativity = teamRelativity;
-            }
-        }
 
         public override string ToString()
         {

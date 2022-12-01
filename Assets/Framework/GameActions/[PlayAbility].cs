@@ -49,15 +49,18 @@ public partial class GameAction
             ExternalResultantEvent?.Invoke(this);
         }
 
-        public void Prompt()
+        public void Prompt(Player performer, Ability ability)
         {
-            throw new NotImplementedException();
+            
         }
 
         public class PromptArgs
         {
-
+            public Player Performer { get; set; }
+            public Ability Ability { get; set; }
         }
+
+        
     }
 
 

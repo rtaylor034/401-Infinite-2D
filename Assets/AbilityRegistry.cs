@@ -19,6 +19,7 @@ public static class AbilityRegistry
         * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
         * HIT AREA - HashSet<Vector3Int>
         * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
+        * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
         * 
         * Unsourced:
         * NAME - string
@@ -47,7 +48,7 @@ public static class AbilityRegistry
                 },
                 new Ability.Sourced.TargetingCondition[]
                 {
-                    Ability.Sourced.STANDARD_ATTACK,
+                    Ability.Sourced.STANDARD_ATTACK_TARGET,
                     Ability.Sourced.STANDARD_COLLISION
                 }
             ),

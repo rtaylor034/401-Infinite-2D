@@ -11,6 +11,8 @@ public partial class GameAction
     public class InflictEffect : GameAction
     {
         public UnitEffect Effect { get; private set; }
+        public Unit AffectedUnit { get; private set; }
+
         /// <summary>
         /// Occurs when any <see cref="InflictEffect"/> is created.
         /// </summary>
@@ -18,18 +20,19 @@ public partial class GameAction
         public static event GameActionEventHandler<InflictEffect> ExternalResultantEvent;
         protected override void InternalPerform()
         {
-            Effect.SetActive(true);
+            Effect.SetActive(true, AffectedUnit);
         }
 
         protected override void InternalUndo()
         {
-            Effect.SetActive(false);
+            Effect.SetActive(false, AffectedUnit);
         }
 
-        public InflictEffect(Player performer, UnitEffect inflictedUnit) : base(performer)
+        public InflictEffect(Player performer, UnitEffect inflictedUnit, Unit affectedUnit) : base(performer)
         {
             Effect = inflictedUnit;
             ExternalResultantEvent?.Invoke(this);
+            AffectedUnit = affectedUnit;
         }
     }
 

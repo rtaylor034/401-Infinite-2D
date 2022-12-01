@@ -23,7 +23,9 @@ public partial class GameAction
                 //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
                 foreach(var effectC in sourced.TargetEffects)
                 {
-                    AddResultant(new InflictEffect(Performer, effectC.CreateInstance()));
+                    //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
+                    for (int i = 1; i < ParticipatingUnits.Length; i++)
+                        AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
                 }
 
                 sourced.FollowUpMethod?.Invoke(this);

@@ -9,16 +9,17 @@ public abstract class Ability
 {
     
     public string Name { get; set; }
-    public EAbilityType TypeIdentity { get; set; }
+    public ETypeIdentity TypeIdentity { get; set; }
 
-    public enum EAbilityType
+    public enum ETypeIdentity : byte
     {
         Attack,
         Defense,
-        Utility
+        Utility, 
+        Special
     }
 
-    public Ability(string name, EAbilityType typeIdentity)
+    public Ability(string name, ETypeIdentity typeIdentity)
     {
         Name = name;
         TypeIdentity = typeIdentity;
@@ -31,13 +32,19 @@ public abstract class Ability
         public List<TargetCondition> TargetConditions { get; set; }
         public Action<GameAction.PlayAbility> ActionMethod { get; set; }
 
-        public Unsourced(string name, EAbilityType typeIdentity, IList<TargetCondition> targetConditions, Action<GameAction.PlayAbility> actionMethod)
+        public Unsourced(string name, ETypeIdentity typeIdentity, Action<GameAction.PlayAbility> actionMethod, SingleTargetCondition initialTargetCondition)
+            : this(name, typeIdentity, actionMethod, initialTargetCondition, null) { }
+
+        public Unsourced(string name, ETypeIdentity typeIdentity, Action<GameAction.PlayAbility> actionMethod, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions)
             : base(name, typeIdentity)
         {
             Name = name;
             TypeIdentity = typeIdentity;
-            TargetConditions = (targetConditions is null) ?
-                new List<TargetCondition>() : new List<TargetCondition>(targetConditions);
+            TargetConditions = new()
+            {
+                (p, _, t) => initialTargetCondition(p, t)
+            };
+            TargetConditions.AddRange(secondaryTargetConditions);
             ActionMethod = actionMethod;
         }
     }
@@ -48,7 +55,7 @@ public abstract class Ability
         public delegate bool TargetingCondition(Player user, Unit source, Unit target);
         public HashSet<Vector3Int> HitArea { get; set; }
         public List<ConstructorTemplate<UnitEffect>> TargetEffects { get; set; }
-        public TargetingCondition TargetCondition { get; set; }
+        public List<TargetingCondition> TargetingConditions { get; set; }
         public Action<GameAction.PlayAbility> FollowUpMethod { get; set; }
 
         public static readonly TargetingCondition STANDARD_ATTACK = (p, _, t) => p.Team != t.Team;
@@ -76,12 +83,12 @@ public abstract class Ability
             return true;
         };
 
-        public Sourced(string name, EAbilityType typeIdentity, IList<ConstructorTemplate<UnitEffect>> targetEffects, IEnumerable<Vector3Int> hitArea, TargetingCondition targetCondition) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, TargetingCondition[] targetingConditions) :
             base(name, typeIdentity)
         {
             HitArea = new HashSet<Vector3Int>(hitArea);
             TargetEffects = new List<ConstructorTemplate<UnitEffect>>(targetEffects);
-            TargetCondition = targetCondition;
+            TargetingConditions = new(targetingConditions);
         }
 
     }

@@ -3,19 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class UnitEffect
+public abstract partial class UnitEffect
 {
+    //Will be null until SetActive is called once.
+    //If all executes according to plan, will never read as null, as SetActive should be called by appropriate GameActions.
     public Unit AffectedUnit { get; private set; }
+    
+    //EVERY Turn counts as a Duration tick. by default Duration = 1, meaning the effect will only last for the following Turn after it is inflicted (opponents turn), and wears off on your next Turn.
     public int Duration { get; private set; }
 
-    protected UnitEffect(Unit affectedUnit, int duration = 1)
+    protected UnitEffect(int duration)
     {
-        AffectedUnit = affectedUnit;
         Duration = duration;
     }
 
-    public void SetActive(bool val)
+    public void SetActive(bool val, Unit affectedUnit)
     {
+        AffectedUnit = affectedUnit;
         InternalSetup(val);
         if (val)
         {
@@ -51,14 +55,14 @@ public abstract class UnitEffect
 
         protected override void InternalPerform()
         {
-            if (TickingEffect.Duration <= 0) TickingEffect.SetActive(false);
+            if (TickingEffect.Duration <= 0) TickingEffect.SetActive(false, TickingEffect.AffectedUnit);
             TickingEffect.Duration--;
         }
 
         protected override void InternalUndo()
         {
             TickingEffect.Duration++;
-            if (TickingEffect.Duration > 0) TickingEffect.SetActive(true);
+            if (TickingEffect.Duration > 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit);
             ExternalResultantEvent?.Invoke(this);
         }
     }

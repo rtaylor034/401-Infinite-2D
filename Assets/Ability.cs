@@ -7,7 +7,8 @@ using UnityEngine;
 
 public abstract class Ability
 {
-    
+    public delegate void PlayAction(GameAction.PlayAbility action);
+    public readonly static PlayAction NO_ACTION = _ => { };
     public string Name { get; set; }
     public ETypeIdentity TypeIdentity { get; set; }
 
@@ -30,12 +31,12 @@ public abstract class Ability
         public delegate bool TargetCondition(Player user, Unit previousTarget, Unit currentTarget);
         public delegate bool SingleTargetCondition(Player user, Unit target);
         public List<TargetCondition> TargetConditions { get; set; }
-        public Action<GameAction.PlayAbility> ActionMethod { get; set; }
+        public PlayAction ActionMethod { get; set; }
 
-        public Unsourced(string name, ETypeIdentity typeIdentity, Action<GameAction.PlayAbility> actionMethod, SingleTargetCondition initialTargetCondition)
+        public Unsourced(string name, ETypeIdentity typeIdentity, PlayAction actionMethod, SingleTargetCondition initialTargetCondition)
             : this(name, typeIdentity, actionMethod, initialTargetCondition, new TargetCondition[0]) { }
 
-        public Unsourced(string name, ETypeIdentity typeIdentity, Action<GameAction.PlayAbility> actionMethod, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions)
+        public Unsourced(string name, ETypeIdentity typeIdentity, PlayAction actionMethod, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions)
             : base(name, typeIdentity)
         {
             Name = name;
@@ -58,7 +59,7 @@ public abstract class Ability
         public List<ConstructorTemplate<UnitEffect>> TargetEffects { get; set; }
         public List<SourceCondition> SourceConditions { get; set; }
         public List<TargetingCondition> TargetingConditions { get; set; }
-        public Action<GameAction.PlayAbility> FollowUpMethod { get; set; }
+        public PlayAction FollowUpMethod { get; set; }
 
         public static readonly SourceCondition STANDARD_VALID_SOURCE = (p, s) => p.Team == s.Team;
         public static readonly TargetingCondition STANDARD_ATTACK_TARGET = (p, _, t) => p.Team != t.Team;
@@ -86,16 +87,17 @@ public abstract class Ability
             return true;
         };
 
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
             base(name, typeIdentity)
         {
             HitArea = new HashSet<Vector3Int>(hitArea);
             TargetEffects = new List<ConstructorTemplate<UnitEffect>>(targetEffects);
             TargetingConditions = new(targetingConditions);
             SourceConditions = new(sourceConditions);
+            FollowUpMethod = followUpMethod;
         }
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, TargetingCondition[] targetingConditions) :
-            this(name, typeIdentity, targetEffects, hitArea, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, PlayAction followUpMethod, HashSet<Vector3Int> hitArea, TargetingCondition[] targetingConditions) :
+            this(name, typeIdentity, targetEffects, hitArea, followUpMethod, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
         { }
 
 

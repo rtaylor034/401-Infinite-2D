@@ -7,8 +7,6 @@ using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static System.Collections.Specialized.BitVector32;
-
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
 /// </summary>

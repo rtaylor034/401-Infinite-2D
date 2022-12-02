@@ -18,13 +18,14 @@ public static class AbilityRegistry
         * TYPE IDENTITY - Ability.ETypeIdentity
         * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
         * HIT AREA - HashSet<Vector3Int>
+        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction (void<GameAction.PlayAbility>)
         * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
         * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
         * 
         * Unsourced:
         * NAME - string
         * TYPE IDENTITY - Ability.ETypeIdentity
-        * ON-PLAY ACTION - Action<GameAction.PlayAbility> actionMethod
+        * ON-PLAY ACTION - Ability.PlayAction (void<GameAction.PlayAbility>)
         * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
         * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
         */
@@ -46,6 +47,7 @@ public static class AbilityRegistry
                 {
                     BoardCoords.up
                 },
+                Ability.NO_ACTION,
                 new Ability.Sourced.TargetingCondition[]
                 {
                     Ability.Sourced.STANDARD_ATTACK_TARGET,

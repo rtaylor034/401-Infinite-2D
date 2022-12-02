@@ -71,6 +71,7 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
+        //TODO: cancel/error callback
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.
@@ -92,8 +93,10 @@ public abstract partial class GameAction
                 (args is PromptArgs.Positional a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(FinalCondition):
                 throw new ArgumentException("PromptArgs not recognized?");
 
-            if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
-            GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
+            if (args.Forced && possibleHexes.IsSingleElement(out var single))
+                GameManager.SELECTOR.SpoofSelection(single, OnSelect);
+            else
+                GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
             
             void OnSelect(Selector.SelectorArgs sel)
             {

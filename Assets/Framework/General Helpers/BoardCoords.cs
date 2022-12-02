@@ -322,7 +322,8 @@ public static class BoardCoords
     }
 
     /// <summary>
-    /// Adds <paramref name="offset"/> to every coordinate of <paramref name="positions"/> and returns it.
+    /// Adds <paramref name="offset"/> to every coordinate of <paramref name="positions"/> and returns it. <br></br>
+    /// <i>(<paramref name="positions"/> is unaffected)</i>
     /// </summary>
     /// <param name="positions"></param>
     /// <param name="offset"></param>

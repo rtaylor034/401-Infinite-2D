@@ -137,7 +137,6 @@ public partial class GameAction
             }
         }
         
-
         public class PromptArgs
         {
             public Player Performer { get; set; }

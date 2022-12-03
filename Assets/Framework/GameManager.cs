@@ -106,7 +106,6 @@ public class GameManager : MonoBehaviour
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += _ =>
         {
-            Debug.Log("moveprompted");
             SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), __Confirm);
 
             void __Confirm(Selector.SelectorArgs sel)
@@ -126,6 +125,7 @@ public class GameManager : MonoBehaviour
             }
             
         };
+
         //TEST UNDO
         INPUT.Test.undo.performed += _ =>
         {
@@ -136,7 +136,6 @@ public class GameManager : MonoBehaviour
         //TEST EFFECT
         INPUT.Test.effect.performed += _ =>
         {
-            Debug.Log("effectprompted");
             SELECTOR.Prompt(board.Units, __Confirm);
 
             void __Confirm(Selector.SelectorArgs sel)
@@ -149,14 +148,12 @@ public class GameManager : MonoBehaviour
         //TEST TURN
         INPUT.Test.turn.performed += _ =>
         {
-            Debug.Log("turntested");
             NextTurn();
         };
 
         //TEST ABILITY
         INPUT.Test.ability.performed += _ =>
         {
-            Debug.Log("abilityprompted");
             GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[0], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
         };
     }

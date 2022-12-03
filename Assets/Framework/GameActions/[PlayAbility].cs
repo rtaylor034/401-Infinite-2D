@@ -38,6 +38,7 @@ public partial class GameAction
             {
                 unsourced.ActionMethod?.Invoke(this);
             }
+            else throw new ArgumentException("Ability not recognized");
         }
 
         protected override void InternalUndo()
@@ -98,7 +99,8 @@ public partial class GameAction
 
                     void __TargetConfirm(Selector.SelectorArgs targetSel)
                     {
-                        if (targetSel.Selection is not Unit target) { cancelCallback?.Invoke(targetSel); return; }
+                        if (targetSel.Selection is not Unit target)
+                        { cancelCallback?.Invoke(targetSel); return; }
 
                         var participants = new Unit[] { source, target };
                         confirmCallback?.Invoke(new PlayAbility(player, a, participants));
@@ -110,7 +112,28 @@ public partial class GameAction
             }
             void __HandleUnsourced(Ability.Unsourced a)
             {
-                throw new NotImplementedException();
+                var conds = a.TargetConditions;
+                var pUnits = new Unit[a.TargetConditions.Count];
+                __PromptTarget(0);
+
+                void __PromptTarget(int i)
+                {
+                    var validUnits = board.Units.Where(u => conds[i](player, (i > 0) ? pUnits[i-1] : null, u));
+                    GameManager.SELECTOR.Prompt(validUnits, __TargetConfirm);
+
+                    void __TargetConfirm(Selector.SelectorArgs sel)
+                    {
+                        if (sel.Selection is not Unit u)
+                        { cancelCallback?.Invoke(sel); return; }
+
+                        pUnits[i] = u;
+
+                        if (++i <= pUnits.Length)
+                        { confirmCallback?.Invoke(new PlayAbility(player, a, pUnits)); return; }
+
+                        __PromptTarget(i);
+                    }
+                }
             }
         }
         

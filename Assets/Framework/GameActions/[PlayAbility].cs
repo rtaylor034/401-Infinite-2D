@@ -10,7 +10,20 @@ public partial class GameAction
 
     public class PlayAbility : GameAction
     {
+        /// <summary>
+        /// The <see cref="Ability"/> that was played.
+        /// </summary>
         public Ability PlayedAbility { get; private set; }
+
+        /// <summary>
+        /// The Units that participated in this ability.
+        /// </summary>
+        /// <remarks>
+        /// <i>
+        /// SOURCED: Always 2 elements, [0] is the Source, [1] is the Target. <br></br>
+        /// UNSOURCED: Size is ability-dependent, contains the Targets of the ability in order of selection.
+        /// </i>
+        /// </remarks>
         public Unit[] ParticipatingUnits { get; private set; }
 
         /// <summary>
@@ -19,6 +32,12 @@ public partial class GameAction
         /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<PlayAbility> ExternalResultantEvent;
 
+        /// <summary>
+        /// Occurs when any <see cref="PlayAbility"/> is prompted using <see cref="Prompt(PromptArgs, Action{PlayAbility}, Selector.SelectionConfirmMethod)"/>. <br></br>
+        /// </summary>
+        /// <remarks>
+        /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
+        /// </remarks>
         public static event Action<PromptArgs> OnPromptEvent;
         protected override void InternalPerform()
         {
@@ -46,6 +65,17 @@ public partial class GameAction
             //All performs are resultant gameactions, therefor no internal undo is necessary.
         }
 
+        /// <summary>
+        /// Plays <paramref name="ability"/>, with <paramref name="participants"/> as the participating Units, by <paramref name="performer"/>. <br></br> <br></br>
+        /// > Unless you are creating a <see cref="PlayAbility"/> that has already happened, use <br></br>
+        /// <b><see cref="Prompt(PromptArgs, Action{PlayAbility}, Selector.SelectionConfirmMethod)"/></b>.
+        /// </summary>
+        /// <remarks>
+        /// <i><see cref="PlayAbility"/> object is created within Prompt()</i>
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="ability"></param>
+        /// <param name="participants"></param>
         public PlayAbility(Player performer, Ability ability, IList<Unit> participants) : base(performer)
         {
             PlayedAbility = ability;
@@ -54,6 +84,18 @@ public partial class GameAction
             ExternalResultantEvent?.Invoke(this);
         }
 
+        /// <summary>
+        /// Creates a <see cref="PlayAbility"/> action based on <paramref name="args"/>. <br></br>
+        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="PlayAbility"/> once all selections are made. <br></br>
+        /// > If any selection is cancelled or invalid, <paramref name="cancelCallback"/> will be called with the invalid <see cref="Selector.SelectorArgs"/> instead.
+        /// </summary>
+        /// <remarks>
+        /// <i>(See <see cref="PromptArgs"/>)</i>
+        /// </remarks>
+        /// <param name="args"></param>
+        /// <param name="confirmCallback"></param>
+        /// <param name="cancelCallback"></param>
+        /// <exception cref="ArgumentException"></exception>
         public static void Prompt(PromptArgs args, Action<PlayAbility> confirmCallback, Selector.SelectionConfirmMethod cancelCallback = null)
         {
             var ability = args.Ability;
@@ -139,10 +181,30 @@ public partial class GameAction
         
         public class PromptArgs
         {
+            /// <summary>
+            /// The Player that is performing this ability.
+            /// </summary>
             public Player Performer { get; set; }
+            /// <summary>
+            /// The Ability that is being played.
+            /// </summary>
             public Ability Ability { get; set; }
+            /// <summary>
+            /// The Board that this ability is taking place on. <br></br>
+            /// <i>(Usually can be referenced by <see cref="Unit.Board"/> or <see cref="GameManager.board"/>) <br></br>
+            /// (Only exists because Ryan wants to overengineer everything and have future multi-board support)</i>
+            /// </summary>
             public Board Board { get; set; }
 
+            /// <summary>
+            /// Prompts <paramref name="performer"/> to play an instance of <paramref name="abilityConstruction"/> on Board <paramref name="board"/>.
+            /// </summary>
+            /// <remarks>
+            /// <i>(See <see cref="AbilityRegistry.Registry"/>)</i>
+            /// </remarks>
+            /// <param name="performer"></param>
+            /// <param name="abilityConstruction"></param>
+            /// <param name="board"></param>
             public PromptArgs(Player performer, ConstructorTemplate<Ability> abilityConstruction, Board board)
             {
                 Performer = performer;

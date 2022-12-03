@@ -45,8 +45,9 @@ public abstract partial class GameAction
 
 
         /// <summary>
-        /// Moves <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br>
-        /// > Unless you are creating a Move that already happened, use <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
+        /// Moves <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br> <br></br>
+        /// > Unless you are creating a <see cref="Move"/> that has already happened, use
+        /// <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
         /// </summary>
         /// <remarks>
         /// <i><see cref="Move"/> object is created within Prompt()</i>

@@ -33,10 +33,10 @@ public abstract class Ability
         public List<TargetCondition> TargetConditions { get; set; }
         public PlayAction ActionMethod { get; set; }
 
-        public Unsourced(string name, ETypeIdentity typeIdentity, PlayAction actionMethod, SingleTargetCondition initialTargetCondition)
-            : this(name, typeIdentity, actionMethod, initialTargetCondition, new TargetCondition[0]) { }
+        public Unsourced(string name, ETypeIdentity typeIdentity, SingleTargetCondition initialTargetCondition, PlayAction actionMethod)
+            : this(name, typeIdentity, initialTargetCondition, new TargetCondition[0], actionMethod) { }
 
-        public Unsourced(string name, ETypeIdentity typeIdentity, PlayAction actionMethod, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions)
+        public Unsourced(string name, ETypeIdentity typeIdentity, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions, PlayAction actionMethod)
             : base(name, typeIdentity)
         {
             Name = name;

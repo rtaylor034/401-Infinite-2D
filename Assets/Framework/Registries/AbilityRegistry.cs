@@ -25,9 +25,9 @@ public static class AbilityRegistry
         * Unsourced:
         * NAME - string
         * TYPE IDENTITY - Ability.ETypeIdentity
-        * ON-PLAY ACTION - Ability.PlayAction (void<GameAction.PlayAbility>)
         * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
         * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
+        * ON-PLAY ACTION - Ability.PlayAction (void<GameAction.PlayAbility>)
         */
 
         List<ConstructorTemplate<Ability>> masterList = new()
@@ -37,7 +37,7 @@ public static class AbilityRegistry
             (
                 typeof(Ability.Sourced),
 
-                "Test Attack", Ability.ETypeIdentity.Attack,
+                "Lance", Ability.ETypeIdentity.Attack,
 
                 new ConstructorTemplate<UnitEffect>[]
                 {
@@ -45,21 +45,15 @@ public static class AbilityRegistry
                 },
                 new HashSet<Vector3Int>
                 {
-                    BoardCoords.up
+                    H(0, 1, 0),
+                    H(0, 2, 0),
+                    H(0, 3, 0)
                 },
 
                 new Ability.PlayAction(a =>
                 {
                     GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[1], 8) 
-                        {
-                            Directionals =
-                            (GameAction.Move.PromptArgs.Pathed.EDirectionalsF.Away,
-                            a.ParticipatingUnits[0].Position),
-
-                            MinDistance = 3,
-                            Forced = true
-                        },
+                        (a.Performer, a.ParticipatingUnits[0], 1),
                         move => a.AddLateResultant(move));
                 }),
 
@@ -75,16 +69,18 @@ public static class AbilityRegistry
             (
                 typeof(Ability.Unsourced),
 
-                "Test Utility", Ability.ETypeIdentity.Utility,
+                "Break Will", Ability.ETypeIdentity.Utility,
+
+                new Ability.Unsourced.SingleTargetCondition((p, u) => p.Team != u.Team),
 
                 new Ability.PlayAction(a =>
                 {
                     GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[0], 8),
+                        (a.Performer, a.ParticipatingUnits[0], 3),
                         move => a.AddLateResultant(move));
-                }),
+                })
 
-                new Ability.Unsourced.SingleTargetCondition((p, u) => p.Team == u.Team)
+                
             ),
         };
 
@@ -93,4 +89,5 @@ public static class AbilityRegistry
         Registry = new ReadOnlyCollection<ConstructorTemplate<Ability>>(masterList);
     }
 
+    private static Vector3Int H(int left, int up, int right) => BoardCoords.Simple(left, up, right);
 }

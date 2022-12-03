@@ -137,7 +137,7 @@ public class GameManager : MonoBehaviour
         //TEST UNDO
         INPUT.Test.undo.performed += _ =>
         {
-            Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(false)}");
+            Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(true)}");
             
         };
 

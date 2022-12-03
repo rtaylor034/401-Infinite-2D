@@ -121,8 +121,8 @@ public abstract partial class GameAction
                                 sel.ReturnCode = 1;
                                 cancelCallback?.Invoke(sel);
                             }
-                            return;
                         }
+                        return;
                     }
                     confirmCallback?.Invoke(new(args.Performer, u, u.Position, (sel.Selection as Hex).Position));
                 }

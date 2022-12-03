@@ -465,7 +465,7 @@ public abstract partial class GameAction
 
         public override string ToString()
         {
-            return $"<MOVE>: {MovedUnit}: {FromPos} -> {ToPos}" + base.ToString();
+            return $"<MOVE> {MovedUnit}: {FromPos} -> {ToPos}" + base.ToString();
         }
 
     }

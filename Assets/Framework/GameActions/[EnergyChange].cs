@@ -60,7 +60,7 @@ public abstract partial class GameAction
 
         public override string ToString()
         {
-            return $"<ENERGY>: {Reciever} = {BeforeAmount} -> {AfterAmount}" + base.ToString();
+            return $"<ENERGY> {Reciever} = {BeforeAmount} -> {AfterAmount}" + base.ToString();
         }
     }
 

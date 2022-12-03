@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
 
         Settings = settings;
         CurrentPlayer = Player.DummyPlayer;
+        AbilityRegistry.Initialize(settings);
 
         board.CreateBoard();
 

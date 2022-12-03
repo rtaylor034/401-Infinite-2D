@@ -62,7 +62,7 @@ public abstract partial class GameAction
         }
         public override string ToString()
         {
-            return $"<TURN>: {FromPlayer} -> {ToPlayer}" + base.ToString();
+            return $"<TURN> {FromPlayer} -> {ToPlayer}" + base.ToString();
         }
     }
 

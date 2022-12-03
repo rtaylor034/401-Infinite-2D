@@ -21,6 +21,7 @@ public abstract partial class UnitEffect
     public void SetActive(bool val, Unit affectedUnit, Player inflicter)
     {
         AffectedUnit = affectedUnit;
+        Inflicter = inflicter;
         InternalSetup(val);
         if (val)
         {

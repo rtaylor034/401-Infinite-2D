@@ -32,6 +32,11 @@ public partial class GameAction
             AfterAmount = changeFunction(reciever.HP);
             ExternalResultantEvent?.Invoke(this);
         }
+
+        public override string ToString()
+        {
+            return $"<HP CHANGE> {Reciever} {BeforeAmount} -> {AfterAmount}" + base.ToString();
+        }
     }
 
 

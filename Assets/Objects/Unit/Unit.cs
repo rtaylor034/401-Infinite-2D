@@ -58,6 +58,6 @@ public class Unit : Selectable
 
     public override string ToString()
     {
-        return $"[U{ID}{Team.ToString()[0]}]";
+        return $"[U{ID}{Team.ToString()[0]}-{HP}]";
     }
 }

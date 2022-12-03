@@ -12,8 +12,11 @@ public static class AbilityRegistry
     //have some sort of field that has default effect duration (would be 1 in a normal game).
     public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
     
-    static AbilityRegistry()
+
+    public static void Initialize(GameSettings settings)
     {
+
+        int STD_DURATION = settings.StandardEffectDuration;
         /*
         * Sourced:
         * NAME - string
@@ -34,7 +37,7 @@ public static class AbilityRegistry
 
         List<ConstructorTemplate<Ability>> masterList = new()
         {
-            //>0 TEST ATTACK
+            //>0 LANCE
             new
             (
                 typeof(Ability.Sourced),
@@ -43,7 +46,8 @@ public static class AbilityRegistry
 
                 new ConstructorTemplate<UnitEffect>[]
                 {
-                    new(typeof(UnitEffect.Slow), 1)
+                    new(typeof(UnitEffect.Slow), STD_DURATION),
+                    new(typeof(UnitEffect.Damage), STD_DURATION)
                 },
                 new HashSet<Vector3Int>
                 {
@@ -82,7 +86,7 @@ public static class AbilityRegistry
                         move => a.AddLateResultant(move));
                 })
 
-                
+
             ),
         };
 

@@ -2,12 +2,11 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static System.Collections.Specialized.BitVector32;
-
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
 /// </summary>
@@ -103,17 +102,17 @@ public class GameManager : MonoBehaviour
 
         NextTurn();
 
-        //TEST MOVEMENT
-        INPUT.Test.moveprompt.performed += c =>
-        {
-            Debug.Log("moveprompted");
-            SELECTOR.Prompt(board.Units, Confirm);
 
-            void Confirm(Selector.SelectorArgs sel)
+        //TEST MOVEMENT
+        INPUT.Test.moveprompt.performed += _ =>
+        {
+            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), __Confirm);
+
+            void __Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
                 //funny lazer  test
-                GameAction.Move.Prompt(new GameAction.Move.PathArgs(CurrentPlayer, u, 10)
+                GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
                 { CustomPathingRestrictions = new() {
                     (prev, next) => 
                     { 
@@ -126,11 +125,36 @@ public class GameManager : MonoBehaviour
             }
             
         };
-        //test undo
-        INPUT.Test.undo.performed += c =>
+
+        //TEST UNDO
+        INPUT.Test.undo.performed += _ =>
         {
             Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(false)}");
             
+        };
+
+        //TEST EFFECT
+        INPUT.Test.effect.performed += _ =>
+        {
+            SELECTOR.Prompt(board.Units, __Confirm);
+
+            void __Confirm(Selector.SelectorArgs sel)
+            {
+                if (sel.Selection is not Unit u) return;
+                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Slowed(1), u));
+            }
+        };
+
+        //TEST TURN
+        INPUT.Test.turn.performed += _ =>
+        {
+            NextTurn();
+        };
+
+        //TEST ABILITY
+        INPUT.Test.ability.performed += _ =>
+        {
+            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[0], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
         };
     }
 
@@ -148,7 +172,7 @@ public class GameManager : MonoBehaviour
     private void NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
-        var nextPlayer = (cnode is not null) ? cnode.Next.Value : _turnOrder.First.Value;
+        var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
         GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
             .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
@@ -182,16 +206,17 @@ public class GameManager : MonoBehaviour
     private bool UndoLastGameAction(bool canUndoTurns)
     {
         GameAction action = _game.Peek();
-        if (action is GameAction.Turn turn)
+        if (action is GameAction.Turn)
         {
             if (!canUndoTurns) return false;
-            HandleTurnAction(turn, true);
         }
 
         action.Undo();
         _game.Pop();
         return true;
     }
+
+
     /// <summary>
     /// Acts as a <see cref="GameAction.Turn"/>'s Perform() method. <br></br>
     /// ><i> This method exists because <see cref="GameAction"/> does not have access to turn order.</i>
@@ -201,7 +226,7 @@ public class GameManager : MonoBehaviour
     /// <remarks>
     /// If <paramref name="undo"/> is TRUE, this acts as its Undo() method.
     /// </remarks>
-    private void HandleTurnAction(GameAction.Turn turn, bool undo = false)
+    public void HandleTurnAction(GameAction.Turn turn, bool undo = false)
     {
         if (undo)
         {

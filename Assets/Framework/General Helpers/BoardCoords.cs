@@ -60,10 +60,10 @@ public static class BoardCoords
     /// <param name="around"></param>
     /// <param name="rotations"></param>
     /// <returns></returns>
-    public static List<Vector3Int> Rotate(this IEnumerable<Vector3Int> coords, Vector3Int around, int n)
+    public static HashSet<Vector3Int> Rotate(this IEnumerable<Vector3Int> coords, Vector3Int around, int n)
     {
 
-        var result = new List<Vector3Int>();
+        var result = new HashSet<Vector3Int>();
         foreach (Vector3Int v in coords)
         {
             result.Add(Rotate(v, around, n));
@@ -124,8 +124,9 @@ public static class BoardCoords
     /// <remarks>
     /// <i>out </i><paramref name="exactEdgePairs"/>: Space-pairs that the line goes exactly in-between. (null if none)
     /// </remarks>
-    public static List<Vector3Int> GetLineIntersections(this Vector3Int pos1, Vector3Int pos2, out List<Vector3Int[]> exactEdgePairs)
+    public static List<Vector3Int> LineIntersections(this Vector3Int pos1, Vector3Int pos2, out List<Vector3Int[]> exactEdgePairs)
     {
+        exactEdgePairs = new List<Vector3Int[]>();
         //find maxindex AND check for exact straight.
         List<byte> ind = new List<byte> { 0, 1, 2 };
         int maxdiff = 0;
@@ -140,7 +141,6 @@ public static class BoardCoords
             if ((pos1 - pos2)[i] == 0)
             {
                 ind.Remove(i);
-                exactEdgePairs = null;
                 return ExactStraight(ind[0], ind[1], pos1, pos2, false);
             }
         }
@@ -150,8 +150,7 @@ public static class BoardCoords
         //check for exact edge-axis line
         if ((pos1 - pos2)[ind[0]] == (pos1 - pos2)[ind[1]])
         {
-            exactEdgePairs = new List<Vector3Int[]>();
-
+            
             //**this could be done alot more efficiently, this is just the most understandable way.**
             for (Vector3Int diff = pos1 - pos2; diff != Vector3Int.zero;)
             {
@@ -322,7 +321,8 @@ public static class BoardCoords
     }
 
     /// <summary>
-    /// Adds <paramref name="offset"/> to every coordinate of <paramref name="positions"/> and returns it.
+    /// Adds <paramref name="offset"/> to every coordinate of <paramref name="positions"/> and returns it. <br></br>
+    /// <i>(<paramref name="positions"/> is unaffected)</i>
     /// </summary>
     /// <param name="positions"></param>
     /// <param name="offset"></param>

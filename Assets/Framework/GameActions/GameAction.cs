@@ -35,6 +35,23 @@ public abstract partial class GameAction
     /// <inheritdoc cref="ResultantActions"/>
     private readonly List<GameAction> _resultantActions = new();
 
+    #region Quick Documentation Inherits
+#pragma warning disable IDE0052
+#pragma warning disable IDE1006
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// Primarily used to add resultants to this <see cref="GameAction"/>. <br></br>
+    /// <i>> See <see cref="AddResultant(GameAction)"/></i>
+    /// </remarks>
+    private readonly bool __DOC__ExternalResultantEvent;
+
+#pragma warning restore IDE1006
+#pragma warning restore IDE0052
+    #endregion
+
     /// <summary>
     /// Performs this <see cref="GameAction"/> and all resultant GameActions.
     /// </summary>
@@ -81,9 +98,12 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
+    //BAD DOC, UPDATE
     /// <summary>
     /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
-    /// <i>(See <see cref="ResultantActions"/>)</i>
+    /// <i>(See <see cref="ResultantActions"/>)</i> <br></br> <br></br>
+    /// USE <see cref="AddLateResultant(GameAction)"/> IF: <br></br>
+    /// Resultant is being added anytime after immediate construction of this <see cref="GameAction"/>.
     /// </summary>
     /// <param name="action"></param>
     /// <remarks>
@@ -92,6 +112,15 @@ public abstract partial class GameAction
     public GameAction AddResultant(GameAction action)
     {
         _resultantActions.Add(action);
+        return this;
+    }
+
+    //NEED DOC
+    public GameAction AddLateResultant(GameAction action)
+    {
+        AddResultant(action);
+        action.Perform();
+        Debug.Log($"(Action Resultant Late-Added) -> {action}");
         return this;
     }
 

@@ -132,6 +132,33 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""effect"",
+                    ""type"": ""Button"",
+                    ""id"": ""43eecebc-0188-4b84-875a-26c5c28df90c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""turn"",
+                    ""type"": ""Button"",
+                    ""id"": ""b4aff0dd-b362-44c5-8043-5046a8a0a709"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ability"",
+                    ""type"": ""Button"",
+                    ""id"": ""9406c59a-c266-4bdd-9f78-2ff73f72c2f4"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -154,6 +181,39 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""undo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5c6cb82d-f805-4a46-9cd3-379877190f23"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""effect"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e96bab96-8d52-4918-9652-1061cc0da5e0"",
+                    ""path"": ""<Keyboard>/t"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""turn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e73311f6-0b8c-4272-94a3-f594721c1968"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""ability"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -233,6 +293,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         m_Test = asset.FindActionMap("Test", throwIfNotFound: true);
         m_Test_moveprompt = m_Test.FindAction("moveprompt", throwIfNotFound: true);
         m_Test_undo = m_Test.FindAction("undo", throwIfNotFound: true);
+        m_Test_effect = m_Test.FindAction("effect", throwIfNotFound: true);
+        m_Test_turn = m_Test.FindAction("turn", throwIfNotFound: true);
+        m_Test_ability = m_Test.FindAction("ability", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -351,12 +414,18 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     private ITestActions m_TestActionsCallbackInterface;
     private readonly InputAction m_Test_moveprompt;
     private readonly InputAction m_Test_undo;
+    private readonly InputAction m_Test_effect;
+    private readonly InputAction m_Test_turn;
+    private readonly InputAction m_Test_ability;
     public struct TestActions
     {
         private @Inputs m_Wrapper;
         public TestActions(@Inputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @moveprompt => m_Wrapper.m_Test_moveprompt;
         public InputAction @undo => m_Wrapper.m_Test_undo;
+        public InputAction @effect => m_Wrapper.m_Test_effect;
+        public InputAction @turn => m_Wrapper.m_Test_turn;
+        public InputAction @ability => m_Wrapper.m_Test_ability;
         public InputActionMap Get() { return m_Wrapper.m_Test; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -372,6 +441,15 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @undo.started -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
                 @undo.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
                 @undo.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnUndo;
+                @effect.started -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
+                @effect.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
+                @effect.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnEffect;
+                @turn.started -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
+                @turn.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
+                @turn.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
+                @ability.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
+                @ability.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
+                @ability.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
             }
             m_Wrapper.m_TestActionsCallbackInterface = instance;
             if (instance != null)
@@ -382,6 +460,15 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @undo.started += instance.OnUndo;
                 @undo.performed += instance.OnUndo;
                 @undo.canceled += instance.OnUndo;
+                @effect.started += instance.OnEffect;
+                @effect.performed += instance.OnEffect;
+                @effect.canceled += instance.OnEffect;
+                @turn.started += instance.OnTurn;
+                @turn.performed += instance.OnTurn;
+                @turn.canceled += instance.OnTurn;
+                @ability.started += instance.OnAbility;
+                @ability.performed += instance.OnAbility;
+                @ability.canceled += instance.OnAbility;
             }
         }
     }
@@ -442,5 +529,8 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     {
         void OnMoveprompt(InputAction.CallbackContext context);
         void OnUndo(InputAction.CallbackContext context);
+        void OnEffect(InputAction.CallbackContext context);
+        void OnTurn(InputAction.CallbackContext context);
+        void OnAbility(InputAction.CallbackContext context);
     }
 }

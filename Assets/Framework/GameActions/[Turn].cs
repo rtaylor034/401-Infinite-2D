@@ -10,9 +10,10 @@ public abstract partial class GameAction
     public class Turn : GameAction
     {
         /// <summary>
-        /// Occurs when any <see cref="Turn"/> is performed.
+        /// Occurs when any <see cref="Turn"/> is created.
         /// </summary>
-        public static event GameActionEventHandler<Turn> OnPerform;
+        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
+        public static event GameActionEventHandler<Turn> ExternalResultantEvent;
 
         /// <summary>
         /// The <see cref="Player"/> that ends their turn on this action. <br></br>
@@ -28,12 +29,13 @@ public abstract partial class GameAction
         protected override void InternalPerform()
         {
             //Handled by GameManager
-            OnPerform?.Invoke(this);
+            GameManager.GAME.HandleTurnAction(this);
         }
 
         protected override void InternalUndo()
         {
             //Handled by GameManager
+            GameManager.GAME.HandleTurnAction(this, true);
         }
 
         /// <summary>
@@ -44,11 +46,8 @@ public abstract partial class GameAction
         /// </remarks>
         /// <param name="fromPlayer"></param>
         /// <param name="toPlayer"></param>
-        public Turn(Player fromPlayer, Player toPlayer) : base(toPlayer)
-        {
-            FromPlayer = fromPlayer;
-            ToPlayer = toPlayer;
-        }
+        public Turn(Player fromPlayer, Player toPlayer) : this(toPlayer, fromPlayer, toPlayer) { }
+
         /// <summary>
         /// <inheritdoc cref="Turn.Turn(Player, Player)"/> (by <paramref name="performer"/>)
         /// </summary>
@@ -59,6 +58,7 @@ public abstract partial class GameAction
         {
             FromPlayer = fromPlayer;
             ToPlayer = toPlayer;
+            ExternalResultantEvent?.Invoke(this);
         }
         public override string ToString()
         {

@@ -110,6 +110,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "effect",
+                    "type": "Button",
+                    "id": "43eecebc-0188-4b84-875a-26c5c28df90c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "turn",
+                    "type": "Button",
+                    "id": "b4aff0dd-b362-44c5-8043-5046a8a0a709",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ability",
+                    "type": "Button",
+                    "id": "9406c59a-c266-4bdd-9f78-2ff73f72c2f4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -132,6 +159,39 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "undo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5c6cb82d-f805-4a46-9cd3-379877190f23",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "effect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e96bab96-8d52-4918-9652-1061cc0da5e0",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "turn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e73311f6-0b8c-4272-94a3-f594721c1968",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ability",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -5,6 +5,7 @@ using System.Runtime.ExceptionServices;
 using UnityEditor;
 using UnityEngine;
 
+//NEEDS DOCS
 public abstract class Ability
 {
     public delegate void PlayAction(GameAction.PlayAbility action);

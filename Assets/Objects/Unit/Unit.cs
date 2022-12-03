@@ -20,7 +20,7 @@ public class Unit : Selectable
     
     
     /// <summary>
-    /// Updates this Unit's position on the board. (Should only be called from GameActions).
+    /// Updates this Unit's position on the board. (Should only be called from <see cref="GameAction"/>[ : ])
     /// </summary>
     /// <param name="pos"></param>
     public void UpdatePosition(Vector3Int pos)
@@ -29,6 +29,15 @@ public class Unit : Selectable
         Position = pos;
         _board.HexAt(pos).Occupant = this;
         transform.localPosition = _board.GetLocalTransformAt(Position, -1);
+    }
+
+    /// <summary>
+    /// Updates this Unit's HP value. (Should only be called from <see cref="GameAction"/>[ : ])
+    /// </summary>
+    /// <param name="val"></param>
+    public void UpdateHP(int val)
+    {
+        HP = val;
     }
 
     public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)

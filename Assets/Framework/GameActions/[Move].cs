@@ -72,7 +72,6 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-        //TODO: cancel/error callback
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>
@@ -108,7 +107,7 @@ public abstract partial class GameAction
 
                 void __OnSelect(Selector.SelectorArgs sel)
                 {
-                    if (sel.Selection is not Hex s)
+                    if (sel.Selection is null)
                     {
                         if (args.Forced)
                         {
@@ -125,7 +124,7 @@ public abstract partial class GameAction
                             return;
                         }
                     }
-                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
+                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, (sel.Selection as Hex).Position));
                 }
             
 

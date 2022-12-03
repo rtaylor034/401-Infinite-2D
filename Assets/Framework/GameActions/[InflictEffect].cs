@@ -10,7 +10,14 @@ public partial class GameAction
     /// </summary>
     public class InflictEffect : GameAction
     {
+        /// <summary>
+        /// The inflicted <see cref="UnitEffect"/>.
+        /// </summary>
         public UnitEffect Effect { get; private set; }
+        
+        /// <summary>
+        /// The <see cref="Unit"/> that was inflicted with Effect.
+        /// </summary>
         public Unit AffectedUnit { get; private set; }
 
         /// <summary>
@@ -28,6 +35,12 @@ public partial class GameAction
             Effect.SetActive(false, AffectedUnit);
         }
 
+        /// <summary>
+        /// Inflicts <paramref name="affectedUnit"/> with <paramref name="inflictedEffect"/>, by <paramref name="performer"/>.
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="inflictedEffect"></param>
+        /// <param name="affectedUnit"></param>
         public InflictEffect(Player performer, UnitEffect inflictedEffect, Unit affectedUnit) : base(performer)
         {
             Effect = inflictedEffect;

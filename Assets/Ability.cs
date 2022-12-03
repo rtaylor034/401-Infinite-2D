@@ -66,20 +66,20 @@ public abstract class Ability
         public static readonly TargetingCondition STANDARD_DEFENSE_TARGET = (p, _, t) => p.Team == t.Team;
         public static readonly TargetingCondition STANDARD_COLLISION = (p, s, t) =>
         {
-            bool IsCollision(Hex h)
+            bool __IsCollision(Hex h)
             {
                 return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == p.Team);
             }
             List<Vector3Int[]> edges;
             foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))
             {
-                if (IsCollision(hex)) return false;
+                if (__IsCollision(hex)) return false;
             }
             foreach(var edgePair in edges)
             {
                 foreach (var edge in edgePair)
                 {
-                    if (!IsCollision(s.Board.HexAt(edge))) continue;
+                    if (!__IsCollision(s.Board.HexAt(edge))) continue;
                     return false;
                 }
                     
@@ -96,7 +96,7 @@ public abstract class Ability
             SourceConditions = new(sourceConditions);
             FollowUpMethod = followUpMethod;
         }
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, PlayAction followUpMethod, HashSet<Vector3Int> hitArea, TargetingCondition[] targetingConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
             this(name, typeIdentity, targetEffects, hitArea, followUpMethod, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
         { }
 

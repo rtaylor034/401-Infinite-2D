@@ -107,9 +107,9 @@ public class GameManager : MonoBehaviour
         INPUT.Test.moveprompt.performed += _ =>
         {
             Debug.Log("moveprompted");
-            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), Confirm);
+            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), __Confirm);
 
-            void Confirm(Selector.SelectorArgs sel)
+            void __Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
                 //funny lazer  test
@@ -137,9 +137,9 @@ public class GameManager : MonoBehaviour
         INPUT.Test.effect.performed += _ =>
         {
             Debug.Log("effectprompted");
-            SELECTOR.Prompt(board.Units, Confirm);
+            SELECTOR.Prompt(board.Units, __Confirm);
 
-            void Confirm(Selector.SelectorArgs sel)
+            void __Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
                 GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Slowed(1), u));
@@ -151,6 +151,13 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("turntested");
             NextTurn();
+        };
+
+        //TEST ABILITY
+        INPUT.Test.ability.performed += _ =>
+        {
+            Debug.Log("abilityprompted");
+            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[0], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
         };
     }
 

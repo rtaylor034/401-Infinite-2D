@@ -47,7 +47,22 @@ public static class AbilityRegistry
                 {
                     BoardCoords.up
                 },
-                Ability.NO_ACTION,
+
+                new Ability.PlayAction(a =>
+                {
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[1], 8) 
+                        {
+                            Directionals =
+                            (GameAction.Move.PromptArgs.Pathed.EDirectionalsF.Away,
+                            a.ParticipatingUnits[0].Position),
+
+                            MinDistance = 3,
+                            Forced = true
+                        },
+                        move => a.AddLateResultant(move));
+                }),
+
                 new Ability.Sourced.TargetingCondition[]
                 {
                     Ability.Sourced.STANDARD_ATTACK_TARGET,
@@ -62,9 +77,10 @@ public static class AbilityRegistry
 
                 "Test Utility", Ability.ETypeIdentity.Utility,
 
-                new Action<GameAction.PlayAbility>(a =>
+                new Ability.PlayAction(a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(a.Performer, a.ParticipatingUnits[0], 8),
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[0], 8),
                         move => a.AddLateResultant(move));
                 }),
 

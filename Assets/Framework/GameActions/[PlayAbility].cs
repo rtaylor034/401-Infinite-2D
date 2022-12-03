@@ -24,15 +24,15 @@ public partial class GameAction
         {
             if (PlayedAbility is Ability.Sourced sourced)
             {
+                sourced.FollowUpMethod?.Invoke(this);
                 //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
-                foreach(var effectC in sourced.TargetEffects)
+                foreach (var effectC in sourced.TargetEffects)
                 {
                     //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
                     for (int i = 1; i < ParticipatingUnits.Length; i++)
                         AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
                 }
 
-                sourced.FollowUpMethod?.Invoke(this);
             }
             else if (PlayedAbility is Ability.Unsourced unsourced)
             {
@@ -42,7 +42,7 @@ public partial class GameAction
 
         protected override void InternalUndo()
         {
-            throw new System.NotImplementedException();
+            //All performs are resultant gameactions, therefor no internal undo is necessary.
         }
 
         public PlayAbility(Player performer, Ability ability, IList<Unit> participants) : base(performer)
@@ -58,13 +58,19 @@ public partial class GameAction
             var ability = args.Ability;
             var board = args.Board;
             var player = args.Performer;
-            OnPromptEvent?.Invoke(args);
-
-            if (ability is Ability.Sourced sourced) HandleSourced(sourced);
-            else if (ability is Ability.Unsourced unsourced) HandleUnsourced(unsourced);
-            else throw new ArgumentException("Ability not recognized");
+            __Prompt(true);
             
-            void HandleSourced(Ability.Sourced a)
+            //for consistency with Move.Prompt, incase there is ever a forced ability action.
+            void __Prompt(bool callPromptEvent)
+            {
+                if (callPromptEvent) OnPromptEvent?.Invoke(args);
+
+                if (ability is Ability.Sourced sourced) __HandleSourced(sourced);
+                else if (ability is Ability.Unsourced unsourced) __HandleUnsourced(unsourced);
+                else throw new ArgumentException("Ability not recognized");
+
+            }
+            void __HandleSourced(Ability.Sourced a)
             {
                 var validSources = board.Units.Where(u =>
                 {
@@ -73,23 +79,24 @@ public partial class GameAction
                     return true;
                 });
                 
-                GameManager.SELECTOR.Prompt(validSources, SourceConfirm);
+                GameManager.SELECTOR.Prompt(validSources, __SourceConfirm);
 
-                void SourceConfirm(Selector.SelectorArgs sourceSel)
+                void __SourceConfirm(Selector.SelectorArgs sourceSel)
                 {
                     if (sourceSel.Selection is not Unit source) { cancelCallback?.Invoke(sourceSel); return; }
 
                     var validTargets = board.Units.Where(u =>
                     {
-                        if (!a.HitArea.Offset(source.Position).Contains(u.Position)) return false;
+                        if (!a.HitArea.Offset(source.Position).Rotate(source.Position, player.PerspectiveRotation)
+                        .Contains(u.Position)) return false;
                         foreach (var condition in a.TargetingConditions)
                             if (!condition(player, source, u)) return false;
                         return true;
                     });
 
-                    GameManager.SELECTOR.Prompt(validTargets, TargetConfirm);
+                    GameManager.SELECTOR.Prompt(validTargets, __TargetConfirm);
 
-                    void TargetConfirm(Selector.SelectorArgs targetSel)
+                    void __TargetConfirm(Selector.SelectorArgs targetSel)
                     {
                         if (targetSel.Selection is not Unit target) { cancelCallback?.Invoke(targetSel); return; }
 
@@ -99,13 +106,14 @@ public partial class GameAction
 
                 }
 
-                
+
             }
-            void HandleUnsourced(Ability.Unsourced a)
+            void __HandleUnsourced(Ability.Unsourced a)
             {
                 throw new NotImplementedException();
             }
         }
+        
 
         public class PromptArgs
         {
@@ -120,7 +128,11 @@ public partial class GameAction
                 Ability = abilityConstruction.CreateInstance();
             }
         }
-        
+
+        public override string ToString()
+        {
+            return $"<ABILITY> {PlayedAbility.Name}: {string.Join(" -> ", ParticipatingUnits as IEnumerable<Unit>)}" + base.ToString();
+        }
     }
 
 

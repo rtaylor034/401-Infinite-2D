@@ -75,15 +75,18 @@ public abstract partial class GameAction
         //TODO: cancel/error callback
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
-        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.
+        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>
+        /// > If any selection is cancelled or invalid, <paramref name="cancelCallback"/> will be called with the invalid <see cref="Selector.SelectorArgs"/> instead.
         /// </summary>
         /// <remarks>
-        /// <paramref name="confirmCallback"/> will not be called if no <see cref="Move"/> is created. <br></br>
-        /// <i>(Selection was cancelled or was invalid)</i>
+        /// <paramref name="cancelCallback"/>.ReturnCode: <br></br>
+        /// 1 - Move was Forced, but no valid Hexes could be found. <br></br>
+        /// <br></br>
+        /// <i>(See <see cref="PromptArgs.Pathed"/> / <see cref="PromptArgs.Positional"/>)</i>
         /// </remarks>
         /// <param name="args"></param>
         /// <param name="confirmCallback"></param>
-        public static void Prompt(PromptArgs args, Action<Move> confirmCallback)
+        public static void Prompt(PromptArgs args, Action<Move> confirmCallback, Action<Selector.SelectorArgs> cancelCallback = null)
         {
             __Prompt(true);
 
@@ -105,22 +108,24 @@ public abstract partial class GameAction
 
                 void __OnSelect(Selector.SelectorArgs sel)
                 {
-                    if (sel.Selection is Hex s)
+                    if (sel.Selection is not Hex s)
                     {
-                        confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
-                    }
-                    if (sel.WasCancelled && args.Forced)
-                    {
-                        if (!sel.WasEmpty)
+                        if (args.Forced)
                         {
-                            Debug.Log("you cannot cancel a forced move");
-                            __Prompt(false);
+                            if (!sel.WasEmpty)
+                            {
+                                Debug.Log("you cannot cancel a forced move");
+                                __Prompt(false);
+                            } 
+                            else
+                            {
+                                sel.ReturnCode = 1;
+                                cancelCallback?.Invoke(sel);
+                            }
                             return;
                         }
-                        //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
-                        //Ex: If a card has a forced Move, it should validate the move before it tries to prompt it, so that if validation fails, the card is unplayable. (although it could also be ignored idk.)
-                        Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
                     }
+                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
                 }
             
 

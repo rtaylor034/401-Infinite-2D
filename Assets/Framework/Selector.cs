@@ -140,7 +140,7 @@ public class Selector : MonoBehaviour
 
     #endregion
 
-    public class SelectorArgs : EventArgs
+    public class SelectorArgs : CallbackArgs
     {
         public Selectable Selection { get; set; }
         public bool WasCancelled { get; set; }

@@ -35,7 +35,7 @@ public class ConstructorTemplate<T>
 
         //exceptions 
         if (_constructor == null)
-            throw new System.ArgumentException($"{constructionType.Name} does not have a constructor with that takes parameters: ({string.Join(",", types.ToList())})");
+            throw new System.ArgumentException($"{constructionType.Name} does not have a constructor with that takes parameters: ({string.Join(" | ", types.ToList())})");
         if (!typeof(T).IsAssignableFrom(_type))
             throw new System.Exception($"{constructionType.Name} cannot be converted to {typeof(T).Name}");
 

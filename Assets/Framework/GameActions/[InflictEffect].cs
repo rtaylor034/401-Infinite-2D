@@ -37,7 +37,7 @@ public partial class GameAction
 
         public override string ToString()
         {
-            return $"<INFLICT EFFECT> {Effect} -> {AffectedUnit}" + base.ToString();
+            return $"<EFFECT> {Effect} -> {AffectedUnit}" + base.ToString();
         }
     }
 

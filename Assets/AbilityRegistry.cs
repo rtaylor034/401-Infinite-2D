@@ -18,12 +18,14 @@ public static class AbilityRegistry
         * TYPE IDENTITY - Ability.ETypeIdentity
         * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
         * HIT AREA - HashSet<Vector3Int>
+        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction (void<GameAction.PlayAbility>)
         * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
+        * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
         * 
         * Unsourced:
         * NAME - string
         * TYPE IDENTITY - Ability.ETypeIdentity
-        * ON-PLAY ACTION - Action<GameAction.PlayAbility> actionMethod
+        * ON-PLAY ACTION - Ability.PlayAction (void<GameAction.PlayAbility>)
         * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
         * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
         */
@@ -45,9 +47,25 @@ public static class AbilityRegistry
                 {
                     BoardCoords.up
                 },
+
+                new Ability.PlayAction(a =>
+                {
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[1], 8) 
+                        {
+                            Directionals =
+                            (GameAction.Move.PromptArgs.Pathed.EDirectionalsF.Away,
+                            a.ParticipatingUnits[0].Position),
+
+                            MinDistance = 3,
+                            Forced = true
+                        },
+                        move => a.AddLateResultant(move));
+                }),
+
                 new Ability.Sourced.TargetingCondition[]
                 {
-                    Ability.Sourced.STANDARD_ATTACK,
+                    Ability.Sourced.STANDARD_ATTACK_TARGET,
                     Ability.Sourced.STANDARD_COLLISION
                 }
             ),
@@ -59,9 +77,10 @@ public static class AbilityRegistry
 
                 "Test Utility", Ability.ETypeIdentity.Utility,
 
-                new Action<GameAction.PlayAbility>(a =>
+                new Ability.PlayAction(a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(a.Performer, a.ParticipatingUnits[0], 8),
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[0], 8),
                         move => a.AddLateResultant(move));
                 }),
 

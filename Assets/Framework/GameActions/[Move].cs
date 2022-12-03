@@ -26,7 +26,7 @@ public abstract partial class GameAction
         /// <remarks>
         /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
         /// </remarks>
-        public static event Action<PromptArgs> OnPrompt;
+        public static event Action<PromptArgs> OnPromptEvent;
 
         /// <summary>
         /// The <see cref="Unit"/> that is Moved by this action.
@@ -71,6 +71,7 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
+        //TODO: cancel/error callback
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> when a selection is made.
@@ -83,36 +84,44 @@ public abstract partial class GameAction
         /// <param name="confirmCallback"></param>
         public static void Prompt(PromptArgs args, Action<Move> confirmCallback)
         {
-            OnPrompt?.Invoke(args);
-            Unit u = args.MovingUnit;
-            bool FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
+            __Prompt(true);
 
-            IEnumerable<Selectable> possibleHexes = 
-                (args is PromptArgs.Pathed p)        ? u.Board.PathFind(u.Position,(p.MinDistance, p.Distance), GetCombinedPathingCondition(p), FinalCondition):
-                (args is PromptArgs.Positional a)  ? u.Board.HexesAt(GetPositionalPositions(a)).Where(FinalCondition):
-                throw new ArgumentException("PromptArgs not recognized?");
-
-            if (possibleHexes.IsSingleElement(out var single) && args.Forced) GameManager.SELECTOR.SpoofSelection(single, OnSelect);
-            GameManager.SELECTOR.Prompt(possibleHexes, OnSelect);
-            
-            void OnSelect(Selector.SelectorArgs sel)
+            void __Prompt(bool callPromptEvent)
             {
-                if (sel.Selection is Hex s)
+                if (callPromptEvent) OnPromptEvent?.Invoke(args);
+                Unit u = args.MovingUnit;
+                bool __FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
+
+                IEnumerable<Selectable> possibleHexes =
+                    (args is PromptArgs.Pathed p) ? u.Board.PathFind(u.Position, (p.MinDistance - 1, p.Distance), GetCombinedPathingCondition(p), __FinalCondition) :
+                    (args is PromptArgs.Positional a) ? u.Board.HexesAt(GetPositionalPositions(a)).Where(__FinalCondition) :
+                    throw new ArgumentException("PromptArgs not recognized?");
+
+                if (args.Forced && possibleHexes.IsSingleElement(out var single))
+                    GameManager.SELECTOR.SpoofSelection(single, __OnSelect);
+                else
+                    GameManager.SELECTOR.Prompt(possibleHexes, __OnSelect);
+
+                void __OnSelect(Selector.SelectorArgs sel)
                 {
-                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
-                }
-                if (sel.WasCancelled && args.Forced)
-                {
-                    if (!sel.WasEmpty)
+                    if (sel.Selection is Hex s)
                     {
-                        Debug.Log("you cannot cancel a forced move");
-                        Prompt(args, confirmCallback);
-                        return;
+                        confirmCallback?.Invoke(new(args.Performer, u, u.Position, s.Position));
                     }
-                    //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
-                    //Ex: If a card has a forced Move, it should validate the move before it tries to prompt it, so that if validation fails, the card is unplayable. (although it could also be ignored idk.)
-                    Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
+                    if (sel.WasCancelled && args.Forced)
+                    {
+                        if (!sel.WasEmpty)
+                        {
+                            Debug.Log("you cannot cancel a forced move");
+                            __Prompt(false);
+                            return;
+                        }
+                        //TODO FUTURE: Add some sort of Validate or Check function for a PromptArgs to see if that Move would be possible.
+                        //Ex: If a card has a forced Move, it should validate the move before it tries to prompt it, so that if validation fails, the card is unplayable. (although it could also be ignored idk.)
+                        Debug.LogError("[!!!] Forced Move was prompted, but no Hexes were available.");
+                    }
                 }
+            
 
             }
         }
@@ -133,11 +142,11 @@ public abstract partial class GameAction
             (dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
             dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
             &&
-            Combined(args.CustomPathingRestrictions)(p, n))
+            __Combined(args.CustomPathingRestrictions)(p, n))
             ||
-            Combined(args.CustomPathingOverrides, true)(p, n);
+            __Combined(args.CustomPathingOverrides, true)(p, n);
 
-            Board.ContinuePathCondition Combined(IEnumerable<Board.ContinuePathCondition> cond, bool invert = false)
+            Board.ContinuePathCondition __Combined(IEnumerable<Board.ContinuePathCondition> cond, bool invert = false)
             {
                 return (invert) ?
                 (p, n) =>
@@ -157,9 +166,9 @@ public abstract partial class GameAction
         }
         private static Board.FinalPathCondition GetCombinedFinalConditon(PromptArgs args)
         {
-            return (h) => (Combined(args.CustomFinalRestrictions)(h) && h.IsOccupiable) || Combined(args.CustomFinalOverrides, true)(h);
+            return (h) => (__Combined(args.CustomFinalRestrictions)(h) && h.IsOccupiable) || __Combined(args.CustomFinalOverrides, true)(h);
 
-            Board.FinalPathCondition Combined(IEnumerable<Board.FinalPathCondition> cond, bool invert = false)
+            Board.FinalPathCondition __Combined(IEnumerable<Board.FinalPathCondition> cond, bool invert = false)
             {
                 return (invert) ?
                 (h) =>

@@ -8,6 +8,7 @@ public abstract partial class UnitEffect
     //Will be null until SetActive is called once.
     //If all executes according to plan, will never read as null, as SetActive should be called by appropriate GameActions.
     public Unit AffectedUnit { get; private set; }
+    public Player Inflicter { get; private set; }
     
     //EVERY Turn counts as a Duration tick. by default Duration = 1, meaning the effect will only last for the following Turn after it is inflicted (opponents turn), and wears off on your next Turn.
     public int Duration { get; set; }
@@ -17,7 +18,7 @@ public abstract partial class UnitEffect
         Duration = duration;
     }
 
-    public void SetActive(bool val, Unit affectedUnit)
+    public void SetActive(bool val, Unit affectedUnit, Player inflicter)
     {
         AffectedUnit = affectedUnit;
         InternalSetup(val);

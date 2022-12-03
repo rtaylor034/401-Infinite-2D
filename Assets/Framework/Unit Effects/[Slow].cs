@@ -14,14 +14,14 @@ public partial class UnitEffect
         {
             if (val)
             {
-                GameAction.Move.OnPromptEvent += SlowEffect;
+                GameAction.Move.OnPromptEvent += Effect;
             } else
             {
-                GameAction.Move.OnPromptEvent -= SlowEffect;
+                GameAction.Move.OnPromptEvent -= Effect;
             }
         }
 
-        private void SlowEffect(GameAction.Move.PromptArgs args)
+        private void Effect(GameAction.Move.PromptArgs args)
         {
             if (args.MovingUnit != AffectedUnit) return;
             if (args is not GameAction.Move.PromptArgs.Pathed move) return;

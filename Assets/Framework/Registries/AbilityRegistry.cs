@@ -8,6 +8,8 @@ using UnityEngine;
 public static class AbilityRegistry
 {
 
+    //TODO:
+    //have some sort of field that has default effect duration (would be 1 in a normal game).
     public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
     
     static AbilityRegistry()

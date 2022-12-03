@@ -27,12 +27,12 @@ public partial class GameAction
         public static event GameActionEventHandler<InflictEffect> ExternalResultantEvent;
         protected override void InternalPerform()
         {
-            Effect.SetActive(true, AffectedUnit);
+            Effect.SetActive(true, AffectedUnit, Performer);
         }
 
         protected override void InternalUndo()
         {
-            Effect.SetActive(false, AffectedUnit);
+            Effect.SetActive(false, AffectedUnit, Performer);
         }
 
         /// <summary>

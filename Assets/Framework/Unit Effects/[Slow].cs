@@ -6,9 +6,9 @@ using UnityEngine;
 public partial class UnitEffect
 {
 
-    public class Slowed : UnitEffect
+    public class Slow : UnitEffect
     {
-        public Slowed(int d) : base(d) { }
+        public Slow(int d) : base(d) { }
 
         protected override void InternalSetup(bool val)
         {

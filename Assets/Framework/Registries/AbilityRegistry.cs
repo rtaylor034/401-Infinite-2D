@@ -41,7 +41,7 @@ public static class AbilityRegistry
 
                 new ConstructorTemplate<UnitEffect>[]
                 {
-                    new(typeof(UnitEffect.Slowed), 1)
+                    new(typeof(UnitEffect.Slow), 1)
                 },
                 new HashSet<Vector3Int>
                 {

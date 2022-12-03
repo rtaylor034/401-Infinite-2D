@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
             void __Confirm(Selector.SelectorArgs sel)
             {
                 if (sel.Selection is not Unit u) return;
-                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Slowed(1), u));
+                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
             }
         };
 

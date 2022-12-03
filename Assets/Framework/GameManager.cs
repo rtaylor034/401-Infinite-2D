@@ -22,6 +22,10 @@ public class GameManager : MonoBehaviour
     /// The <see cref="Player"/> that currently has control of the Turn.
     /// </summary>
     public Player CurrentPlayer { get; private set; }
+    /// <summary>
+    /// The <see cref="GameSettings"/> of the current game.
+    /// </summary>
+    public GameSettings Settings { get; private set; }
 
     /// <summary>
     /// Contains all <see cref="Player"/> objects that are participating in the game, in correct turn order.
@@ -80,11 +84,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        StartGame();
+        StartGame(GameSettings.STANDARD);
     }
     #endregion
 
-    private void StartGame()
+    private void StartGame(GameSettings settings)
     {
         if (_gameActive) throw new Exception("Game is already active!");
 
@@ -93,9 +97,12 @@ public class GameManager : MonoBehaviour
         _game = new();
 
         _turnOrder = new();
-        _turnOrder.AddLast(new Player(Player.ETeam.Blue));
-        _turnOrder.AddLast(new Player(Player.ETeam.Red));
+        for (int i = 0; i < settings.TurnOrder.Count; i++)
+        {
+            _turnOrder.AddLast(settings.TurnOrder[i].CreateInstance());
+        }
 
+        Settings = settings;
         CurrentPlayer = Player.DummyPlayer;
 
         board.CreateBoard();

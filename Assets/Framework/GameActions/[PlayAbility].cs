@@ -41,28 +41,12 @@ public partial class GameAction
         public static event Action<PromptArgs> OnPromptEvent;
         protected override void InternalPerform()
         {
-            if (PlayedAbility is Ability.Sourced sourced)
-            {
-                sourced.FollowUpMethod?.Invoke(this);
-                //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
-                foreach (var effectC in sourced.TargetEffects)
-                {
-                    //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
-                    for (int i = 1; i < ParticipatingUnits.Length; i++)
-                        AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
-                }
-
-            }
-            else if (PlayedAbility is Ability.Unsourced unsourced)
-            {
-                unsourced.ActionMethod?.Invoke(this);
-            }
-            else throw new ArgumentException("Ability not recognized");
+            //Everything is just a resultant gameaction, so no need for internal performs
         }
 
         protected override void InternalUndo()
         {
-            //All performs are resultant gameactions, therefor no internal undo is necessary.
+            //Undo is automatic (see InternalPerform())
         }
 
         /// <summary>
@@ -82,6 +66,7 @@ public partial class GameAction
             ParticipatingUnits = new Unit[participants.Count];
             for (int i = 0; i < participants.Count; i++) ParticipatingUnits[i] = participants[i];
             ExternalResultantEvent?.Invoke(this);
+            CreateAbilityResultants();
         }
 
         /// <summary>
@@ -179,6 +164,27 @@ public partial class GameAction
             }
         }
         
+        private void CreateAbilityResultants()
+        {
+            if (PlayedAbility is Ability.Sourced sourced)
+            {
+                sourced.FollowUpMethod?.Invoke(this);
+                //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
+                foreach (var effectC in sourced.TargetEffects)
+                {
+                    //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
+                    for (int i = 1; i < ParticipatingUnits.Length; i++)
+                        AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
+                }
+
+            }
+            else if (PlayedAbility is Ability.Unsourced unsourced)
+            {
+                unsourced.ActionMethod?.Invoke(this);
+            }
+            else throw new ArgumentException("Ability not recognized");
+        }
+
         public class PromptArgs
         {
             /// <summary>

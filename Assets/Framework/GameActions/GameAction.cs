@@ -119,8 +119,8 @@ public abstract partial class GameAction
     public GameAction AddLateResultant(GameAction action)
     {
         AddResultant(action);
-        action.Perform();
         Debug.Log($"(Action Resultant Late-Added) -> {action}");
+        action.Perform();
         return this;
     }
 
@@ -133,9 +133,10 @@ public abstract partial class GameAction
     /// <param name="action"></param>
     public static void Declare(GameAction action)
     {
+        Debug.Log($"(Action Declare) {action}");
         action.Perform();
         GameManager.GAME.PushGameAction(action);
-        Debug.Log($"(Action Declare) {action}");
+        
     }
 
     public override string ToString()

@@ -11,30 +11,37 @@ public partial class GameAction
 
         public static event GameActionEventHandler<HPChange> ExternalResultantEvent;
         public Unit Reciever { get; private set; }
-        public int Offset { get; private set; }
+        public Func<int, int> ChangeFunction { get; private set; }
+        private int _ChangedHP => ChangeFunction(Reciever.HP);
+
+        //Could be a single int variable, but this supports multiple Perform() calls to the same action. yea this probably will never happen, but why the hell not.
+        private readonly Stack<int> _changeStack;
 
         protected override void InternalPerform()
         {
-            Reciever.UpdateHP(Reciever.HP + Offset);
+            _changeStack.Push(_ChangedHP - Reciever.HP);
+            Reciever.UpdateHP(_ChangedHP);
             
         }
 
         protected override void InternalUndo()
         {
-            Reciever.UpdateHP(Reciever.HP - Offset);
+            Reciever.UpdateHP(Reciever.HP - _changeStack.Pop());
         }
         
-        //DEVNOTE/TODO: Consider making all "Change" GameActions use Offset instead of BeforeAmount and AfterAmount. This supports multiple changes happening in the same GameAction cycle.
         public HPChange(Player performer, Unit reciever, Func<int, int> changeFunction) : base(performer)
         {
+            _changeStack = new();
+            _changeStack.Push(0);
             Reciever = reciever;
-            Offset = changeFunction(Reciever.HP) - Reciever.HP;
+            ChangeFunction = changeFunction;
             ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()
         {
-            return $"<HP CHANGE> {Reciever} {Reciever.HP - Offset} -> {Reciever.HP}" + base.ToString();
+            var offset = _ChangedHP - Reciever.HP;
+            return $"<HP CHANGE> {Reciever} ({((offset >= 0) ? "+" : "")}{offset} HP)" + base.ToString();
         }
     }
 

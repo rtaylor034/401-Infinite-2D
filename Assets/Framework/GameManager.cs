@@ -188,8 +188,6 @@ public class GameManager : MonoBehaviour
             );
     }
 
-    #region GameActions
-
     /// <summary>
     /// Adds <paramref name="action"/> to the main action stack.<br></br>
     /// </summary>
@@ -202,6 +200,11 @@ public class GameManager : MonoBehaviour
         _game.Push(action);
         if (action is GameAction.Turn turn) HandleTurnAction(turn);
     }
+
+    //Consider making this part of GameSettings in the future
+    //Maybe make a non-static GameActionManager object to handle events (so that event listeners dont have to be unsubscribed, a new GameActionManager can just be created).
+
+    #region Turn GameAction Handling
 
     /// <summary>
     /// Undoes the last performed action and removes it from the main action stack.

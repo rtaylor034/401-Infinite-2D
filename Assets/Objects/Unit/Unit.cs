@@ -32,7 +32,7 @@ public class Unit : Selectable
     }
 
     /// <summary>
-    /// Updates this Unit's HP value. (Should only be called from <see cref="GameAction"/>[ : ])
+    /// Sets this Unit's HP to <paramref name="val"/>. (Should only be called from <see cref="GameAction"/>[ : ])
     /// </summary>
     /// <param name="val"></param>
     public void UpdateHP(int val)

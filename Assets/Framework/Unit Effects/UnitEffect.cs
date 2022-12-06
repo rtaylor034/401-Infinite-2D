@@ -16,6 +16,7 @@ public abstract partial class UnitEffect
     protected UnitEffect(int duration)
     {
         Duration = duration;
+        GameAction.InflictEffect.ExternalResultantEvent += CallWhenInflicted;
     }
 
     public void SetActive(bool val, Unit affectedUnit, Player inflicter)
@@ -33,8 +34,25 @@ public abstract partial class UnitEffect
         }
         
     }
+    private void CallWhenInflicted(GameAction.InflictEffect action)
+    {
+        if (action.Effect != this) return;
+        WhenInflicted(action);
+        GameAction.InflictEffect.ExternalResultantEvent -= CallWhenInflicted;
+    }
 
     protected abstract void InternalSetup(bool val);
+
+    /// <summary>
+    /// <b>[virtual]</b><br></br>
+    /// Called when <see langword="this"/> is inflicted via a <see cref="GameAction.InflictEffect"/>.
+    /// </summary>
+    /// <remarks>
+    /// (<c><see langword="this"/>.AffectedUnit</c> has not been set yet, use <c><paramref name="action"/>.AffectedUnit</c>)
+    /// </remarks>
+    /// <param name="action"></param>
+    protected virtual void WhenInflicted(GameAction.InflictEffect action) { }
+    
 
     private void TickDown(GameAction.Turn action)
     {

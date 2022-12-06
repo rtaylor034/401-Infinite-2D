@@ -110,7 +110,6 @@ public class GameManager : MonoBehaviour
 
         NextTurn();
 
-
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += _ =>
         {

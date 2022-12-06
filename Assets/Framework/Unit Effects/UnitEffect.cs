@@ -71,6 +71,6 @@ public abstract partial class UnitEffect
 
     public override string ToString()
     {
-        return $"({GetType().Name} {Duration})";
+        return $"[{GetType().Name}:{Duration}]";
     }
 }

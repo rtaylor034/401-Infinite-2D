@@ -152,13 +152,22 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""ability"",
-                    ""type"": ""Button"",
+                    ""name"": ""ability1"",
+                    ""type"": ""Value"",
                     ""id"": ""9406c59a-c266-4bdd-9f78-2ff73f72c2f4"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ability2"",
+                    ""type"": ""Value"",
+                    ""id"": ""b323a272-e5ee-4503-ac80-dc75310e3f26"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -208,12 +217,23 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e73311f6-0b8c-4272-94a3-f594721c1968"",
+                    ""id"": ""54d1f81e-07d5-4fd4-9c03-30b7d52c49d4"",
                     ""path"": ""<Keyboard>/1"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""ability"",
+                    ""action"": ""ability1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""89de8649-1e74-410e-9e0f-59bb53c842f4"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""ability2"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -295,7 +315,8 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         m_Test_undo = m_Test.FindAction("undo", throwIfNotFound: true);
         m_Test_effect = m_Test.FindAction("effect", throwIfNotFound: true);
         m_Test_turn = m_Test.FindAction("turn", throwIfNotFound: true);
-        m_Test_ability = m_Test.FindAction("ability", throwIfNotFound: true);
+        m_Test_ability1 = m_Test.FindAction("ability1", throwIfNotFound: true);
+        m_Test_ability2 = m_Test.FindAction("ability2", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -416,7 +437,8 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Test_undo;
     private readonly InputAction m_Test_effect;
     private readonly InputAction m_Test_turn;
-    private readonly InputAction m_Test_ability;
+    private readonly InputAction m_Test_ability1;
+    private readonly InputAction m_Test_ability2;
     public struct TestActions
     {
         private @Inputs m_Wrapper;
@@ -425,7 +447,8 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         public InputAction @undo => m_Wrapper.m_Test_undo;
         public InputAction @effect => m_Wrapper.m_Test_effect;
         public InputAction @turn => m_Wrapper.m_Test_turn;
-        public InputAction @ability => m_Wrapper.m_Test_ability;
+        public InputAction @ability1 => m_Wrapper.m_Test_ability1;
+        public InputAction @ability2 => m_Wrapper.m_Test_ability2;
         public InputActionMap Get() { return m_Wrapper.m_Test; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -447,9 +470,12 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @turn.started -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
                 @turn.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
                 @turn.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnTurn;
-                @ability.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
-                @ability.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
-                @ability.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility;
+                @ability1.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility1;
+                @ability1.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility1;
+                @ability1.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility1;
+                @ability2.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
+                @ability2.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
+                @ability2.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
             }
             m_Wrapper.m_TestActionsCallbackInterface = instance;
             if (instance != null)
@@ -466,9 +492,12 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @turn.started += instance.OnTurn;
                 @turn.performed += instance.OnTurn;
                 @turn.canceled += instance.OnTurn;
-                @ability.started += instance.OnAbility;
-                @ability.performed += instance.OnAbility;
-                @ability.canceled += instance.OnAbility;
+                @ability1.started += instance.OnAbility1;
+                @ability1.performed += instance.OnAbility1;
+                @ability1.canceled += instance.OnAbility1;
+                @ability2.started += instance.OnAbility2;
+                @ability2.performed += instance.OnAbility2;
+                @ability2.canceled += instance.OnAbility2;
             }
         }
     }
@@ -531,6 +560,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         void OnUndo(InputAction.CallbackContext context);
         void OnEffect(InputAction.CallbackContext context);
         void OnTurn(InputAction.CallbackContext context);
-        void OnAbility(InputAction.CallbackContext context);
+        void OnAbility1(InputAction.CallbackContext context);
+        void OnAbility2(InputAction.CallbackContext context);
     }
 }

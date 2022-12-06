@@ -8,28 +8,30 @@ public partial class UnitEffect
 
     public class Damage : UnitEffect
     {
-        public int Amount { get; private set; }
-        public Damage(int duration, int amount) : base(duration)
-        {
-            Amount = amount;
-        }
-        public Damage(int d) : this(d, 1) { }
-
+        public Damage(int duration) : base(duration) { }
         protected override void InternalSetup(bool val)
         {
             if (val)
             {
-                GameAction.Turn.ExternalResultantEvent += Effect;
+                GameAction.InflictEffect.ExternalResultantEvent += ShieldHandling;
             } else
             {
-                GameAction.Turn.ExternalResultantEvent -= Effect;
+                GameAction.InflictEffect.ExternalResultantEvent -= ShieldHandling;
             }
         }
 
-        private void Effect(GameAction.Turn action)
+        private void ShieldHandling(GameAction.InflictEffect action)
         {
-            if (action.FromPlayer.Team == AffectedUnit.Team)
-                action.AddResultant(new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp - Amount));
+            if (action.Effect is not UnitEffect.Shield) return;
+            action.AddResultant(new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp + 1));
+
+            //once a shield has been used to absorb this damage, stop listening for shields.
+            GameAction.InflictEffect.ExternalResultantEvent -= ShieldHandling;
+        }
+
+        protected override void WhenInflicted(GameAction.InflictEffect action)
+        {
+            action.AddResultant(new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1));
         }
     }
 }

@@ -30,7 +30,6 @@ public partial class GameAction
         {
             _changeStack.Push(_ChangedHP - Reciever.HP);
             Reciever.UpdateHP(_ChangedHP);
-            
         }
 
         protected override void InternalUndo()

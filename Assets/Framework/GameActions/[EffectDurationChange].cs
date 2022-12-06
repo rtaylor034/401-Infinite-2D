@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,14 +12,10 @@ public partial class GameAction
         /// The <see cref="UnitEffect"/> that had its Duration changed.
         /// </summary>
         public UnitEffect TickingEffect { get; private set; }
-        /// <summary>
-        /// The <see cref="UnitEffect.Duration"/> before this action was performed.
-        /// </summary>
-        public int BeforeAmount { get; private set; }
-        /// <summary>
-        /// The <see cref="UnitEffect.Duration"/> after this action was performed.
-        /// </summary>
-        public int AfterAmount { get; private set; }
+        public Func<int, int> ChangeFunction { get; private set; }
+
+        private int _ChangedValue => ChangeFunction(TickingEffect.Duration);
+        private readonly Stack<int> _changeStack;
 
         /// <summary>
         /// Occurs when any <see cref="EffectDurationChange"/> is created.
@@ -37,27 +34,31 @@ public partial class GameAction
         /// <param name="changeFunction"></param>
         public EffectDurationChange(Player performer, UnitEffect effect, System.Func<int, int> changeFunction) : base(performer)
         {
+            _changeStack = new();
             TickingEffect = effect;
-            BeforeAmount = effect.Duration;
-            AfterAmount = changeFunction(effect.Duration);
+            ChangeFunction = changeFunction;
             ExternalResultantEvent?.Invoke(this);
         }
 
         protected override void InternalPerform()
         {
-            TickingEffect.Duration = AfterAmount;
+            _changeStack.Push(_ChangedValue - TickingEffect.Duration);
+            TickingEffect.UpdateDuration(_ChangedValue);
+
             if (TickingEffect.Duration < 0) TickingEffect.SetActive(false, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
         }
 
         protected override void InternalUndo()
         {
-            TickingEffect.Duration = BeforeAmount;
+            TickingEffect.UpdateDuration(TickingEffect.Duration - _changeStack.Pop());
+
             if (TickingEffect.Duration == 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
         }
 
         public override string ToString()
         {
-            return $"<EFFECT DURATION> {TickingEffect} = {BeforeAmount} ->  {AfterAmount}" + base.ToString();
+            var offset = _ChangedValue - TickingEffect.Duration;
+            return $"<HP CHANGE> {TickingEffect} ({((offset >= 0) ? "+" : "")}{offset} TS)" + base.ToString();
         }
     }
 }

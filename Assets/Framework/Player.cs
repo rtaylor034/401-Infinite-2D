@@ -7,7 +7,7 @@ public class Player
 {
 
     public ETeam Team { get; private set; }
-    public int Energy { get; set; } = 0;
+    public int Energy { get; private set; } = 0;
     public int PerspectiveRotation => PerspectiveRotationOf(Team);
 
     public Player(ETeam team)
@@ -38,6 +38,14 @@ public class Player
         };
     }
 
+    /// <summary>
+    /// Sets this Players's Energy to <paramref name="val"/>. (Should only be called from <see cref="GameAction"/>[ : ])
+    /// </summary>
+    /// <param name="val"></param>
+    public void UpdateEnergy(int val)
+    {
+        Energy = val;
+    }
 
     public static Player DummyPlayer => new Player(ETeam.NONE);
 

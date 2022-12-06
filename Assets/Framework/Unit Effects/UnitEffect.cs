@@ -11,7 +11,7 @@ public abstract partial class UnitEffect
     public Player Inflicter { get; private set; }
     
     //EVERY Turn counts as a Duration tick. by default Duration = 1, meaning the effect will only last for the following Turn after it is inflicted (opponents turn), and wears off on your next Turn.
-    public int Duration { get; set; }
+    public int Duration { get; private set; }
 
     protected UnitEffect(int duration)
     {
@@ -33,6 +33,15 @@ public abstract partial class UnitEffect
             GameAction.Turn.ExternalResultantEvent -= TickDown;
         }
         
+    }
+
+    /// <summary>
+    /// Sets this UnitEffect's Duration to <paramref name="val"/>. (Should only be called from <see cref="GameAction"/>[ : ])
+    /// </summary>
+    /// <param name="val"></param>
+    public void UpdateDuration(int val)
+    {
+        Duration = val;
     }
     private void CallWhenInflicted(GameAction.InflictEffect action)
     {
@@ -62,6 +71,6 @@ public abstract partial class UnitEffect
 
     public override string ToString()
     {
-        return $"({GetType().Name} {Duration})";
+        return $"[{GetType().Name}:{Duration}]";
     }
 }

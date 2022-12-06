@@ -20,25 +20,20 @@ public abstract partial class GameAction
         /// The <see cref="Player"/> that recieved the change in energy on this action.
         /// </summary>
         public Player Reciever { get; private set; }
-        /// <summary>
-        /// The amount of energy that Reciever had before this action. <br></br>
-        /// <i>Reciever's energy is set to this amount when this action is undone.</i>
-        /// </summary>
-        public int BeforeAmount { get; private set; }
-        /// <summary>
-        /// The amount of energy that Reciever had after this action. <br></br>
-        /// <i>Reciever's energy is set to this amount when this action is performed.</i>
-        /// </summary>
-        public int AfterAmount { get; private set; }
+        public Func<int, int> ChangeFunction { get; private set; }
 
+        private int _ChangedValue => ChangeFunction(Reciever.Energy);
+
+        private readonly Stack<int> _changeStack;
         protected override void InternalPerform()
         {
-            Reciever.Energy = AfterAmount;
+            _changeStack.Push(_ChangedValue - Reciever.Energy);
+            Reciever.UpdateEnergy(_ChangedValue);
         }
 
         protected override void InternalUndo()
         {
-            Reciever.Energy = BeforeAmount;
+            Reciever.UpdateEnergy(Reciever.Energy - _changeStack.Pop());
         }
 
         /// <summary>
@@ -52,15 +47,16 @@ public abstract partial class GameAction
         /// <param name="changeFunction"></param>
         public EnergyChange(Player performer, Player reciever, Func<int, int> changeFunction) : base(performer)
         {
+            _changeStack = new();
+            ChangeFunction = changeFunction;
             Reciever = reciever;
-            BeforeAmount = reciever.Energy;
-            AfterAmount = changeFunction(reciever.Energy);
             ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()
         {
-            return $"<ENERGY> {Reciever} = {BeforeAmount} -> {AfterAmount}" + base.ToString();
+            var offset = _ChangedValue - Reciever.Energy;
+            return $"<ENERGY CHANGE> {Reciever} ({((offset >= 0) ? "+" : "")}{offset} Energy)" + base.ToString();
         }
     }
 

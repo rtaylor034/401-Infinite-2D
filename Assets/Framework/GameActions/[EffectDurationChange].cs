@@ -45,14 +45,14 @@ public partial class GameAction
 
         protected override void InternalPerform()
         {
-            if (TickingEffect.Duration <= 0) TickingEffect.SetActive(false, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
             TickingEffect.Duration = AfterAmount;
+            if (TickingEffect.Duration < 0) TickingEffect.SetActive(false, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
         }
 
         protected override void InternalUndo()
         {
             TickingEffect.Duration = BeforeAmount;
-            if (TickingEffect.Duration > 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
+            if (TickingEffect.Duration == 0) TickingEffect.SetActive(true, TickingEffect.AffectedUnit, TickingEffect.Inflicter);
         }
 
         public override string ToString()

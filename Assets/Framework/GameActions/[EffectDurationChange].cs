@@ -58,7 +58,7 @@ public partial class GameAction
         public override string ToString()
         {
             var offset = _ChangedValue - TickingEffect.Duration;
-            return $"<HP CHANGE> {TickingEffect} ({((offset >= 0) ? "+" : "")}{offset} TS)" + base.ToString();
+            return $"<EDURATION CHANGE> {TickingEffect} ({((offset >= 0) ? "+" : "")}{offset} Ticks)" + base.ToString();
         }
     }
 }

@@ -158,11 +158,13 @@ public class GameManager : MonoBehaviour
             NextTurn();
         };
 
-        //TEST ABILITY
-        INPUT.Test.ability.performed += _ =>
+        //TEST ABILITIES
+        INPUT.Test.ability1.performed += _ => __AbilityTest(0);
+        INPUT.Test.ability2.performed += _ => __AbilityTest(2);
+        void __AbilityTest(int id)
         {
-            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[0], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
-        };
+            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[id], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
+        }
     }
 
     //TBI

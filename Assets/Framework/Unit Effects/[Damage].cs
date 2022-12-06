@@ -31,7 +31,7 @@ public partial class UnitEffect
 
         protected override void WhenInflicted(GameAction.InflictEffect action)
         {
-            action.AddResultant(new GameAction.HPChange(Inflicter, action.AffectedUnit, hp => hp - 1));
+            action.AddResultant(new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1));
         }
     }
 }

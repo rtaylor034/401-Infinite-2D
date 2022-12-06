@@ -70,7 +70,7 @@ public static class AbilityRegistry
                 }
             ),
 
-            //>1 TEST UTILITY
+            //>1 BREAK WILL
             new
             (
                 typeof(Ability.Unsourced),
@@ -83,11 +83,49 @@ public static class AbilityRegistry
                 {
                     GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
                         (a.Performer, a.ParticipatingUnits[0], 3),
-                        move => a.AddLateResultant(move));
+                        moveAction => a.AddLateResultant(moveAction));
                 })
 
 
             ),
+
+            //>2 INSPIRE
+            //uses new format
+            new(typeof(Ability.Sourced), new object[]
+            {
+                "Inspire", Ability.ETypeIdentity.Defense,
+
+                new ConstructorTemplate<UnitEffect>[]
+                {
+                    new(typeof(UnitEffect.Shield), STD_DURATION)
+                },
+
+                new HashSet<Vector3Int>
+                {
+                    H(1, 0, 0),
+                    H(2, 0, 0),
+                    H(0, 1, 0),
+                    H(0, 2, 0),
+                    H(0, 0, 1),
+                    H(0, 0, 2),
+                    H(1, 1, 0),
+                    H(0, 1, 1)
+                },
+
+                new Ability.PlayAction(a =>
+                {
+                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[1], 5),
+                        moveAction => a.AddLateResultant(moveAction));
+                }),
+
+                new Ability.Sourced.TargetingCondition[]
+                {
+                    Ability.Sourced.STANDARD_DEFENSE_TARGET,
+                    Ability.Sourced.STANDARD_COLLISION
+                }
+
+            })
         };
 
 

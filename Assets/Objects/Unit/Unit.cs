@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class Unit : Selectable
 {
-    //Change
-
     public int HP { get; private set; }
     public Player.ETeam Team { get; private set; }
     public int MaxHP { get; private set; }
     public int ID { get; private set; }
 
     public Vector3Int Position { get; private set; }
+    /// <summary>
+    /// The Board that this Unit resides on.
+    /// </summary>
+    /// <remarks>
+    /// <i>Future-proof for multi-board gameplay(?)</i>
+    /// </remarks>
     public Board Board => _board;
 
     protected Board _board;
@@ -40,6 +44,14 @@ public class Unit : Selectable
         HP = val;
     }
 
+    /// <summary>
+    /// <b>[MUST BE CALLED AFTER INSTANTIATION]</b> (<see cref="Object.Instantiate(Object)>"/>)
+    /// </summary>
+    /// <param name="board"></param>
+    /// <param name="maxhp"></param>
+    /// <param name="team"></param>
+    /// <param name="pos"></param>
+    /// <returns></returns>
     public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
     {
         _board = board;

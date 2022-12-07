@@ -5,7 +5,9 @@ using UnityEngine;
 
 public partial class GameAction
 {
-
+    /// <summary>
+    /// [ : ] <see cref="GameAction"/>
+    /// </summary>
     public class EffectDurationChange : GameAction
     {
         /// <summary>

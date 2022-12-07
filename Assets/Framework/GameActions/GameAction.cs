@@ -108,12 +108,12 @@ public abstract partial class GameAction
     }
 
     /// <summary>
-    /// Makes <paramref name="action"/> a resultant of <see langword="this"/> <see cref="GameAction"/>. <br></br>
+    /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
     /// (Adds to <see cref="ResultantActions"/>)
     /// </summary>
     /// <remarks>
-    /// Use AddResultant() if adding a resultant *before* <see langword="this"/> <see cref="GameAction"/> has been performed. <br></br>
-    /// Use AddLateResultant() if adding a resultant *after* <see langword="this"/> <see cref="GameAction"/> has been performed.
+    /// Use AddResultant() if adding a resultant *before* this <see cref="GameAction"/> has been performed. <br></br>
+    /// Use AddLateResultant() if adding a resultant *after* this <see cref="GameAction"/> has been performed.
     /// <br></br><br></br>
     /// <i>i.e. If using a Prompt(), use AddLateResultant(), otherwise use AddResultant().</i>
     /// </remarks>

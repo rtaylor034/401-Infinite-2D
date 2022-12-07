@@ -72,6 +72,7 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
+        //TODO: Make some sort of queue or combining method to handle multiple Moves prompted at the same time.
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>

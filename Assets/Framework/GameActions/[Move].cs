@@ -209,7 +209,7 @@ public abstract partial class GameAction
         private static Func<Unit, Board.ContinuePathCondition> OpposingUnitCollision => u => (_, next) =>
         !(next.Occupant != null && next.Occupant.Team != u.Team);
         private static Func<Unit, Board.ContinuePathCondition> GuardedBaseCollision => u => (_, next) =>
-        !(next is BaseHex bhex && bhex.Team != u.Team);
+        !(next is BaseHex bhex && bhex.Team != u.Team && bhex.IsGuarded);
 
         #endregion
         #region Standard Directional Conditions

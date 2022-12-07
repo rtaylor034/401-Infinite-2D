@@ -5,12 +5,27 @@ using UnityEngine;
 
 public abstract partial class UnitEffect
 {
-    //Will be null until SetActive is called once.
-    //If all executes according to plan, will never read as null, as SetActive should be called by appropriate GameActions.
+    /// <summary>
+    /// The <see cref="Unit"/> that this <see cref="UnitEffect"/> is inflicted upon.
+    /// </summary>
+    /// <remarks>
+    /// <i>Is <see langword="null"/> until <see cref="SetActive(bool, Unit, Player)"/> is called.<br></br>
+    /// > If all works correctly, this situation should never come up.</i>
+    /// </remarks>
     public Unit AffectedUnit { get; private set; }
+    /// <summary>
+    /// The <see cref="Player"/> that inflicted this <see cref="UnitEffect"/>.
+    /// </summary>
+    /// <remarks>
+    /// <inheritdoc cref="AffectedUnit"/>
+    /// </remarks>
     public Player Inflicter { get; private set; }
-    
-    //EVERY Turn counts as a Duration tick. by default Duration = 1, meaning the effect will only last for the following Turn after it is inflicted (opponents turn), and wears off on your next Turn.
+    /// <summary>
+    /// The amount of Turns this <see cref="UnitEffect"/> has left to last.
+    /// </summary>
+    /// <remarks>
+    /// <i>If set to 1 (default), the effect will last for the Turn it is inflicted, aswell as the Turn after.</i>
+    /// </remarks>
     public int Duration { get; private set; }
 
     protected UnitEffect(int duration)
@@ -19,6 +34,14 @@ public abstract partial class UnitEffect
         GameAction.InflictEffect.ExternalResultantEvent += CallWhenInflicted;
     }
 
+    /// <summary>
+    /// Sets this effect to be active on <paramref name="affectedUnit"/>, inflicted by <paramref name="inflicter"/>. <br></br>
+    /// <paramref name="val"/> = TRUE : Activate this effect. <br></br>
+    /// <paramref name="val"/> = FALSE : Deactivate this effect.
+    /// </summary>
+    /// <param name="val"></param>
+    /// <param name="affectedUnit"></param>
+    /// <param name="inflicter"></param>
     public void SetActive(bool val, Unit affectedUnit, Player inflicter)
     {
         AffectedUnit = affectedUnit;
@@ -50,6 +73,12 @@ public abstract partial class UnitEffect
         GameAction.InflictEffect.ExternalResultantEvent -= CallWhenInflicted;
     }
 
+    /// <summary>
+    /// <b>[abstract]</b> <br></br>
+    /// Called when <see cref="SetActive(bool, Unit, Player)"/> is called with its <paramref name="val"/>. <br></br>
+    /// > Used to subscribe/unsubscribe the appropriate methods for each implementation of [ : ]<see cref="UnitEffect"/>
+    /// </summary>
+    /// <param name="val"></param>
     protected abstract void InternalSetup(bool val);
 
     /// <summary>

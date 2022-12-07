@@ -76,7 +76,7 @@ public abstract partial class UnitEffect
     /// <summary>
     /// <b>[abstract]</b> <br></br>
     /// Called when <see cref="SetActive(bool, Unit, Player)"/> is called with its <paramref name="val"/>. <br></br>
-    /// > Used to subscribe/unsubscribe the appropriate methods for each implementation of [ : ]<see cref="UnitEffect"/>
+    /// > Used to subscribe/unsubscribe the appropriate methods for each derivation[ : ] of <see cref="UnitEffect"/>
     /// </summary>
     /// <param name="val"></param>
     protected abstract void InternalSetup(bool val);

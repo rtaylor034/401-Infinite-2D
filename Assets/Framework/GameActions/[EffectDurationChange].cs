@@ -35,6 +35,7 @@ public partial class GameAction
         /// Changes <paramref name="effect"/>'s Duration by <paramref name="changeFunction"/>, by <paramref name="performer"/>. <br></br>
         /// </summary>
         /// <remarks>
+        /// <paramref name="changeFunction"/> : <br></br>
         /// <inheritdoc cref="ChangeFunction"/>
         /// </remarks>
         /// <param name="performer"></param>

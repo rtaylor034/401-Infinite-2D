@@ -5,13 +5,21 @@ using UnityEngine;
 
 public partial class GameAction
 {
-
+    /// <summary>
+    /// [ : ] <see cref="GameAction"/>
+    /// </summary>
     public class EffectDurationChange : GameAction
     {
         /// <summary>
         /// The <see cref="UnitEffect"/> that had its Duration changed.
         /// </summary>
         public UnitEffect TickingEffect { get; private set; }
+        /// <summary>
+        /// The function that TickingEffects Duration is changed by.
+        /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="__DOC__ChangeFunction"/>
+        /// </remarks>
         public Func<int, int> ChangeFunction { get; private set; }
 
         private int _ChangedValue => ChangeFunction(TickingEffect.Duration);
@@ -27,7 +35,8 @@ public partial class GameAction
         /// Changes <paramref name="effect"/>'s Duration by <paramref name="changeFunction"/>, by <paramref name="performer"/>. <br></br>
         /// </summary>
         /// <remarks>
-        /// <i>(See <see cref="EnergyChange"/> for an example usage of <paramref name="changeFunction"/>)</i>
+        /// <paramref name="changeFunction"/> : <br></br>
+        /// <inheritdoc cref="ChangeFunction"/>
         /// </remarks>
         /// <param name="performer"></param>
         /// <param name="effect"></param>

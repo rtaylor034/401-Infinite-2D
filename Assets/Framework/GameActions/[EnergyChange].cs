@@ -17,14 +17,20 @@ public abstract partial class GameAction
         public static event GameActionEventHandler<EnergyChange> ExternalResultantEvent;
 
         /// <summary>
-        /// The <see cref="Player"/> that recieved the change in energy on this action.
+        /// The <see cref="Player"/> that recieved the change in Energy.
         /// </summary>
         public Player Reciever { get; private set; }
+        /// <summary>
+        /// The function that Reciever.Energy is changed by.
+        /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="__DOC__ChangeFunction"/>
+        /// </remarks>
         public Func<int, int> ChangeFunction { get; private set; }
 
         private int _ChangedValue => ChangeFunction(Reciever.Energy);
-
         private readonly Stack<int> _changeStack;
+
         protected override void InternalPerform()
         {
             _changeStack.Push(_ChangedValue - Reciever.Energy);
@@ -37,11 +43,11 @@ public abstract partial class GameAction
         }
 
         /// <summary>
-        /// Changes <paramref name="reciever"/>'s Energy amount by the <paramref name="changeFunction"/>. (by <paramref name="performer"/>)
+        /// Changes <paramref name="reciever"/>'s Energy amount by the <paramref name="changeFunction"/>, by <paramref name="performer"/>.
         /// </summary>
         /// <remarks>
-        /// <i>Ex: <c><paramref name="changeFunction"/> = (e) => { return e + 1; }</c> <br></br>
-        /// This would add 1 to <paramref name="reciever"/>'s energy amount.</i>
+        /// <paramref name="changeFunction"/> : <br></br>
+        /// <inheritdoc cref="ChangeFunction"/>
         /// </remarks>
         /// <param name="reciever"></param>
         /// <param name="changeFunction"></param>

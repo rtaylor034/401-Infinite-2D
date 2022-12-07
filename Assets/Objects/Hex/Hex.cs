@@ -25,10 +25,10 @@ public abstract class Hex : Selectable
         return this;
     }
 
-    public virtual void TestMethod()
+    public override string ToString()
     {
-        Debug.Log($"I am a {GetType().Name} hex at coordinate {Position}.");
+        return $"{{{GetType().Name} : {Position}}}";
     }
 
-    
+
 }

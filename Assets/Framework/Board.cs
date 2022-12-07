@@ -26,7 +26,6 @@ public class Board : MonoBehaviour
     /// </summary>
     public HashSet<Unit> Units => new(_units);
     public Dictionary<Vector3Int, Hex> HexDict => new(_hexDict);
-    public HashSet<Hex> Hexes => new(_hexDict.Values);
     public void CreateBoard()
     {
         GenerateMap(Map.MapList[0]);

@@ -8,6 +8,10 @@ public class Player
 
     public ETeam Team { get; private set; }
     public int Energy { get; private set; } = 0;
+
+    /// <summary>
+    /// This Player's perspective rotation amount.
+    /// </summary>
     public int PerspectiveRotation => PerspectiveRotationOf(Team);
 
     public Player(ETeam team)
@@ -55,5 +59,14 @@ public class Player
     public override string ToString()
     {
         return $"P*{Team}";
+    }
+
+    
+}
+public static class PlayerExtensions
+{
+    public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Player player, Vector3Int anchor)
+    {
+        return coords.Rotate(anchor, player.PerspectiveRotation);
     }
 }

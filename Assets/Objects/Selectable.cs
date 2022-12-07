@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// <b>abstract</b> [ : ] <see cref="MonoBehaviour"/>
+/// </summary>
 public abstract class Selectable : MonoBehaviour
 {
     public delegate void SelectionCallback(Selectable s);

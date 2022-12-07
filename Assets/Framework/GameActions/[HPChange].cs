@@ -5,7 +5,6 @@ using UnityEngine;
 
 public partial class GameAction
 {
-    //TODO: Make general "changer" abstract class with all basic implentations for any <x>Chagne GameAction.
     public class HPChange : GameAction
     {
         /// <summary>
@@ -14,12 +13,15 @@ public partial class GameAction
         /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
         public static event GameActionEventHandler<HPChange> ExternalResultantEvent;
         /// <summary>
-        /// The Unit recieving the HP change.
+        /// The <see cref="Unit"/> recieving the HP change.
         /// </summary>
         public Unit Reciever { get; private set; }
         /// <summary>
         /// The function that the Reciever's HP changes by.
         /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="__DOC__ChangeFunction"/>
+        /// </remarks>
         public Func<int, int> ChangeFunction { get; private set; }
         private int _ChangedHP => ChangeFunction(Reciever.HP);
 
@@ -37,7 +39,16 @@ public partial class GameAction
             Reciever.UpdateHP(Reciever.HP - _changeStack.Pop());
         }
 
-        //TODO: Doc
+        /// <summary>
+        /// Changes <paramref name="reciever"/>'s HP by the <paramref name="changeFunction"/>, by <paramref name="performer"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="changeFunction"/> : <br></br>
+        /// <inheritdoc cref="ChangeFunction"/>
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="reciever"></param>
+        /// <param name="changeFunction"></param>
         public HPChange(Player performer, Unit reciever, Func<int, int> changeFunction) : base(performer)
         {
             _changeStack = new();

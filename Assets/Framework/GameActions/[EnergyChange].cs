@@ -43,7 +43,7 @@ public abstract partial class GameAction
         }
 
         /// <summary>
-        /// Changes <paramref name="reciever"/>'s Energy amount by the <paramref name="changeFunction"/>. (by <paramref name="performer"/>)
+        /// Changes <paramref name="reciever"/>'s Energy amount by the <paramref name="changeFunction"/>, by <paramref name="performer"/>.
         /// </summary>
         /// <remarks>
         /// <paramref name="changeFunction"/> : <br></br>

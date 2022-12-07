@@ -107,24 +107,24 @@ public abstract partial class GameAction
         Performer = performer;
     }
 
-    //BAD DOC, UPDATE
     /// <summary>
-    /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
-    /// <i>(See <see cref="ResultantActions"/>)</i> <br></br> <br></br>
-    /// USE <see cref="AddLateResultant(GameAction)"/> IF: <br></br>
-    /// Resultant is being added anytime after immediate construction of this <see cref="GameAction"/>.
+    /// Makes <paramref name="action"/> a resultant of <see langword="this"/> <see cref="GameAction"/>. <br></br>
+    /// (Adds to <see cref="ResultantActions"/>)
     /// </summary>
-    /// <param name="action"></param>
     /// <remarks>
-    /// Returns: <see langword="this"/>.
+    /// Use AddResultant() if adding a resultant *before* <see langword="this"/> <see cref="GameAction"/> has been performed. <br></br>
+    /// Use AddLateResultant() if adding a resultant *after* <see langword="this"/> <see cref="GameAction"/> has been performed.
+    /// <br></br><br></br>
+    /// <i>i.e. If using a Prompt(), use AddLateResultant(), otherwise use AddResultant().</i>
     /// </remarks>
+    /// <param name="action"></param>
     public GameAction AddResultant(GameAction action)
     {
         _resultantActions.Add(action);
         return this;
     }
 
-    //NEED DOC
+    /// <inheritdoc cref="AddResultant(GameAction)"/>
     public GameAction AddLateResultant(GameAction action)
     {
         AddResultant(action);

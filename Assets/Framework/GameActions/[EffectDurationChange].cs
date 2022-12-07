@@ -12,6 +12,14 @@ public partial class GameAction
         /// The <see cref="UnitEffect"/> that had its Duration changed.
         /// </summary>
         public UnitEffect TickingEffect { get; private set; }
+        /// <summary>
+        /// The function that TickingEffects Duration is changed by.
+        /// </summary>
+        /// <remarks>
+        /// <c><see cref="int"/> ChangeFunctionMethod(<see cref="int"/> <paramref name="originalValue"/>) { }</c> <br></br>
+        /// - <paramref name="originalValue"/> : The value before applying the change function. <br></br>
+        /// - <see langword="return"/> : The changed value.
+        /// </remarks>
         public Func<int, int> ChangeFunction { get; private set; }
 
         private int _ChangedValue => ChangeFunction(TickingEffect.Duration);
@@ -27,7 +35,7 @@ public partial class GameAction
         /// Changes <paramref name="effect"/>'s Duration by <paramref name="changeFunction"/>, by <paramref name="performer"/>. <br></br>
         /// </summary>
         /// <remarks>
-        /// <i>(See <see cref="EnergyChange"/> for an example usage of <paramref name="changeFunction"/>)</i>
+        /// <inheritdoc cref="ChangeFunction"/>
         /// </remarks>
         /// <param name="performer"></param>
         /// <param name="effect"></param>

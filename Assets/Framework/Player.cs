@@ -51,6 +51,9 @@ public class Player
         Energy = val;
     }
 
+    /// <summary>
+    /// A dummy <see cref="Player"/> object with no behavior.
+    /// </summary>
     public static Player DummyPlayer => new Player(ETeam.NONE);
 
     //Player class stores a player's Abilities, Passive, Control spheres, etc.
@@ -65,6 +68,13 @@ public class Player
 }
 public static class PlayerExtensions
 {
+    /// <summary>
+    /// Rotates (<see langword="this"/>)<paramref name="coords"/> around <paramref name="anchor"/> to respect <paramref name="player"/>'s perspective.
+    /// </summary>
+    /// <param name="coords"></param>
+    /// <param name="player"></param>
+    /// <param name="anchor"></param>
+    /// <returns></returns>
     public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Player player, Vector3Int anchor)
     {
         return coords.Rotate(anchor, player.PerspectiveRotation);

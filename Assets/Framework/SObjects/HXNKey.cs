@@ -10,7 +10,7 @@ public class HXNKey : ScriptableObject
     [SerializeField]
     private char[] _keys;
 
-    private Dictionary<char, Hex> _charKeyDict = new();
+    private readonly Dictionary<char, Hex> _charKeyDict = new();
 
     private void OnValidate()
     {
@@ -22,10 +22,12 @@ public class HXNKey : ScriptableObject
         }
 
         //debug
+        /*
         foreach (var pair in _charKeyDict)
         {
             Debug.Log($"{pair.Key} => {pair.Value.name}");
         }
+        */
     }
 
     public Hex GetHex(char key)

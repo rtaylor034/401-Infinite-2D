@@ -16,7 +16,6 @@ public abstract class Hex : Selectable
 
     public Unit Occupant { get; set; } = null;
     public Board Board => _board;
-
     protected Board _board;
 
     public Hex Init(Board board, Vector3Int pos)

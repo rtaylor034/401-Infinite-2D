@@ -47,6 +47,15 @@ public abstract partial class GameAction
     /// <i>> See <see cref="AddResultant(GameAction)"/></i>
     /// </remarks>
     private readonly bool __DOC__ExternalResultantEvent;
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="int"/> ChangeFunctionMethod(<see cref="int"/> <paramref name="originalValue"/>) { }</c> <br></br>
+    /// - <paramref name="originalValue"/> : The value before applying the change function. <br></br>
+    /// - <see langword="return"/> : The changed value.
+    /// </remarks>
+    private readonly bool __DOC__ChangeFunction;
 
 #pragma warning restore IDE1006
 #pragma warning restore IDE0052

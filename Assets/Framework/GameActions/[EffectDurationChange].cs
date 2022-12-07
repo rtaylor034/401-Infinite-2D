@@ -16,9 +16,7 @@ public partial class GameAction
         /// The function that TickingEffects Duration is changed by.
         /// </summary>
         /// <remarks>
-        /// <c><see cref="int"/> ChangeFunctionMethod(<see cref="int"/> <paramref name="originalValue"/>) { }</c> <br></br>
-        /// - <paramref name="originalValue"/> : The value before applying the change function. <br></br>
-        /// - <see langword="return"/> : The changed value.
+        /// <inheritdoc cref="__DOC__ChangeFunction"/>
         /// </remarks>
         public Func<int, int> ChangeFunction { get; private set; }
 

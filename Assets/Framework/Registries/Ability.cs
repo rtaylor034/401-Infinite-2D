@@ -16,7 +16,7 @@ public abstract class Ability
     /// </summary>
     /// <remarks>
     /// <c><see langword="void"/> PlayActionMethod(<see cref="GameAction.PlayAbility"/> <paramref name="action"/>) { }</c> <br></br>
-    /// <i><paramref name="action"/> = the <see cref="GameAction.PlayAbility"/> that played this ability.</i>
+    /// - <paramref name="action"/> : the <see cref="GameAction.PlayAbility"/> that played this ability.
     /// </remarks>
     /// <param name="action"></param>
     public delegate void PlayAction(GameAction.PlayAbility action);
@@ -68,20 +68,23 @@ public abstract class Ability
         /// </summary>
         /// <remarks>
         /// <c><see cref="bool"/> TargetConditionMethod(<see cref="Player"/> <paramref name="user"/>, <see cref="Unit"/> <paramref name="previousTarget"/>, <see cref="Unit"/> <paramref name="currentTarget"/>) { }</c> <br></br>
-        /// <i><paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
-        /// <paramref name="previousTarget"/> : The <see cref="Unit"/> that was selected as a Target before this one. <br></br>
-        /// <paramref name="currentTarget"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Target. <br></br>
-        /// <see langword="return"/> : Whether or not <paramref name="currentTarget"/> is a valid Target.
-        /// </i></remarks>
+        /// - <paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
+        /// - <paramref name="previousTarget"/> : The <see cref="Unit"/> that was selected as a Target before this one. <br></br>
+        /// - <paramref name="currentTarget"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Target. <br></br>
+        ///  <see langword="return"/> -> Whether or not <paramref name="currentTarget"/> is a valid Target.
+        /// </remarks>
         /// <param name="user"></param>
         /// <param name="previousTarget"></param>
         /// <param name="currentTarget"></param>
         public delegate bool TargetCondition(Player user, Unit previousTarget, Unit currentTarget);
 
         /// <summary>
-        /// [Delegate] <br></br>
+        /// [Delegate] <br></br><br></br>
         /// Same as <see cref="TargetCondition"/>, but <paramref name="previousTarget"/> is discarded.
         /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="TargetCondition"/>
+        /// </remarks>
         /// <param name="user"></param>
         /// <param name="target"></param>
         /// <returns></returns>
@@ -149,11 +152,11 @@ public abstract class Ability
         /// </summary>
         /// <remarks>
         /// <c><see cref="bool"/> TargetingConditionMethod(<see cref="Player"/> <paramref name="user"/>, <see cref="Unit"/> <paramref name="source"/>, <see cref="Unit"/> <paramref name="target"/>) { }</c> <br></br>
-        /// <i><paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
-        /// <paramref name="source"/> : The <see cref="Unit"/> that was selected as the Source. <br></br>
-        /// <paramref name="target"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Target. <br></br>
-        /// <see langword="return"/> : Whether or not <paramref name="currentTarget"/> is a valid Target.
-        /// </i></remarks>
+        /// - <paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
+        /// - <paramref name="source"/> : The <see cref="Unit"/> that was selected as the Source. <br></br>
+        /// - <paramref name="target"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Target. <br></br>
+        /// <see langword="return"/> -> Whether or not <paramref name="currentTarget"/> is a valid Target.
+        /// </remarks>
         /// <param name="user"></param>
         /// <param name="source"></param>
         /// <param name="target"></param>
@@ -163,10 +166,10 @@ public abstract class Ability
         /// </summary>
         /// <remarks>
         /// <c><see cref="bool"/> SourceConditionMethod(<see cref="Player"/> <paramref name="user"/>, <see cref="Unit"/> <paramref name="source"/>) { }</c> <br></br>
-        /// <i><paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
-        /// <paramref name="source"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Source. <br></br>
-        /// <see langword="return"/> : Whether or not <paramref name="source"/> is a valid Source.
-        /// </i></remarks>
+        /// - <paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
+        /// - <paramref name="source"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Source. <br></br>
+        /// <see langword="return"/> -> Whether or not <paramref name="source"/> is a valid Source.
+        /// </remarks>
         /// <param name="user"></param>
         /// <param name="source"></param>
         public delegate bool SourceCondition(Player user, Unit source);

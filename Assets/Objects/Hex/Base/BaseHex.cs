@@ -11,6 +11,18 @@ public class BaseHex : Hex
     public Player.ETeam Team => _team;
 
     //TBI
-    public bool IsGuarded { get; private set; }
+    public bool IsGuarded
+    {
+        get
+        {
+            HashSet<BaseHex> result = new();
+            foreach (Hex hex in _board.HexDict.Values)
+                if (hex is BaseHex b) result.Add(b);
+
+            foreach (BaseHex bhex in result)
+                if (bhex.Occupant is not null && bhex.Occupant.Team == _team) return true;
+            return false;
+        }
+    }
 
 }

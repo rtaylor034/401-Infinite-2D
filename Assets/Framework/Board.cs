@@ -26,7 +26,7 @@ public class Board : MonoBehaviour
     /// </summary>
     public HashSet<Unit> Units => new(_units);
     public Dictionary<Vector3Int, Hex> HexDict => new(_hexDict);
-
+    public HashSet<Hex> Hexes => new(_hexDict.Values);
     public void CreateBoard()
     {
         GenerateMap(Map.MapList[0]);
@@ -148,9 +148,9 @@ public class Board : MonoBehaviour
         HashSet<Hex> o = new() { HexAt(startPos) };
 
         HashSet<Hex> traversed = new();
-        Recur(o, range.Item2);
+        __Recur(o, range.Item2);
 
-        void Recur(HashSet<Hex> roots, int r)
+        void __Recur(HashSet<Hex> roots, int r)
         {
             if (range.Item2 - range.Item1 > r) o.UnionWith(roots);
             if (r == 0) return;
@@ -175,7 +175,7 @@ public class Board : MonoBehaviour
             }
             branches.ExceptWith(traversed);
             branches.ExceptWith(roots);
-            if (branches.Count > 0) Recur(branches, r - 1);
+            if (branches.Count > 0) __Recur(branches, r - 1);
         }
 
         o.RemoveWhere(hex => !finalCondition(hex));

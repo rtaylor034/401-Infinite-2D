@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-//ABSTRACT (Must instantiate a derived class)
+/// <summary>
+/// <b>abstract</b> [ : ] <see cref="Selectable"/>
+/// </summary>
 public abstract class Hex : Selectable
 {
     //position in board coordinates.

@@ -9,7 +9,7 @@ public static class AbilityRegistry
 {
 
     //TODO:
-    //have some sort of field that has default effect duration (would be 1 in a normal game).
+    // Create seperate registries per GameSettings.
     public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
     
 
@@ -32,7 +32,7 @@ public static class AbilityRegistry
         * TYPE IDENTITY - Ability.ETypeIdentity
         * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
         * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
-        * ON-PLAY ACTION - Ability.PlayAction (void<GameAction.PlayAbility>)
+        * ON-PLAY ACTION - Ability.PlayAction <void(GameAction.PlayAbility)>
         */
 
         List<ConstructorTemplate<Ability>> masterList = new()

@@ -7,14 +7,23 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Selector : MonoBehaviour
+public class Selector
 {
     public delegate void SelectionConfirmMethod(SelectorArgs args);
+    public bool IsActive
+    {
+        get => _isactive_;
+        private set
+        {
+            _isactive_ = value;
+            SInputs(value);
+        }
+    }
+    private bool _isactive_;
 
     private IEnumerable<Selectable> _currentPrompt;
     private SelectionConfirmMethod _confirmMethod;
-
-    #region Setups
+    
     private void SInputs(bool value)
     {
         if (value == true)
@@ -26,26 +35,6 @@ public class Selector : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region Unity Messages
-    private void Awake()
-    {
-        enabled = false;
-    }
-
-    private void OnEnable()
-    {
-        SInputs(true);
-    }
-
-    private void OnDisable()
-    {
-        SInputs(false);
-    }
-    #endregion
-
-    //TODO: add Player argument at some point
     /// <summary>
     /// Prompts the player to select an object from the given <paramref name="selectables"/>.<br></br>
     /// Runs <paramref name="confirmMethod"/> when an object is selected or when prompt is cancelled.
@@ -57,9 +46,9 @@ public class Selector : MonoBehaviour
     /// </returns>
     public bool Prompt(IEnumerable<Selectable> selectables, SelectionConfirmMethod confirmMethod)
     {
-        if (enabled) return false;
+        if (IsActive) return false;
 
-        enabled = true;
+        IsActive = true;
         _currentPrompt = selectables;
         _confirmMethod = confirmMethod;
 
@@ -83,9 +72,9 @@ public class Selector : MonoBehaviour
     /// </remarks>
     public bool SpoofSelection(Selectable selection, SelectionConfirmMethod confirmMethod)
     {
-        if (enabled) return false;
+        if (IsActive) return false;
 
-        enabled = true;
+        IsActive = true;
         _currentPrompt = new[] { selection };
         _confirmMethod = confirmMethod;
 
@@ -109,7 +98,7 @@ public class Selector : MonoBehaviour
 
     private void FinalizeSelection(SelectorArgs args)
     {
-        enabled = false;
+        IsActive = false;
         foreach (var s in _currentPrompt)
         {
             s.DisableSelection();
@@ -126,7 +115,7 @@ public class Selector : MonoBehaviour
     /// </returns>
     public bool ForceCancel()
     {
-        if (!enabled) return false;
+        if (!IsActive) return false;
         SelectionCancel();
         return true;
     }

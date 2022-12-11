@@ -15,8 +15,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board board;
-    [SerializeField]
-    private Selector selector;
 
     /// <summary>
     /// The <see cref="Player"/> that currently has control of the Turn.
@@ -68,10 +66,10 @@ public class GameManager : MonoBehaviour
 
     private void SSingletons()
     {
+        SELECTOR = new Selector();
         INPUT = new Inputs();
         INPUT.Enable();
         GAME = this;
-        SELECTOR = selector;
     }
 
     #endregion

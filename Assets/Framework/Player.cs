@@ -8,6 +8,7 @@ public class Player
 
     public ETeam Team { get; private set; }
     public int Energy { get; private set; } = 0;
+    public int ControlSpheres { get; private set; } = 0;
 
     /// <summary>
     /// This Player's perspective rotation amount.
@@ -49,6 +50,14 @@ public class Player
     public void UpdateEnergy(int val)
     {
         Energy = val;
+    }
+    /// <summary>
+    /// Sets this Players's Control Spheres to <paramref name="val"/>. (Should only be called from <see cref="GameAction"/>[ : ])
+    /// </summary>
+    /// <param name="val"></param>
+    public void UpdateControlSpheres(int val)
+    {
+        ControlSpheres = val;
     }
 
     /// <summary>

@@ -109,25 +109,27 @@ public class GameManager : MonoBehaviour
         NextTurn();
 
         //TEST MOVEMENT
-        INPUT.Test.moveprompt.performed += _ =>
+        INPUT.Test.moveprompt.performed += async _ =>
         {
-            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), __Confirm);
+            var sel = await SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team));
 
-            void __Confirm(Selector.SelectorArgs sel)
-            {
-                if (sel.Selection is not Unit u) return;
-                //funny lazer  test
-                GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
-                { CustomPathingRestrictions = new() {
-                    (prev, next) => 
-                    { 
-                        foreach (var i in BoardCoords.Indicies)
-                            if (next.Position[i] == u.Position[i]) return true;
-                        return false;
-                    }
-                }
-                ,MinDistance = 0}, a => GameAction.Declare(a));
-            }
+            if (sel.Selection is not Unit u) return;
+            //funny lazer  test
+            GameAction.Declare(
+                await GameAction.Move.Prompt(
+                new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
+                {
+                    CustomPathingRestrictions = new()
+                    {
+                        (prev, next) =>
+                        {
+                            foreach (var i in BoardCoords.Indicies)
+                                if (next.Position[i] == u.Position[i]) return true;
+                            return false;
+                        }
+                    },
+                    MinDistance = 0
+                }));
 
         };
 
@@ -139,15 +141,12 @@ public class GameManager : MonoBehaviour
         };
 
         //TEST EFFECT
-        INPUT.Test.effect.performed += _ =>
+        INPUT.Test.effect.performed += async _ =>
         {
-            SELECTOR.Prompt(board.Units, __Confirm);
+            var sel = await SELECTOR.Prompt(board.Units);
+            if (sel.Selection is not Unit u) return;
 
-            void __Confirm(Selector.SelectorArgs sel)
-            {
-                if (sel.Selection is not Unit u) return;
-                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
-            }
+            GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
         };
 
         //TEST TURN

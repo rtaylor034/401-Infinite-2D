@@ -86,14 +86,15 @@ public abstract partial class GameAction
         /// </remarks>
         /// <param name="args"></param>
         /// <param name="confirmCallback"></param>
-        public static void Prompt(PromptArgs args, Action<Move> confirmCallback, Action<Selector.SelectorArgs> cancelCallback = null)
+        public static async Task<Move> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null)
         {
-            __Prompt(true);
+            return await __Prompt(true);
 
-            void __Prompt(bool callPromptEvent)
+            async Task<Move> __Prompt(bool callPromptEvent)
             {
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
                 Unit u = args.MovingUnit;
+
                 bool __FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
 
                 IEnumerable<Selectable> possibleHexes =
@@ -101,33 +102,26 @@ public abstract partial class GameAction
                     (args is PromptArgs.Positional a) ? u.Board.HexesAt(GetPositionalPositions(a)).Where(__FinalCondition) :
                     throw new ArgumentException("PromptArgs not recognized?");
 
-                if (args.Forced && possibleHexes.IsSingleElement(out var single))
-                    GameManager.SELECTOR.SpoofSelection(single, __OnSelect);
-                else
-                    GameManager.SELECTOR.Prompt(possibleHexes, __OnSelect);
+                Selector.SelectionArgs sel = (args.Forced && possibleHexes.IsSingleElement(out var single)) ?
+                    GameManager.SELECTOR.SpoofSelection(single) :
+                    await GameManager.SELECTOR.Prompt(possibleHexes);
 
-                void __OnSelect(Selector.SelectorArgs sel)
+                if (sel.Selection is null && args.Forced)
                 {
-                    if (sel.Selection is null)
+                    if (!sel.WasEmpty)
                     {
-                        if (args.Forced)
-                        {
-                            if (!sel.WasEmpty)
-                            {
-                                Debug.Log("you cannot cancel a forced move");
-                                __Prompt(false);
-                            } 
-                            else
-                            {
-                                sel.ReturnCode = 1;
-                                cancelCallback?.Invoke(sel);
-                            }
-                        }
-                        return;
+                        Debug.Log("you cannot cancel a forced move");
+                        return await __Prompt(false);
+                    } 
+                    else
+                    {
+                        sel.ReturnCode = 1;
+                        cancelCallback?.Invoke(sel);
+                        return null;
                     }
-                    confirmCallback?.Invoke(new(args.Performer, u, u.Position, (sel.Selection as Hex).Position));
                 }
-            
+
+                return new(args.Performer, u, u.Position, (sel.Selection as Hex).Position);
 
             }
         }

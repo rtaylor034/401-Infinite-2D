@@ -10,28 +10,26 @@ using UnityEngine.InputSystem;
 
 public class Selector
 {
+    private static SelectionArgs ArgsOf(Selectable selection) => new SelectionArgs(selection);
+    private static SelectionArgs CancelledArgs => new SelectionArgs(null, cancelled: true);
+    private static SelectionArgs EmptyArgs => new SelectionArgs(null, empty: true);
 
-    /// <summary>
-    /// Prompts the player to select an object from the given <paramref name="selectables"/>.<br></br>
-    /// Runs <paramref name="confirmMethod"/> when an object is selected or when prompt is cancelled.
-    /// </summary>
-    /// <param name="selectables"></param>
-    /// <param name="confirmMethod"></param>
-    /// <returns>
-    /// FALSE if a prompt is already active (will do nothing).
-    /// </returns>
-    public async Task<SelectorArgs> Prompt(IEnumerable<Selectable> selectables)
+    public async Task<SelectionArgs> Prompt(IEnumerable<Selectable> selectables)
     {
-        CustomTask<SelectorArgs> promptTask = new();
+        CustomTask<SelectionArgs> promptTask = new();
+
+        void __Cancel(InputAction.CallbackContext _) =>
+            promptTask.Resolve(CancelledArgs);
+
 
         GameManager.INPUT.Selector.Cancel.performed += __Cancel;
 
-        foreach (var s in selectables) s.EnableSelection(sel => promptTask.Resolve(new SelectorArgs(sel)));
+        foreach (var s in selectables) s.EnableSelection(sel => promptTask.Resolve(ArgsOf(sel)));
 
         if (selectables.Count() == 0)
-            promptTask.Resolve(new SelectorArgs(null, empty: true));
-        
-        SelectorArgs o = await promptTask;
+            promptTask.Resolve(EmptyArgs);
+
+        SelectionArgs o = await promptTask;
 
         //finalize
         foreach (var s in selectables)
@@ -39,21 +37,22 @@ public class Selector
             s.DisableSelection();
         }
         GameManager.INPUT.Selector.Cancel.performed -= __Cancel;
-        return o;
 
-        void __Cancel(InputAction.CallbackContext _)
-        {
-            promptTask.Resolve(new SelectorArgs(null, cancelled: true));
-        }
+        return o;
     }
 
-    public class SelectorArgs : CallbackArgs
+    public SelectionArgs SpoofSelection(Selectable selection)
+    {
+        return ArgsOf(selection);
+    }
+
+    public class SelectionArgs : CallbackArgs
     {
         public Selectable Selection { get; set; }
         public bool WasCancelled { get; set; }
         public bool WasEmpty { get; set; }
 
-        public SelectorArgs(Selectable selection, bool cancelled = false, bool empty = false)
+        public SelectionArgs(Selectable selection, bool cancelled = false, bool empty = false)
         {
             WasEmpty = empty;
             Selection = selection;

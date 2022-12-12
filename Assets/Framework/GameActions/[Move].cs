@@ -106,23 +106,21 @@ public abstract partial class GameAction
                     GameManager.SELECTOR.SpoofSelection(single) :
                     await GameManager.SELECTOR.Prompt(possibleHexes);
 
-                if (sel.Selection is null && args.Forced)
+                if (sel.Selection is not null)
+                    return new(args.Performer, u, u.Position, (sel.Selection as Hex).Position);
+                
+                if (args.Forced)
                 {
                     if (!sel.WasEmpty)
                     {
                         Debug.Log("you cannot cancel a forced move");
                         return await __Prompt(false);
-                    } 
-                    else
-                    {
-                        sel.ReturnCode = 1;
-                        cancelCallback?.Invoke(sel);
-                        return null;
                     }
+                    sel.ReturnCode = 1;
                 }
 
-                return new(args.Performer, u, u.Position, (sel.Selection as Hex).Position);
-
+                cancelCallback?.Invoke(sel);
+                return null;
             }
         }
 

@@ -131,7 +131,8 @@ public class GameManager : MonoBehaviour
                         }
                     },
                     MinDistance = 0
-                }));
+                },
+                _ => print("MOVE CANCELLED")));
 
         };
 

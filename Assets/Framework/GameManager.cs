@@ -128,7 +128,7 @@ public class GameManager : MonoBehaviour
                 }
                 ,MinDistance = 0}, a => GameAction.Declare(a));
             }
-            
+
         };
 
         //TEST UNDO

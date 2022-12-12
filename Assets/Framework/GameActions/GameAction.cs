@@ -120,16 +120,22 @@ public abstract partial class GameAction
     /// <param name="action"></param>
     public GameAction AddResultant(GameAction action)
     {
-        _resultantActions.Add(action);
+        if (action is not null)
+            _resultantActions.Add(action);
+
         return this;
     }
 
     /// <inheritdoc cref="AddResultant(GameAction)"/>
     public GameAction AddLateResultant(GameAction action)
     {
-        AddResultant(action);
-        Debug.Log($"(Action Resultant Late-Added) -> {action}");
-        action.Perform();
+        if (action is not null)
+        {
+            AddResultant(action);
+            Debug.Log($"(Action Resultant Late-Added) -> {action}");
+            action.Perform();
+        }
+
         return this;
     }
 
@@ -142,6 +148,8 @@ public abstract partial class GameAction
     /// <param name="action"></param>
     public static void Declare(GameAction action)
     {
+        if (action == null) return;
+
         Debug.Log($"(Action Declare) {action}");
         action.Perform();
         GameManager.GAME.PushGameAction(action);

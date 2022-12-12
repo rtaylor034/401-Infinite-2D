@@ -94,6 +94,7 @@ public class ControlledTask<T>
         }
         public void Resolve(B result)
         {
+            if (_completed) throw new Exception("Awaiter already resolved");
             _result = result;
             _completed = true;
             _continueAction();

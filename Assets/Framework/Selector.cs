@@ -16,18 +16,14 @@ public class Selector
 
     public async Task<SelectionArgs> Prompt(IEnumerable<Selectable> selectables)
     {
+        if (!selectables.Any()) return EmptyArgs;
+
         ControlledTask<SelectionArgs> promptTask = new();
-
-        void __Cancel(InputAction.CallbackContext _) =>
-            promptTask.Resolve(CancelledArgs);
-
-
-        GameManager.INPUT.Selector.Cancel.performed += __Cancel;
 
         foreach (var s in selectables) s.EnableSelection(sel => promptTask.Resolve(ArgsOf(sel)));
 
-        if (selectables.Count() == 0)
-            promptTask.Resolve(EmptyArgs);
+        GameManager.INPUT.Selector.Cancel.performed += __Cancel;
+        void __Cancel(InputAction.CallbackContext _) => promptTask.Resolve(CancelledArgs);
 
         SelectionArgs o = await promptTask;
 

@@ -12,11 +12,18 @@ using UnityEngine;
 public class ControlledTask
 {
     public ControlledAwaiter Awaiter { get; private set; }
+
+    /// <summary>
+    /// Creates a task that halts <see langword="await"/> execution until Resolve() is called.
+    /// </summary>
     public ControlledTask()
     {
         Awaiter = new ControlledAwaiter();
     }
 
+    /// <summary>
+    /// Resolves this task and releases <see langword="await"/> execution.
+    /// </summary>
     public void Resolve()
     {
         Awaiter.Resolve();
@@ -52,11 +59,21 @@ public class ControlledTask
 public class ControlledTask<T>
 {
     public ControlledAwaiter<T> Awaiter { get; private set; }
+
+    /// <summary>
+    /// <inheritdoc cref="ControlledTask.ControlledTask"/><br></br>
+    /// > Yields type <typeparamref name="T"/> when resolved.
+    /// </summary>
     public ControlledTask()
     {
         Awaiter = new ControlledAwaiter<T>();
     }
 
+    /// <summary>
+    /// <inheritdoc cref="ControlledTask.Resolve"/> <br></br>
+    /// > Yields <paramref name="result"/>.
+    /// </summary>
+    /// <param name="result"></param>
     public void Resolve(T result)
     {
         Awaiter.Resolve(result);

@@ -16,7 +16,7 @@ public class Selector
 
     public async Task<SelectionArgs> Prompt(IEnumerable<Selectable> selectables)
     {
-        CustomTask<SelectionArgs> promptTask = new();
+        ControlledTask<SelectionArgs> promptTask = new();
 
         void __Cancel(InputAction.CallbackContext _) =>
             promptTask.Resolve(CancelledArgs);

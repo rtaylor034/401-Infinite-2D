@@ -9,12 +9,12 @@ using UnityEngine;
 
 
 
-public class CustomTask
+public class ControlledTask
 {
-    public CustomAwaiter Awaiter { get; private set; }
-    public CustomTask()
+    public ControlledAwaiter Awaiter { get; private set; }
+    public ControlledTask()
     {
-        Awaiter = new CustomAwaiter();
+        Awaiter = new ControlledAwaiter();
     }
 
     public void Resolve()
@@ -22,15 +22,15 @@ public class CustomTask
         Awaiter.Resolve();
     }
 
-    public CustomAwaiter GetAwaiter() => Awaiter;
+    public ControlledAwaiter GetAwaiter() => Awaiter;
 
-    public class CustomAwaiter : INotifyCompletion
+    public class ControlledAwaiter : INotifyCompletion
     {
         private bool _completed;
         public bool IsCompleted => _completed;
         private Action _continueAction;
 
-        public CustomAwaiter()
+        public ControlledAwaiter()
         {
             _completed = false;
         }
@@ -49,12 +49,12 @@ public class CustomTask
     }
 }
 
-public class CustomTask<T>
+public class ControlledTask<T>
 {
-    public CustomAwaiter<T> Awaiter { get; private set; }
-    public CustomTask()
+    public ControlledAwaiter<T> Awaiter { get; private set; }
+    public ControlledTask()
     {
-        Awaiter = new CustomAwaiter<T>();
+        Awaiter = new ControlledAwaiter<T>();
     }
 
     public void Resolve(T result)
@@ -62,16 +62,16 @@ public class CustomTask<T>
         Awaiter.Resolve(result);
     }
 
-    public CustomAwaiter<T> GetAwaiter() => Awaiter;
+    public ControlledAwaiter<T> GetAwaiter() => Awaiter;
 
-    public class CustomAwaiter<B> : INotifyCompletion
+    public class ControlledAwaiter<B> : INotifyCompletion
     {
         private bool _completed;
         private B _result;
         public bool IsCompleted => _completed;
         private Action _continueAction;
 
-        public CustomAwaiter()
+        public ControlledAwaiter()
         {
             _completed = false;
         }

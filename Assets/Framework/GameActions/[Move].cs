@@ -14,11 +14,6 @@ public abstract partial class GameAction
     /// </summary>
     public class Move : GameAction
     {
-        /// <summary>
-        /// Occurs when any <see cref="Move"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<Move> ExternalResultantEvent;
 
         /// <summary>
         /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Action{Move})"/>. <br></br>
@@ -61,7 +56,6 @@ public abstract partial class GameAction
             MovedUnit = movedUnit;
             FromPos = fromPos;
             ToPos = toPos;
-            ExternalResultantEvent?.Invoke(this);
         }
         protected override void InternalPerform()
         {

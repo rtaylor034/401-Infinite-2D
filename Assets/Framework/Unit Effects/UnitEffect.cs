@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public abstract partial class UnitEffect
 {
@@ -49,11 +51,11 @@ public abstract partial class UnitEffect
         InternalSetup(val);
         if (val)
         {
-            GameAction.Turn.ExternalResultantEvent += TickDown;
+            GameAction.OnEvaluationEvent += TickDown;
         } 
         else
         {
-            GameAction.Turn.ExternalResultantEvent -= TickDown;
+            GameAction.OnEvaluationEvent -= TickDown;
         }
         
     }
@@ -92,9 +94,10 @@ public abstract partial class UnitEffect
     protected virtual void WhenInflicted(GameAction.InflictEffect action) { }
     
 
-    private void TickDown(GameAction.Turn action)
+    private async Task TickDown(GameAction action)
     {
-        action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
+        if (action is not GameAction.Turn turn) return;
+        await action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
     }
 
 

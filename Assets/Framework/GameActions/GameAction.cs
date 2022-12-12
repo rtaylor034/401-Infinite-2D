@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -12,11 +15,15 @@ public abstract partial class GameAction
     /// [Event Handler Delegate] <br></br>
     /// </summary>
     /// <remarks>
-    /// <c>EventSubscriberMethod(<typeparamref name="T"/> <paramref name="action"/>) { }</c>
+    /// <c>EventSubscriberMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c>
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     /// <param name="action"></param>
-    public delegate void GameActionEventHandler<T>(T action) where T : GameAction;
+    public delegate void GameActionEventHandler(GameAction action);
+
+    public delegate Task GameActionEventHandlerAsync(GameAction action);
+
+    public static GameActionEventHandlerAsync OnEvaluationEvent;
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
@@ -118,23 +125,13 @@ public abstract partial class GameAction
     /// <i>i.e. If using a Prompt(), use AddLateResultant(), otherwise use AddResultant().</i>
     /// </remarks>
     /// <param name="action"></param>
-    public GameAction AddResultant(GameAction action)
-    {
-        if (action is not null)
-            _resultantActions.Add(action);
-
-        return this;
-    }
-
-    /// <inheritdoc cref="AddResultant(GameAction)"/>
-    public GameAction AddLateResultant(GameAction action)
+    public async Task<GameAction> AddResultant(GameAction action)
     {
         if (action is not null)
         {
-            AddResultant(action);
-            Debug.Log($"(Action Resultant Late-Added) -> {action}");
-            action.Perform();
-        }
+            await action.Evaluate();
+            _resultantActions.Add(action);
+        }   
 
         return this;
     }
@@ -146,14 +143,23 @@ public abstract partial class GameAction
     /// Primary method for making GameActions part of the game.
     /// </remarks>
     /// <param name="action"></param>
-    public static void Declare(GameAction action)
+    public static async void Declare(GameAction action)
     {
         if (action == null) return;
 
+        await action.Evaluate();
         Debug.Log($"(Action Declare) {action}");
         action.Perform();
         GameManager.GAME.PushGameAction(action);
         
+    }
+
+    private async Task Evaluate()
+    {
+        foreach(var externalEvaluation in OnEvaluationEvent.GetInvocationList().Cast<GameActionEventHandlerAsync>())
+        {
+            await externalEvaluation(this);
+        }
     }
 
     public override string ToString()

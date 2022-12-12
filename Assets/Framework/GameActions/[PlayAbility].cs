@@ -28,12 +28,6 @@ public partial class GameAction
         public Unit[] ParticipatingUnits { get; private set; }
 
         /// <summary>
-        /// Occurs when any <see cref="PlayAbility"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<PlayAbility> ExternalResultantEvent;
-
-        /// <summary>
         /// Occurs when any <see cref="PlayAbility"/> is prompted using <see cref="Prompt(PromptArgs, Action{PlayAbility}, Selector.SelectionConfirmMethod)"/>. <br></br>
         /// </summary>
         /// <remarks>
@@ -66,7 +60,6 @@ public partial class GameAction
             PlayedAbility = ability;
             ParticipatingUnits = new Unit[participants.Count];
             for (int i = 0; i < participants.Count; i++) ParticipatingUnits[i] = participants[i];
-            ExternalResultantEvent?.Invoke(this);
             CreateAbilityResultants();
         }
 

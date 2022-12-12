@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public abstract partial class GameAction
@@ -13,7 +15,7 @@ public abstract partial class GameAction
         /// Occurs when any <see cref="Turn"/> is created.
         /// </summary>
         /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<Turn> ExternalResultantEvent;
+        //public static event GameActionEventHandler<Turn> ExternalResultantEvent;
 
         /// <summary>
         /// The <see cref="Player"/> that ends their turn on this action. <br></br>
@@ -58,7 +60,6 @@ public abstract partial class GameAction
         {
             FromPlayer = fromPlayer;
             ToPlayer = toPlayer;
-            ExternalResultantEvent?.Invoke(this);
         }
         public override string ToString()
         {

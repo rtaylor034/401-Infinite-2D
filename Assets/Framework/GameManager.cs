@@ -169,6 +169,17 @@ public class GameManager : MonoBehaviour
                     (CurrentPlayer, AbilityRegistry.Registry[id], board),
                     _ => Debug.Log("ABILITY CANCELLED")));
         }
+
+        GameAction.Turn.ExternalResultantEvent += async _ =>
+        {
+            await Task.Delay(1000);
+            Debug.Log("bruh1");
+        };
+        GameAction.Turn.ExternalResultantEvent += async _ =>
+        {
+            await Task.Delay(1000);
+            Debug.Log("bruh2");
+        };
     }
 
     //TBI

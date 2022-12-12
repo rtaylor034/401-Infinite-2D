@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEditor.Search;
 using UnityEngine;
 
@@ -81,24 +82,24 @@ public partial class GameAction
         /// <param name="confirmCallback"></param>
         /// <param name="cancelCallback"></param>
         /// <exception cref="ArgumentException"></exception>
-        public static void Prompt(PromptArgs args, Action<PlayAbility> confirmCallback, Selector.SelectionConfirmMethod cancelCallback = null)
+        public static async Task<PlayAbility> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null)
         {
             var ability = args.Ability;
             var board = args.Board;
             var player = args.Performer;
-            __Prompt(true);
+            return await __Prompt(true);
             
             //for consistency with Move.Prompt, incase there is ever a forced ability action.
-            void __Prompt(bool callPromptEvent)
+            async Task<PlayAbility> __Prompt(bool callPromptEvent)
             {
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
 
-                if (ability is Ability.Sourced sourced) __HandleSourced(sourced);
-                else if (ability is Ability.Unsourced unsourced) __HandleUnsourced(unsourced);
+                if (ability is Ability.Sourced sourced) return await __HandleSourced(sourced);
+                else if (ability is Ability.Unsourced unsourced) return await __HandleUnsourced(unsourced);
                 else throw new ArgumentException("Ability not recognized");
 
             }
-            void __HandleSourced(Ability.Sourced a)
+            async Task<PlayAbility> __HandleSourced(Ability.Sourced a)
             {
                 var validSources = board.Units.Where(u =>
                 {
@@ -107,59 +108,49 @@ public partial class GameAction
                     return true;
                 });
                 
-                GameManager.SELECTOR.Prompt(validSources, __SourceConfirm);
+                var sourceSel = await GameManager.SELECTOR.Prompt(validSources);
+            
+                if (sourceSel.Selection is not Unit source) { cancelCallback?.Invoke(sourceSel); return null; }
 
-                void __SourceConfirm(Selector.SelectorArgs sourceSel)
+                var validTargets = board.Units.Where(u =>
                 {
-                    if (sourceSel.Selection is not Unit source) { cancelCallback?.Invoke(sourceSel); return; }
+                    if (!a.HitArea.Offset(source.Position).Rotate(source.Position, player.PerspectiveRotation)
+                    .Contains(u.Position)) return false;
+                    foreach (var condition in a.TargetingConditions)
+                        if (!condition(player, source, u)) return false;
+                    return true;
+                });
 
-                    var validTargets = board.Units.Where(u =>
-                    {
-                        if (!a.HitArea.Offset(source.Position).Rotate(source.Position, player.PerspectiveRotation)
-                        .Contains(u.Position)) return false;
-                        foreach (var condition in a.TargetingConditions)
-                            if (!condition(player, source, u)) return false;
-                        return true;
-                    });
+                var targetSel = await GameManager.SELECTOR.Prompt(validTargets);
 
-                    GameManager.SELECTOR.Prompt(validTargets, __TargetConfirm);
+                if (targetSel.Selection is not Unit target)
+                { cancelCallback?.Invoke(targetSel); return null; }
 
-                    void __TargetConfirm(Selector.SelectorArgs targetSel)
-                    {
-                        if (targetSel.Selection is not Unit target)
-                        { cancelCallback?.Invoke(targetSel); return; }
-
-                        var participants = new Unit[] { source, target };
-                        confirmCallback?.Invoke(new PlayAbility(player, a, participants));
-                    }
-
-                }
-
-
+                var participants = new Unit[] { source, target };
+                return new PlayAbility(player, a, participants);
             }
-            void __HandleUnsourced(Ability.Unsourced a)
+
+            async Task<PlayAbility> __HandleUnsourced(Ability.Unsourced a)
             {
                 var conds = a.TargetConditions;
                 var pUnits = new Unit[a.TargetConditions.Count];
-                __PromptTarget(0);
+                return await __PromptTarget(0);
 
-                void __PromptTarget(int i)
+                async Task<PlayAbility> __PromptTarget(int i)
                 {
                     var validUnits = board.Units.Where(u => conds[i](player, (i > 0) ? pUnits[i-1] : null, u));
-                    GameManager.SELECTOR.Prompt(validUnits, __TargetConfirm);
+                    var sel = await GameManager.SELECTOR.Prompt(validUnits);
 
-                    void __TargetConfirm(Selector.SelectorArgs sel)
-                    {
-                        if (sel.Selection is not Unit u)
-                        { cancelCallback?.Invoke(sel); return; }
+                    if (sel.Selection is not Unit u)
+                    { cancelCallback?.Invoke(sel); return null; }
 
-                        pUnits[i] = u;
+                    pUnits[i] = u;
 
-                        if (++i <= pUnits.Length)
-                        { confirmCallback?.Invoke(new PlayAbility(player, a, pUnits)); return; }
+                    if (++i <= pUnits.Length)
+                        return new PlayAbility(player, a, pUnits);
 
-                        __PromptTarget(i);
-                    }
+                    return await __PromptTarget(i);
+                
                 }
             }
         }

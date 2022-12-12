@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -117,7 +118,8 @@ public class GameManager : MonoBehaviour
             //funny lazer  test
             GameAction.Declare(
                 await GameAction.Move.Prompt(
-                new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
+                new GameAction.Move.PromptArgs.Pathed
+                (CurrentPlayer, u, 10)
                 {
                     CustomPathingRestrictions = new()
                     {
@@ -156,11 +158,15 @@ public class GameManager : MonoBehaviour
         };
 
         //TEST ABILITIES
-        INPUT.Test.ability1.performed += _ => __AbilityTest(0);
-        INPUT.Test.ability2.performed += _ => __AbilityTest(2);
-        void __AbilityTest(int id)
+        INPUT.Test.ability1.performed += async _ => await __AbilityTest(0);
+        INPUT.Test.ability2.performed += async _ => await __AbilityTest(2);
+        async Task __AbilityTest(int id)
         {
-            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[id], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
+            GameAction.Declare
+                (await GameAction.PlayAbility.Prompt
+                    (new GameAction.PlayAbility.PromptArgs
+                    (CurrentPlayer, AbilityRegistry.Registry[id], board),
+                    _ => Debug.Log("ABILITY CANCELLED")));
         }
     }
 

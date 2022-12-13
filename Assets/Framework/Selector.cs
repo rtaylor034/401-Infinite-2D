@@ -14,6 +14,12 @@ public class Selector
     private static SelectionArgs CancelledArgs => new SelectionArgs(null, cancelled: true);
     private static SelectionArgs EmptyArgs => new SelectionArgs(null, empty: true);
 
+    /// <summary>
+    /// Prompts the player to select an object from the given <paramref name="selectables"/>.
+    /// <br></br>
+    /// Releases <see langword="await"/> when the player makes a selection and returns it as a <see cref="SelectionArgs"/>. 
+    /// </summary>
+    /// <param name="selectables"> </param>
     public async Task<SelectionArgs> Prompt(IEnumerable<Selectable> selectables)
     {
         if (!selectables.Any()) return EmptyArgs;
@@ -42,10 +48,25 @@ public class Selector
         return ArgsOf(selection);
     }
 
+    /// <summary>
+    /// [ : ] <see cref="CallbackArgs"/>
+    /// </summary>
     public class SelectionArgs : CallbackArgs
     {
+        /// <summary>
+        /// The <see cref="Selectable"/> that was selected. <br></br>
+        /// </summary>
+        /// <remarks>
+        /// > <see langword="null"/> if selection was cancelled/unavailable.
+        /// </remarks>
         public Selectable Selection { get; set; }
+        /// <summary>
+        /// TRUE if selection was manually cancelled.
+        /// </summary>
         public bool WasCancelled { get; set; }
+        /// <summary>
+        /// TRUE if the the selection prompt was empty when given.
+        /// </summary>
         public bool WasEmpty { get; set; }
 
         public SelectionArgs(Selectable selection, bool cancelled = false, bool empty = false)

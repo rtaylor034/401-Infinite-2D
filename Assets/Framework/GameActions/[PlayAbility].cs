@@ -155,7 +155,7 @@ public partial class GameAction
         {
             if (PlayedAbility is Ability.Sourced sourced)
             {
-                foreach (Ability.PlayAction playAction in sourced.FollowUpMethod.GetInvocationList())
+                foreach (var playAction in sourced.FollowUpMethod.CastedInvocationList())
                     await playAction(this);
                 //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
                 foreach (var effectC in sourced.TargetEffects)
@@ -168,7 +168,7 @@ public partial class GameAction
             }
             else if (PlayedAbility is Ability.Unsourced unsourced)
             {
-                foreach (Ability.PlayAction playAction in unsourced.ActionMethod.GetInvocationList())
+                foreach (var playAction in unsourced.ActionMethod.CastedInvocationList())
                     await playAction(this);
             }
             else throw new ArgumentException("Ability not recognized");

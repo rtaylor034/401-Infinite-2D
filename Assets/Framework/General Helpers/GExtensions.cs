@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public static class GExtensions
@@ -41,5 +42,15 @@ public static class GExtensions
     {
         yield return item;
     }
-
+    /// <summary>
+    /// [Shorthand] <br></br>
+    /// <c>.GetInvocationList().Cast&lt;<typeparamref name="T"/>&gt;()</c>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="del"></param>
+    /// <returns></returns>
+    public static IEnumerable<T> CastedInvocationList<T>(this T del) where T : MulticastDelegate
+    {
+        return del.GetInvocationList().Cast<T>();
+    }
 }

@@ -12,7 +12,8 @@ public static class PassiveRegistry
     {
         List<ConstructorTemplate<Passive>> masterList = new()
         {
-            new(typeof(Passive.Test), "Agile")
+            new(typeof(Passive.Agile), "Agile"),
+            new(typeof(Passive.PointRunner), "Point Runner")
         };
 
         Registry = masterList.AsReadOnly();

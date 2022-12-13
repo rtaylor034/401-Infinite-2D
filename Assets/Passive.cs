@@ -27,4 +27,9 @@ public abstract partial class Passive
     /// </summary>
     /// <param name="val"></param>
     protected abstract void InternalSetup(bool val);
+
+    public override string ToString()
+    {
+        return $"!{Name}!";
+    }
 }

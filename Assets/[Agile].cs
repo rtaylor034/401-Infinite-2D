@@ -9,9 +9,9 @@ public partial class Passive
     /// <summary>
     /// [ : ] <see cref="Passive"/>
     /// </summary>
-    public class Test : Passive
+    public class Agile : Passive
     {
-        public Test(string name) : base(name) { }
+        public Agile(string name) : base(name) { }
 
         protected override void InternalSetup(bool val)
         {

@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
         board.CreateBoard();
 
         await NextTurn();
-        await GameAction.Declare(new GameAction.ActivatePassive(CurrentPlayer, PassiveRegistry.Registry[0].CreateInstance(), CurrentPlayer));
+        await GameAction.Declare(new GameAction.ActivatePassive(CurrentPlayer, PassiveRegistry.Registry[1].CreateInstance(), CurrentPlayer));
 
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>
@@ -121,8 +121,9 @@ public class GameManager : MonoBehaviour
             await GameAction.Declare(
                 await GameAction.Move.Prompt(
                 new GameAction.Move.PromptArgs.Pathed
-                (CurrentPlayer, u, 3)
-                {
+                (CurrentPlayer, u, 4)
+                /*{
+                    
                     CustomPathingRestrictions = new()
                     {
                         (prev, next) =>
@@ -133,8 +134,8 @@ public class GameManager : MonoBehaviour
                         }
                     },
                     MinDistance = 0
-                },
-                _ => print("MOVE CANCELLED")));
+                } */
+                , _ => print("MOVE CANCELLED")));
 
         };
 

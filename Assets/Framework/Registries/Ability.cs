@@ -52,11 +52,13 @@ public abstract class Ability
         Special
     }
 
-    public Ability(string name, ETypeIdentity typeIdentity)
+    protected Ability(string name, ETypeIdentity typeIdentity)
     {
         Name = name;
         TypeIdentity = typeIdentity;
     }
+
+
 
     /// <summary>
     /// [ : ] <see cref="Ability"/> <br></br>

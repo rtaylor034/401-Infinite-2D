@@ -104,10 +104,12 @@ public class GameManager : MonoBehaviour
         Settings = settings;
         CurrentPlayer = Player.DummyPlayer;
         AbilityRegistry.Initialize(settings);
+        PassiveRegistry.Initialize(settings);
 
         board.CreateBoard();
 
         await NextTurn();
+        await GameAction.Declare(new GameAction.ActivatePassive(CurrentPlayer, PassiveRegistry.Registry[0].CreateInstance(), CurrentPlayer));
 
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>
@@ -119,7 +121,7 @@ public class GameManager : MonoBehaviour
             await GameAction.Declare(
                 await GameAction.Move.Prompt(
                 new GameAction.Move.PromptArgs.Pathed
-                (CurrentPlayer, u, 10)
+                (CurrentPlayer, u, 3)
                 {
                     CustomPathingRestrictions = new()
                     {
@@ -192,6 +194,7 @@ public class GameManager : MonoBehaviour
         await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2));
         await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0));
         await GameAction.Declare(turnAction);
+
     }
 
     /// <summary>

@@ -37,7 +37,10 @@ public partial class Passive
                 if (hex.Occupant == null) continue;
                 if (hex.Occupant.Team == u.Team)
                 {
-                    await GameAction.Declare(await GameAction.Move.Prompt(
+                    //(hypothetical) options to solve this issue:
+                    //1 - Call Perform() before GameActions are evaluated, so that u.Position will be updated. (may cause expandability problems later?, less information transferred)
+                    //2 Make a "FromPosition" parameter in PromptArgs.Pathed. (honestly this just seems like the better answer, but more work possibly to convert everything to this paradigm).
+                    await action.AddResultant(await GameAction.Move.Prompt(
                         new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, u, 2)));
                 }
             }

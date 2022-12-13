@@ -155,7 +155,7 @@ public partial class GameAction
         {
             if (PlayedAbility is Ability.Sourced sourced)
             {
-                sourced.FollowUpMethod?.Invoke(this);
+                await sourced.FollowUpMethod?.Invoke(this);
                 //DEVNOTE: may create excessive UnitEffect objects, not really sure what to do about that.
                 foreach (var effectC in sourced.TargetEffects)
                 {
@@ -167,7 +167,7 @@ public partial class GameAction
             }
             else if (PlayedAbility is Ability.Unsourced unsourced)
             {
-                unsourced.ActionMethod?.Invoke(this);
+                await unsourced.ActionMethod?.Invoke(this);
             }
             else throw new ArgumentException("Ability not recognized");
         }

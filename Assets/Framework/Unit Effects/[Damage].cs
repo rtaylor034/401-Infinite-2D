@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public partial class UnitEffect
@@ -13,25 +14,26 @@ public partial class UnitEffect
         {
             if (val)
             {
-                GameAction.InflictEffect.ExternalResultantEvent += ShieldHandling;
+                GameAction.OnEvaluationEvent += ShieldHandling;
             } else
             {
-                GameAction.InflictEffect.ExternalResultantEvent -= ShieldHandling;
+                GameAction.OnEvaluationEvent -= ShieldHandling;
             }
         }
 
-        private void ShieldHandling(GameAction.InflictEffect action)
+        private async Task ShieldHandling(GameAction action)
         {
-            if (action.Effect is not UnitEffect.Shield) return;
-            action.AddResultant(new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp + 1));
-
+            if (action is not GameAction.InflictEffect effect) return;
+            if (effect.Effect is not UnitEffect.Shield) return;
             //once a shield has been used to absorb this damage, stop listening for shields.
-            GameAction.InflictEffect.ExternalResultantEvent -= ShieldHandling;
+            GameAction.OnEvaluationEvent -= ShieldHandling;
+
+            await action.AddResultant(new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp + 1));
         }
 
-        protected override void WhenInflicted(GameAction.InflictEffect action)
+        protected override async Task WhenInflicted(GameAction.InflictEffect action)
         {
-            action.AddResultant(new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1));
+            await action.AddResultant(new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1));
         }
     }
 }

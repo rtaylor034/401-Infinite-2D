@@ -89,6 +89,8 @@ public abstract partial class GameAction
     {
         for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
         InternalUndo();
+        var e = new List<int>();
+        
     }
 
     /// <summary>
@@ -143,7 +145,7 @@ public abstract partial class GameAction
     /// Primary method for making GameActions part of the game.
     /// </remarks>
     /// <param name="action"></param>
-    public static async void Declare(GameAction action)
+    public static async Task Declare(GameAction action)
     {
         if (action == null) return;
 
@@ -156,11 +158,13 @@ public abstract partial class GameAction
 
     private async Task Evaluate()
     {
-        foreach(var externalEvaluation in OnEvaluationEvent.GetInvocationList().Cast<GameActionEventHandlerAsync>())
+        await InternalEvaluate();
+        foreach(GameActionEventHandlerAsync externalEvaluation in OnEvaluationEvent.)
         {
             await externalEvaluation(this);
         }
     }
+    protected virtual Task InternalEvaluate() => Task.CompletedTask;
 
     public override string ToString()
     {

@@ -58,7 +58,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    a.AddLateResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
                         (a.Performer, a.ParticipatingUnits[0], 1)));
                 }),
 
@@ -80,7 +80,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    a.AddLateResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
                         (a.Performer, a.ParticipatingUnits[0], 3)));
                 })
 
@@ -112,7 +112,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    a.AddLateResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
                         (a.Performer, a.ParticipatingUnits[1], 5)));
                 }),
 

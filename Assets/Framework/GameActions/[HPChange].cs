@@ -7,11 +7,7 @@ public partial class GameAction
 {
     public class HPChange : GameAction
     {
-        /// <summary>
-        /// Occurs when any <see cref="HPChange"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<HPChange> ExternalResultantEvent;
+
         /// <summary>
         /// The <see cref="Unit"/> recieving the HP change.
         /// </summary>
@@ -55,7 +51,6 @@ public partial class GameAction
             _changeStack.Push(0);
             Reciever = reciever;
             ChangeFunction = changeFunction;
-            ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()

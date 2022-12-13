@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    private void StartGame(GameSettings settings)
+    private async void StartGame(GameSettings settings)
     {
         if (_gameActive) throw new Exception("Game is already active!");
 
@@ -107,7 +107,7 @@ public class GameManager : MonoBehaviour
 
         board.CreateBoard();
 
-        NextTurn();
+        await NextTurn();
 
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>
@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviour
 
             if (sel.Selection is not Unit u) return;
             //funny lazer  test
-            GameAction.Declare(
+            await GameAction.Declare(
                 await GameAction.Move.Prompt(
                 new GameAction.Move.PromptArgs.Pathed
                 (CurrentPlayer, u, 10)
@@ -149,13 +149,13 @@ public class GameManager : MonoBehaviour
             var sel = await SELECTOR.Prompt(board.Units);
             if (sel.Selection is not Unit u) return;
 
-            GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
+            await GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
         };
 
         //TEST TURN
-        INPUT.Test.turn.performed += _ =>
+        INPUT.Test.turn.performed += async _ =>
         {
-            NextTurn();
+            await NextTurn();
         };
 
         //TEST ABILITIES
@@ -163,23 +163,13 @@ public class GameManager : MonoBehaviour
         INPUT.Test.ability2.performed += async _ => await __AbilityTest(2);
         async Task __AbilityTest(int id)
         {
-            GameAction.Declare
+            await GameAction.Declare
                 (await GameAction.PlayAbility.Prompt
                     (new GameAction.PlayAbility.PromptArgs
                     (CurrentPlayer, AbilityRegistry.Registry[id], board),
                     _ => Debug.Log("ABILITY CANCELLED")));
         }
 
-        GameAction.Turn.ExternalResultantEvent += async _ =>
-        {
-            await Task.Delay(1000);
-            Debug.Log("bruh1");
-        };
-        GameAction.Turn.ExternalResultantEvent += async _ =>
-        {
-            await Task.Delay(1000);
-            Debug.Log("bruh2");
-        };
     }
 
     //TBI
@@ -193,15 +183,15 @@ public class GameManager : MonoBehaviour
     /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation. <br></br>
     /// > Also declares <see cref="GameAction.EnergyChange"/> resultant actions for standard energy gain.
     /// </summary>
-    private void NextTurn()
+    private async Task NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
         var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
-        GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
-            .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
-            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0))
-            );
+        GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
+        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2));
+        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0));
+        await GameAction.Declare(turnAction);
     }
 
     /// <summary>

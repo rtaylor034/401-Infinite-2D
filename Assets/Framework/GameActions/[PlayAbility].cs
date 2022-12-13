@@ -44,6 +44,10 @@ public partial class GameAction
             //Undo is automatic (see InternalPerform())
         }
 
+        protected override async Task InternalEvaluate()
+        {
+            await CreateAbilityResultants();
+        }
         /// <summary>
         /// Plays <paramref name="ability"/>, with <paramref name="participants"/> as the participating Units, by <paramref name="performer"/>. <br></br> <br></br>
         /// > Unless you are creating a <see cref="PlayAbility"/> that has already happened, use <br></br>
@@ -60,7 +64,6 @@ public partial class GameAction
             PlayedAbility = ability;
             ParticipatingUnits = new Unit[participants.Count];
             for (int i = 0; i < participants.Count; i++) ParticipatingUnits[i] = participants[i];
-            CreateAbilityResultants();
         }
 
         /// <summary>
@@ -148,7 +151,7 @@ public partial class GameAction
             }
         }
         
-        private void CreateAbilityResultants()
+        private async Task CreateAbilityResultants()
         {
             if (PlayedAbility is Ability.Sourced sourced)
             {
@@ -158,7 +161,7 @@ public partial class GameAction
                 {
                     //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
                     for (int i = 1; i < ParticipatingUnits.Length; i++)
-                        AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
+                        await AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
                 }
 
             }

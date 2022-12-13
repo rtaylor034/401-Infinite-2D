@@ -8,11 +8,6 @@ public partial class GameAction
     public class ControlSphereChange : GameAction
     {
         /// <summary>
-        /// Occurs when any <see cref="ControlSphereChange"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<ControlSphereChange> ExternalResultantEvent;
-        /// <summary>
         /// The <see cref="Player"/> recieving the Control Sphere count change.
         /// </summary>
         public Player Reciever { get; private set; }
@@ -54,7 +49,6 @@ public partial class GameAction
             _changeStack.Push(0);
             Reciever = reciever;
             ChangeFunction = changeFunction;
-            ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()

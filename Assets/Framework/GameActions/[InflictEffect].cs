@@ -20,11 +20,6 @@ public partial class GameAction
         /// </summary>
         public Unit AffectedUnit { get; private set; }
 
-        /// <summary>
-        /// Occurs when any <see cref="InflictEffect"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<InflictEffect> ExternalResultantEvent;
         protected override void InternalPerform()
         {
             Effect.SetActive(true, AffectedUnit, Performer);
@@ -45,7 +40,6 @@ public partial class GameAction
         {
             Effect = inflictedEffect;
             AffectedUnit = affectedUnit;
-            ExternalResultantEvent?.Invoke(this);
         }
 
         public override string ToString()

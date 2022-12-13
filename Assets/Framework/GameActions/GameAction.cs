@@ -19,11 +19,17 @@ public abstract partial class GameAction
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     /// <param name="action"></param>
-    public delegate void GameActionEventHandler(GameAction action);
+    public delegate Task EvaluationEventHandler(GameAction action);
 
-    public delegate Task GameActionEventHandlerAsync(GameAction action);
+    //consider changing from static, kinda lazy
+    private static List<EvaluationEventHandler> _onEvaluationEventSubscribers;
+    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent;
 
-    public static GameActionEventHandlerAsync OnEvaluationEvent;
+    static GameAction()
+    {
+        _onEvaluationEventSubscribers = new();
+        OnEvaluationEvent = new(_onEvaluationEventSubscribers);
+    }
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
@@ -89,7 +95,6 @@ public abstract partial class GameAction
     {
         for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
         InternalUndo();
-        var e = new List<int>();
         
     }
 
@@ -159,7 +164,7 @@ public abstract partial class GameAction
     private async Task Evaluate()
     {
         await InternalEvaluate();
-        foreach(GameActionEventHandlerAsync externalEvaluation in OnEvaluationEvent.)
+        foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
         {
             await externalEvaluation(this);
         }

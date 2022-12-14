@@ -108,8 +108,9 @@ public class GameManager : MonoBehaviour
 
         board.CreateBoard();
 
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
         await NextTurn();
-        await GameAction.Declare(new GameAction.ActivatePassive(CurrentPlayer, PassiveRegistry.Registry[1].CreateInstance(), CurrentPlayer));
+        
 
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>

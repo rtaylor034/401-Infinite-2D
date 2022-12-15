@@ -75,7 +75,16 @@ public abstract partial class GameAction
             MovedUnit.UpdatePosition(FromPos);
         }
 
-        //TODO: Make some sort of queue or combining method to handle multiple Moves prompted at the same time.
+        /// <summary>
+        /// Prompts for a split move between (and starting with) the <see cref="Unit"/> specified in <paramref name="args"/> and <paramref name="otherSplitUnits"/>. <br></br>
+        /// Max distance per <see cref="Unit"/> is <paramref name="maxPerUnit"/>.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="otherSplitUnits"></param>
+        /// <param name="maxPerUnit"></param>
+        /// <param name="cancelCallback"></param>
+        /// <param name="callPromptEvent"></param>
+        /// <returns></returns>
         public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
             if (callPromptEvent) OnPromptEvent?.Invoke(args);

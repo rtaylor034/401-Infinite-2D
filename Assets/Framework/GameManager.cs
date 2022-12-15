@@ -109,6 +109,7 @@ public class GameManager : MonoBehaviour
         board.CreateBoard();
 
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));
         await NextTurn();
         
 

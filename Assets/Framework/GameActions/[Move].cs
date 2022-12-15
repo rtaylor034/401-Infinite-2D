@@ -87,6 +87,7 @@ public abstract partial class GameAction
         /// <returns></returns>
         public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
+            if (args is null) return null;
             if (callPromptEvent) OnPromptEvent?.Invoke(args);
 
             Stack<Move> moves = new();
@@ -189,9 +190,13 @@ public abstract partial class GameAction
         /// <param name="confirmCallback"></param>
         public static async Task<Move> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
+
             async Task<Move> __Prompt()
             {
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
+
+                
+                if (args.ReturnCode == -1) return null;
 
                 HashSet<Selectable> possibleHexes = new(GetPossibleHexes(args));
 
@@ -337,12 +342,14 @@ public abstract partial class GameAction
         #endregion
 
         /// <summary>
-        /// <b>abstract</b>
+        /// <b>abstract</b> [ : ] <see cref="CallbackArgs"/>
         /// </summary>
         /// <remarks>
-        /// (See <see cref="PromptArgs.Pathed"/>, <see cref="PromptArgs.Positional"/>)
+        /// (See <see cref="PromptArgs.Pathed"/>, <see cref="PromptArgs.Positional"/>)<br></br>
+        /// <see cref="CallbackArgs.ReturnCode"/>: <br></br>
+        /// -1 : Technical Null (will force Prompt() to return <see langword="null"/>).
         /// </remarks>
-        public abstract class PromptArgs
+        public abstract class PromptArgs : CallbackArgs
         {
             /// <summary>
             /// The Player that is performing this <see cref="Move"/>.

@@ -87,7 +87,8 @@ public abstract partial class GameAction
         /// <returns></returns>
         public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
-
+            //dumb as hell, but idk a better way to ensure complete safety.
+            if (args.ReturnCode == -1) return null;
             if (callPromptEvent) OnPromptEvent?.Invoke(args);
             if (args.ReturnCode == -1) return null;
 
@@ -115,7 +116,7 @@ public abstract partial class GameAction
 
             while (units.Count > 0)
             {
-                var dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
+                int dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
                 args.Distance = dist;
                 args.MinDistance = required - ((units.Count - 1) * dist);
                 args.MovingUnit = units.Peek();
@@ -194,6 +195,8 @@ public abstract partial class GameAction
 
             async Task<Move> __Prompt()
             {
+                //dumb as hell, but idk a better way to ensure complete safety.
+                if (args.ReturnCode == -1) return null;
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
                 if (args.ReturnCode == -1) return null;
 

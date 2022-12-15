@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
 public partial class Passive
 {
@@ -24,14 +26,12 @@ public partial class Passive
             }
         }
 
-        private void Effect(GameAction.Move.PromptArgs args)
+        private async void Effect(GameAction.Move.PromptArgs args)
         {
-            if (args is not GameAction.Move.PromptArgs.Pathed pathed) return;
+            if (args.Performer != EmpoweredPlayer) return;
 
-            if (pathed.Performer == EmpoweredPlayer && pathed.MovingUnit.Team == EmpoweredPlayer.Team)
-            {
-                pathed.Distance += 1;
-            }
+            args.MovingUnit.Board.Un
+            foreach(var move in await GameAction.Move.PromptSplit(args, )
 
             args.ReturnCode = -1;
         }

@@ -87,8 +87,9 @@ public abstract partial class GameAction
         /// <returns></returns>
         public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
-            if (args is null) return null;
+
             if (callPromptEvent) OnPromptEvent?.Invoke(args);
+            if (args.ReturnCode == -1) return null;
 
             Stack<Move> moves = new();
             Queue<Unit> units = new();
@@ -194,8 +195,6 @@ public abstract partial class GameAction
             async Task<Move> __Prompt()
             {
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
-
-                
                 if (args.ReturnCode == -1) return null;
 
                 HashSet<Selectable> possibleHexes = new(GetPossibleHexes(args));

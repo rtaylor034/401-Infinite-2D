@@ -32,6 +32,8 @@ public partial class Passive
             {
                 pathed.Distance += 1;
             }
+
+            args.ReturnCode = -1;
         }
     }
 

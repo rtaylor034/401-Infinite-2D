@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -156,13 +157,13 @@ public abstract partial class GameAction
 
         await action.Evaluate();
         Debug.Log($"(Action Declare) {action}");
-        action.Perform();
         GameManager.GAME.PushGameAction(action);
         
     }
 
     private async Task Evaluate()
     {
+        InternalPerform();
         await InternalEvaluate();
         foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
         {

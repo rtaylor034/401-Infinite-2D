@@ -8,8 +8,6 @@ using UnityEngine;
 public static class AbilityRegistry
 {
 
-    //TODO:
-    // Create seperate registries per GameSettings.
     public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
     
 

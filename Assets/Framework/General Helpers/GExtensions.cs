@@ -38,7 +38,7 @@ public static class GExtensions
     /// <typeparam name="T"> Type of the object. </typeparam>
     /// <param name="item"> The instance that will be wrapped. </param>
     /// <returns> An <see cref="IEnumerable"/>&lt;<typeparamref name="T"/>&gt; consisting of a single item. </returns>
-    public static IEnumerable<T> YieldAsEnumerable<T>(this T item)
+    public static IEnumerable<T> Wrapped<T>(this T item)
     {
         yield return item;
     }

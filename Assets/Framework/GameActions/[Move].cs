@@ -4,8 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using static System.Collections.Specialized.BitVector32;
 
 public abstract partial class GameAction
 {
@@ -37,6 +39,13 @@ public abstract partial class GameAction
         /// <i>MovedUnit is Moved to this position when this action is performed.</i>
         /// </summary>
         public Vector3Int ToPos { get; private set; }
+        /// <summary>
+        /// The distance that this Move traversed.
+        /// </summary>
+        /// <remarks>
+        /// <c>=> FromPos.RadiusBetween(ToPos)</c>
+        /// </remarks>
+        public int MovedDistance => FromPos.RadiusBetween(ToPos);
 
 
         /// <summary>
@@ -67,6 +76,95 @@ public abstract partial class GameAction
         }
 
         //TODO: Make some sort of queue or combining method to handle multiple Moves prompted at the same time.
+        public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
+        {
+            if (callPromptEvent) OnPromptEvent?.Invoke(args);
+
+            Stack<Move> moves = new();
+            Queue<Unit> units = new();
+            units.Enqueue(args.MovingUnit);
+            foreach (Unit u in otherSplitUnits) units.Enqueue(u);
+
+            int required = args.MinDistance;
+            int distLeft = args.Distance;
+
+            void __UpdateSplit(Move move, bool undo = false)
+            {
+                if (undo)
+                {
+                    distLeft += move.MovedDistance;
+                    required += move.MovedDistance;
+                }
+                else
+                {
+                    distLeft -= move.MovedDistance;
+                    required -= move.MovedDistance;
+                }
+            }
+
+            while (units.Count > 0)
+            {
+                var dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
+                args.Distance = dist;
+                args.MinDistance = required - ((units.Count - 1) * dist);
+                args.MovingUnit = units.Peek();
+
+                HashSet<Selectable> selectables = new(GetPossibleHexes(args));
+                foreach (Unit u in units) selectables.Add(u);
+                selectables.Remove(args.MovingUnit);
+
+                Selector.SelectionArgs sel = await GetSelection(selectables);
+
+                if (sel.Selection is Unit unit)
+                {
+                    while (units.Peek() != unit) units.Enqueue(units.Dequeue());
+                    continue;
+                }
+                if (sel.Selection is Hex hex)
+                {
+                    Move move = new(args.Performer, args.MovingUnit, args.MovingUnit.Position, hex.Position);
+                    moves.Push(move);
+                    move.InternalPerform();
+                    __UpdateSplit(move);
+
+                    units.Dequeue();
+
+                    continue;
+                }
+
+                if (moves.Count > 0)
+                {
+                    Move cancel = moves.Pop();
+                    cancel.InternalUndo();
+                    __UpdateSplit(cancel, true);
+
+                    //weirdchamp code, should just use a list :P
+                    Queue<Unit> oldUnits = new(units);
+                    units.Clear();
+                    units.Enqueue(cancel.MovedUnit);
+                    foreach (Unit old in oldUnits) units.Enqueue(old);
+                    continue;
+                }
+                if (args.Forced)
+                {
+                    if (!sel.WasEmpty)
+                    {
+                        Debug.Log("you cannot cancel a forced move");
+                        continue;
+                    }
+                    sel.ReturnCode = 1;
+                }
+
+                cancelCallback?.Invoke(sel);
+                break;
+            }
+
+            //undo because moves were artificially performed
+            foreach (Move move in moves) move.InternalUndo();
+
+            return moves.Where(m => m.MovedDistance > 0);
+        }
+
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>
@@ -80,35 +178,26 @@ public abstract partial class GameAction
         /// </remarks>
         /// <param name="args"></param>
         /// <param name="confirmCallback"></param>
-        public static async Task<Move> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null)
+        public static async Task<Move> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
         {
-            return await __Prompt(true);
-
-            async Task<Move> __Prompt(bool callPromptEvent)
+            async Task<Move> __Prompt()
             {
                 if (callPromptEvent) OnPromptEvent?.Invoke(args);
-                Unit u = args.MovingUnit;
 
-                bool __FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
+                HashSet<Selectable> possibleHexes = new(GetPossibleHexes(args));
 
-                IEnumerable<Selectable> possibleHexes =
-                    (args is PromptArgs.Pathed p) ? u.Board.PathFind(u.Position, (p.MinDistance - 1, p.Distance), GetCombinedPathingCondition(p), __FinalCondition) :
-                    (args is PromptArgs.Positional a) ? u.Board.HexesAt(GetPositionalPositions(a)).Where(__FinalCondition) :
-                    throw new ArgumentException("PromptArgs not recognized?");
+                Selector.SelectionArgs sel = await GetSelection(possibleHexes);
 
-                Selector.SelectionArgs sel = (args.Forced && possibleHexes.IsSingleElement(out var single)) ?
-                    GameManager.SELECTOR.SpoofSelection(single) :
-                    await GameManager.SELECTOR.Prompt(possibleHexes);
-
+                var u = args.MovingUnit;
                 if (sel.Selection is not null)
                     return new(args.Performer, u, u.Position, (sel.Selection as Hex).Position);
-                
+
                 if (args.Forced)
                 {
                     if (!sel.WasEmpty)
                     {
                         Debug.Log("you cannot cancel a forced move");
-                        return await __Prompt(false);
+                        return await __Prompt();
                     }
                     sel.ReturnCode = 1;
                 }
@@ -116,8 +205,37 @@ public abstract partial class GameAction
                 cancelCallback?.Invoke(sel);
                 return null;
             }
+
+            return await __Prompt();
         }
 
+        #region Method Helpers
+        private static async Task<Selector.SelectionArgs> GetSelection(IEnumerable<Selectable> selectables)
+        {
+            return selectables.IsSingleElement(out var single) ?
+                    GameManager.SELECTOR.SpoofSelection(single) :
+                    await GameManager.SELECTOR.Prompt(selectables);
+        }
+        private static HashSet<Selectable> GetPossibleHexes(PromptArgs args)
+        {
+            bool __FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
+            Unit u = args.MovingUnit;
+
+            HashSet<Selectable> o;
+            if (args is PromptArgs.Pathed p)
+            {
+                o = new(u.Board.PathFind(u.Position, (p.MinDistance - 1, p.Distance), GetCombinedPathingCondition(p), __FinalCondition));
+                if (p.MinDistance <= 0) o.Add(p.MovingUnit.Board.HexAt(p.MovingUnit.Position));
+            }
+            else if (args is PromptArgs.Positional a)
+            {
+                o = new(u.Board.HexesAt(GetPositionalPositions(a)).Where(__FinalCondition));
+                if (!args.Forced) o.Add(a.MovingUnit.Board.HexAt(a.MovingUnit.Position));
+            }
+            else throw new ArgumentException("PromptArgs not recognized?");
+
+            return o;
+        }
         private static Board.ContinuePathCondition GetCombinedPathingCondition(PromptArgs.Pathed args)
         {
             Unit u = args.MovingUnit;
@@ -189,7 +307,7 @@ public abstract partial class GameAction
             BoardCoords.Rotate(o, args.AnchorPosition, Player.PerspectiveRotationOf(args.TeamRelativity));
             return o;
         }
-
+        #endregion
         #region Standard Collision Conditions
         private static Board.ContinuePathCondition HexCollision => (_, next) =>
         !next.BlocksPathing;

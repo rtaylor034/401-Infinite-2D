@@ -43,6 +43,8 @@ public partial class Passive
                 if (hex.Occupant.Team == u.Team && hex.Occupant != u)
                 {
                     _triggerable = false;
+
+                    /*
                     var firstSplit = await GameAction.Move.Prompt(
                         new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, u, 2));
                     await action.AddResultant(firstSplit);
@@ -50,7 +52,13 @@ public partial class Passive
                     var secondSplit = await GameAction.Move.Prompt(
                         new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, hex.Occupant, 2 - firstSplit.ToPos.RadiusBetween(firstSplit.FromPos)));
                     await action.AddResultant(secondSplit);
-
+                    */
+                    foreach(var split in await GameAction.Move.PromptSplit(
+                        new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, u, 2),
+                        hex.Occupant.YieldAsEnumerable()))
+                    {
+                        await move.AddResultant(split);
+                    }
                     
                 }
             }
@@ -59,7 +67,7 @@ public partial class Passive
 
         private Task Refresh(GameAction action)
         {
-            
+            //Need to make a GameAction that changes the value of _triggerable, could be dynamic, could be not
             Task o = Task.CompletedTask;
             if (action is not GameAction.Turn turn) return o;
             if (turn.ToPlayer == EmpoweredPlayer) _triggerable = true;

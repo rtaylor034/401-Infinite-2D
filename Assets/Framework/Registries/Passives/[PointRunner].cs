@@ -47,7 +47,7 @@ public partial class Passive
 
                     foreach(var split in await GameAction.Move.PromptSplit(
                         new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, u, 2),
-                        hex.Occupant.YieldAsEnumerable()))
+                        hex.Occupant.Wrapped()))
                     {
                         await move.AddResultant(split);
                     }

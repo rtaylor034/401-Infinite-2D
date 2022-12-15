@@ -79,6 +79,9 @@ public abstract partial class GameAction
         /// Prompts for a split move between (and starting with) the <see cref="Unit"/> specified in <paramref name="args"/> and <paramref name="otherSplitUnits"/>. <br></br>
         /// Max distance per <see cref="Unit"/> is <paramref name="maxPerUnit"/>.
         /// </summary>
+        /// <remarks>
+        /// <i>It is OK if <paramref name="args"/>.MovingUnit is included in <paramref name="otherSplitUnits"/>.</i>
+        /// </remarks>
         /// <param name="args"></param>
         /// <param name="otherSplitUnits"></param>
         /// <param name="maxPerUnit"></param>
@@ -95,7 +98,7 @@ public abstract partial class GameAction
             Stack<Move> moves = new();
             Queue<Unit> units = new();
             units.Enqueue(args.MovingUnit);
-            foreach (Unit u in otherSplitUnits) units.Enqueue(u);
+            foreach (Unit u in otherSplitUnits) if (u != args.MovingUnit) units.Enqueue(u);
 
             int required = args.MinDistance;
             int distLeft = args.Distance;

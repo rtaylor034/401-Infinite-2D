@@ -19,7 +19,7 @@ public class Unit : Selectable
     /// </remarks>
     public Board Board => _board;
     /// <summary>
-    /// All Units that are on the same Team as this <see cref="Unit"/>.
+    /// All Units that are on the same Team as this <see cref="Unit"/> (including itself).
     /// </summary>
     /// <remarks>
     /// <c>=> _board.Units.Where(u => u.Team == Team)</c>

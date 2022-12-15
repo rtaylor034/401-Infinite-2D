@@ -9,7 +9,7 @@ public abstract partial class Passive
 {
     public Player EmpoweredPlayer { get; private set; }
     public string Name { get; set; }
-    public object[] State { get; private set; } = null;
+    public object[] State { get; private set; } = new object[0];
 
     protected Passive(string name)
     {
@@ -42,15 +42,9 @@ public abstract partial class Passive
         public Passive PassiveObj { get; private set; }
         public object[] AfterState { get; private set; }
         public object[] BeforeState { get; private set; }
-        protected override void InternalPerform()
-        {
-            PassiveObj.State = AfterState;
-        }
 
-        protected override void InternalUndo()
-        {
-            PassiveObj.State = BeforeState;
-        }
+        protected override void InternalPerform() => PassiveObj.State = AfterState;
+        protected override void InternalUndo() => PassiveObj.State = BeforeState;
 
         public StateSet(Passive passiveObj, params object[] state) : base(passiveObj.EmpoweredPlayer)
         {
@@ -61,7 +55,7 @@ public abstract partial class Passive
 
         public override string ToString()
         {
-            return $"<PASSIVE STATE> {PassiveObj}: {BeforeState} -> {AfterState}" + base.ToString();
+            return $"<PASSIVE STATE> {PassiveObj}: {string.Join(" ", BeforeState)} -> {string.Join(" ", AfterState)}" + base.ToString();
         }
     }
 }

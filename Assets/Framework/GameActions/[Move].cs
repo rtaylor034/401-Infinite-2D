@@ -180,6 +180,98 @@ public abstract partial class GameAction
             return moves.Where(m => m.MovedDistance > 0);
         }
 
+        public static async Task<IEnumerable<Move>> PromptSplitO(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
+        {
+            //dumb as hell, but idk a better way to ensure complete safety.
+            if (args.ReturnCode == -1) return null;
+            if (callPromptEvent) OnPromptEvent?.Invoke(args);
+            if (args.ReturnCode == -1) return null;
+
+            Stack<Move> moves = new();
+            Queue<Unit> units = new();
+            units.Enqueue(args.MovingUnit);
+            foreach (Unit u in otherSplitUnits) if (u != args.MovingUnit) units.Enqueue(u);
+
+            int required = args.MinDistance;
+            int distLeft = args.Distance;
+
+            void __UpdateSplit(Move move, bool undo = false)
+            {
+                if (undo)
+                {
+                    distLeft += move.MovedDistance;
+                    required += move.MovedDistance;
+                }
+                else
+                {
+                    distLeft -= move.MovedDistance;
+                    required -= move.MovedDistance;
+                }
+            }
+
+            while (units.Count > 0)
+            {
+                int dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
+                args.Distance = dist;
+                args.MinDistance = required - ((units.Count - 1) * dist);
+                args.MovingUnit = units.Peek();
+
+                HashSet<Selectable> selectables = new(GetPossibleHexes(args));
+                foreach (Unit u in units) selectables.Add(u);
+                selectables.Remove(args.MovingUnit);
+
+                Selector.SelectionArgs sel = await GetSelection(selectables);
+
+                if (sel.Selection is Unit unit)
+                {
+                    while (units.Peek() != unit) units.Enqueue(units.Dequeue());
+                    continue;
+                }
+                if (sel.Selection is Hex hex)
+                {
+                    Move move = new(args.Performer, args.MovingUnit, args.MovingUnit.Position, hex.Position);
+                    moves.Push(move);
+                    move.InternalPerform();
+                    __UpdateSplit(move);
+
+                    units.Dequeue();
+
+                    continue;
+                }
+
+                if (moves.Count > 0)
+                {
+                    Move cancel = moves.Pop();
+                    cancel.InternalUndo();
+                    __UpdateSplit(cancel, true);
+
+                    //weirdchamp code, should just use a list :P
+                    Queue<Unit> oldUnits = new(units);
+                    units.Clear();
+                    units.Enqueue(cancel.MovedUnit);
+                    foreach (Unit old in oldUnits) units.Enqueue(old);
+                    continue;
+                }
+                if (args.Forced)
+                {
+                    if (!sel.WasEmpty)
+                    {
+                        Debug.Log("you cannot cancel a forced move");
+                        continue;
+                    }
+                    sel.ReturnCode = 1;
+                }
+
+                cancelCallback?.Invoke(sel);
+                break;
+            }
+
+            //undo because moves were artificially performed
+            foreach (Move move in moves) move.InternalUndo();
+
+            return moves.Where(m => m.MovedDistance > 0);
+        }
+
         /// <summary>
         /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
         /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>

@@ -89,6 +89,7 @@ public class GameManager : MonoBehaviour
 
     private async void StartGame(GameSettings settings)
     {
+        
         if (_gameActive) throw new Exception("Game is already active!");
 
         _gameActive = true;
@@ -107,6 +108,13 @@ public class GameManager : MonoBehaviour
         PassiveRegistry.Initialize(settings);
 
         board.CreateBoard();
+        var p = Vector3Int.zero;
+        while (true)
+        {
+            p = ((await SELECTOR.Prompt(board.PathFindO(p, (5, 6), (_, _) => true, _ => true,
+                (_, h) => (h is WallHex) ? 2 : 1).Keys)).Selection as Hex).Position;
+        }
+        
 
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));

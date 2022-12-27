@@ -23,14 +23,8 @@ public abstract partial class GameAction
     public delegate Task EvaluationEventHandler(GameAction action);
 
     //consider changing from static, kinda lazy
-    private static List<EvaluationEventHandler> _onEvaluationEventSubscribers;
-    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent;
-
-    static GameAction()
-    {
-        _onEvaluationEventSubscribers = new();
-        OnEvaluationEvent = new(_onEvaluationEventSubscribers);
-    }
+    private readonly static List<EvaluationEventHandler> _onEvaluationEventSubscribers = new();
+    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent = new(_onEvaluationEventSubscribers);
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>

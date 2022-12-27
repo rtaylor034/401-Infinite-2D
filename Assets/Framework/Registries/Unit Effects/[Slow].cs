@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public partial class UnitEffect
@@ -21,14 +22,17 @@ public partial class UnitEffect
             }
         }
 
-        private void Effect(GameAction.Move.PromptArgs args)
+        private Task Effect(GameAction.Move.PromptArgs args)
         {
-            if (args.MovingUnit != AffectedUnit) return;
-            if (args is not GameAction.Move.PromptArgs.Pathed move) return;
+            var O = Task.CompletedTask;
+            if (args.MovingUnit != AffectedUnit) return O;
+            if (args is not GameAction.Move.PromptArgs.Pathed move) return O;
 
             //Rounded Down
             move.Distance /= 2;
             move.MinDistance /= 2;
+
+            return O;
         }
     }
 }

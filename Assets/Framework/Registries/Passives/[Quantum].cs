@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -29,7 +30,7 @@ public partial class Passive
         //TODO: Make an OnPromptEvent sytem similar to OnEvaluateEvent thats all dynamic and async and shit.
         //very good yes nice
         //How is this gunna handle when PromptSplit is called with Units of differing teams? make a PromptArgs.Split perhaps idk.
-        private async void Effect(GameAction.Move.PromptArgs args)
+        private async Task Effect(GameAction.Move.PromptArgs args)
         {
             if (args.Performer != EmpoweredPlayer) return;
 

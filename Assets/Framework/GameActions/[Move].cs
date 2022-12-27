@@ -16,14 +16,9 @@ public abstract partial class GameAction
     /// </summary>
     public class Move : GameAction
     {
-
-        /// <summary>
-        /// Occurs when any <see cref="Move"/> is prompted using <see cref="Prompt(PromptArgs, Action{Move})"/>. <br></br>
-        /// </summary>
-        /// <remarks>
-        /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>
-        /// </remarks>
-        public static event Action<PromptArgs> OnPromptEvent;
+        public delegate Task PromptEventHandler(PromptArgs args);
+        private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
+        public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
 
         /// <summary>
         /// The <see cref="Unit"/> that is Moved by this action.
@@ -92,7 +87,7 @@ public abstract partial class GameAction
         {
             //dumb as hell, but idk a better way to ensure complete safety.
             if (args.ReturnCode == -1) return null;
-            if (callPromptEvent) OnPromptEvent?.Invoke(args);
+            if (callPromptEvent) await InvokePromptEvent(args);
             if (args.ReturnCode == -1) return null;
 
             Stack<Move> moves = new();
@@ -184,7 +179,7 @@ public abstract partial class GameAction
         {
             //dumb as hell, but idk a better way to ensure complete safety.
             if (args.ReturnCode == -1) return null;
-            if (callPromptEvent) OnPromptEvent?.Invoke(args);
+            if (callPromptEvent) await InvokePromptEvent(args);
             if (args.ReturnCode == -1) return null;
 
             Stack<Move> moves = new();
@@ -292,7 +287,7 @@ public abstract partial class GameAction
             {
                 //dumb as hell, but idk a better way to ensure complete safety.
                 if (args.ReturnCode == -1) return null;
-                if (callPromptEvent) OnPromptEvent?.Invoke(args);
+                if (callPromptEvent) await InvokePromptEvent(args);
                 if (args.ReturnCode == -1) return null;
 
                 HashSet<Selectable> possibleHexes = new(GetPossibleHexes(args));
@@ -318,6 +313,14 @@ public abstract partial class GameAction
             }
 
             return await __Prompt();
+        }
+        
+        private static async Task InvokePromptEvent(PromptArgs args)
+        {
+            foreach(var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
+            {
+                await subscriber.Invoke(args);
+            }
         }
 
         #region Method Helpers

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GuardedCollection<T>
 {
-    private ICollection<T> _collection;
+    private readonly ICollection<T> _collection;
     
     public GuardedCollection(ICollection<T> collection)
     {

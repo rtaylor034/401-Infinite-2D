@@ -8,8 +8,6 @@ using UnityEngine;
 public static class AbilityRegistry
 {
 
-    //TODO:
-    // Create seperate registries per GameSettings.
     public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
     
 
@@ -56,11 +54,10 @@ public static class AbilityRegistry
                     H(0, 3, 0)
                 },
 
-                new Ability.PlayAction(a =>
+                new Ability.PlayAction(async a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[0], 1),
-                        move => a.AddLateResultant(move));
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[0], 1)));
                 }),
 
                 new Ability.Sourced.TargetingCondition[]
@@ -79,11 +76,10 @@ public static class AbilityRegistry
 
                 new Ability.Unsourced.SingleTargetCondition((p, u) => p.Team != u.Team),
 
-                new Ability.PlayAction(a =>
+                new Ability.PlayAction(async a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[0], 3),
-                        moveAction => a.AddLateResultant(moveAction));
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[0], 3)));
                 })
 
 
@@ -112,11 +108,10 @@ public static class AbilityRegistry
                     H(0, 1, 1)
                 },
 
-                new Ability.PlayAction(a =>
+                new Ability.PlayAction(async a =>
                 {
-                    GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[1], 5),
-                        moveAction => a.AddLateResultant(moveAction));
+                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
+                        (a.Performer, a.ParticipatingUnits[1], 5)));
                 }),
 
                 new Ability.Sourced.TargetingCondition[]

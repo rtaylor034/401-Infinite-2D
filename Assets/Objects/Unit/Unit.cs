@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Unit : Selectable
@@ -17,6 +18,20 @@ public class Unit : Selectable
     /// <i>Future-proof for multi-board gameplay(?)</i>
     /// </remarks>
     public Board Board => _board;
+    /// <summary>
+    /// All Units that are on the same Team as this <see cref="Unit"/> (including itself).
+    /// </summary>
+    /// <remarks>
+    /// <c>=> _board.Units.Where(u => u.Team == Team)</c>
+    /// </remarks>
+    public IEnumerable<Unit> Allies => _board.Units.Where(u => u.Team == Team);
+    /// <summary>
+    /// All Units that are not on the same Team as this <see cref="Unit"/>.
+    /// </summary>
+    /// <remarks>
+    /// <c>=> _board.Units.Where(u => u.Team != Team)</c>
+    /// </remarks>
+    public IEnumerable<Unit> Enemies => _board.Units.Where(u => u.Team != Team);
 
     protected Board _board;
 

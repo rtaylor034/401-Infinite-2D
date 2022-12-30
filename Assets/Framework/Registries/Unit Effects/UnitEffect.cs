@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public abstract partial class UnitEffect
 {
@@ -31,7 +34,7 @@ public abstract partial class UnitEffect
     protected UnitEffect(int duration)
     {
         Duration = duration;
-        GameAction.InflictEffect.ExternalResultantEvent += CallWhenInflicted;
+        GameAction.OnEvaluationEvent += CallWhenInflicted;
     }
 
     /// <summary>
@@ -49,11 +52,11 @@ public abstract partial class UnitEffect
         InternalSetup(val);
         if (val)
         {
-            GameAction.Turn.ExternalResultantEvent += TickDown;
+            GameAction.OnEvaluationEvent += TickDown;
         } 
         else
         {
-            GameAction.Turn.ExternalResultantEvent -= TickDown;
+            GameAction.OnEvaluationEvent -= TickDown;
         }
         
     }
@@ -66,11 +69,13 @@ public abstract partial class UnitEffect
     {
         Duration = val;
     }
-    private void CallWhenInflicted(GameAction.InflictEffect action)
+    private async Task CallWhenInflicted(GameAction action)
     {
-        if (action.Effect != this) return;
-        WhenInflicted(action);
-        GameAction.InflictEffect.ExternalResultantEvent -= CallWhenInflicted;
+        if (action is not GameAction.InflictEffect effect) return;
+        if (effect.Effect != this) return;
+        GameAction.OnEvaluationEvent -= CallWhenInflicted;
+
+        await WhenInflicted(effect);
     }
 
     /// <summary>
@@ -89,12 +94,13 @@ public abstract partial class UnitEffect
     /// (<c><see langword="this"/>.AffectedUnit</c> has not been set yet, use <c><paramref name="action"/>.AffectedUnit</c>)
     /// </remarks>
     /// <param name="action"></param>
-    protected virtual void WhenInflicted(GameAction.InflictEffect action) { }
+    protected virtual Task WhenInflicted(GameAction.InflictEffect action) => Task.CompletedTask;
     
 
-    private void TickDown(GameAction.Turn action)
+    private async Task TickDown(GameAction action)
     {
-        action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
+        if (action is not GameAction.Turn turn) return;
+        await action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
     }
 
 

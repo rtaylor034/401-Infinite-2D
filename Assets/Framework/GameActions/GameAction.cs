@@ -1,6 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -12,11 +16,15 @@ public abstract partial class GameAction
     /// [Event Handler Delegate] <br></br>
     /// </summary>
     /// <remarks>
-    /// <c>EventSubscriberMethod(<typeparamref name="T"/> <paramref name="action"/>) { }</c>
+    /// <c>EventSubscriberMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c>
     /// </remarks>
     /// <typeparam name="T"></typeparam>
     /// <param name="action"></param>
-    public delegate void GameActionEventHandler<T>(T action) where T : GameAction;
+    public delegate Task EvaluationEventHandler(GameAction action);
+
+    //consider changing from static, kinda lazy
+    private readonly static List<EvaluationEventHandler> _onEvaluationEventSubscribers = new();
+    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent = new(_onEvaluationEventSubscribers);
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
@@ -82,6 +90,7 @@ public abstract partial class GameAction
     {
         for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
         InternalUndo();
+        
     }
 
     /// <summary>
@@ -118,18 +127,14 @@ public abstract partial class GameAction
     /// <i>i.e. If using a Prompt(), use AddLateResultant(), otherwise use AddResultant().</i>
     /// </remarks>
     /// <param name="action"></param>
-    public GameAction AddResultant(GameAction action)
+    public async Task<GameAction> AddResultant(GameAction action)
     {
-        _resultantActions.Add(action);
-        return this;
-    }
+        if (action is not null)
+        {
+            await action.Evaluate();
+            _resultantActions.Add(action);
+        }   
 
-    /// <inheritdoc cref="AddResultant(GameAction)"/>
-    public GameAction AddLateResultant(GameAction action)
-    {
-        AddResultant(action);
-        Debug.Log($"(Action Resultant Late-Added) -> {action}");
-        action.Perform();
         return this;
     }
 
@@ -140,13 +145,26 @@ public abstract partial class GameAction
     /// Primary method for making GameActions part of the game.
     /// </remarks>
     /// <param name="action"></param>
-    public static void Declare(GameAction action)
+    public static async Task Declare(GameAction action)
     {
+        if (action == null) return;
+
+        await action.Evaluate();
         Debug.Log($"(Action Declare) {action}");
-        action.Perform();
         GameManager.GAME.PushGameAction(action);
         
     }
+
+    private async Task Evaluate()
+    {
+        InternalPerform();
+        await InternalEvaluate();
+        foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
+        {
+            await externalEvaluation(this);
+        }
+    }
+    protected virtual Task InternalEvaluate() => Task.CompletedTask;
 
     public override string ToString()
     {

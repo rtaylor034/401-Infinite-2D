@@ -25,11 +25,6 @@ public partial class GameAction
         private int _ChangedValue => ChangeFunction(TickingEffect.Duration);
         private readonly Stack<int> _changeStack;
 
-        /// <summary>
-        /// Occurs when any <see cref="EffectDurationChange"/> is created.
-        /// </summary>
-        /// <remarks><inheritdoc cref="GameAction.__DOC__ExternalResultantEvent"/></remarks>
-        public static event GameActionEventHandler<EffectDurationChange> ExternalResultantEvent;
 
         /// <summary>
         /// Changes <paramref name="effect"/>'s Duration by <paramref name="changeFunction"/>, by <paramref name="performer"/>. <br></br>
@@ -46,7 +41,6 @@ public partial class GameAction
             _changeStack = new();
             TickingEffect = effect;
             ChangeFunction = changeFunction;
-            ExternalResultantEvent?.Invoke(this);
         }
 
         protected override void InternalPerform()

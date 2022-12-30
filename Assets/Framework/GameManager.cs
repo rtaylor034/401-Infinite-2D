@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -86,8 +87,9 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    private void StartGame(GameSettings settings)
+    private async void StartGame(GameSettings settings)
     {
+        
         if (_gameActive) throw new Exception("Game is already active!");
 
         _gameActive = true;
@@ -103,32 +105,41 @@ public class GameManager : MonoBehaviour
         Settings = settings;
         CurrentPlayer = Player.DummyPlayer;
         AbilityRegistry.Initialize(settings);
+        PassiveRegistry.Initialize(settings);
 
         board.CreateBoard();
-
-        NextTurn();
+        
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));
+        await NextTurn();
+        
 
         //TEST MOVEMENT
-        INPUT.Test.moveprompt.performed += _ =>
+        INPUT.Test.moveprompt.performed += async _ =>
         {
-            SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team), __Confirm);
+            var sel = await SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team));
 
-            void __Confirm(Selector.SelectorArgs sel)
-            {
-                if (sel.Selection is not Unit u) return;
-                //funny lazer  test
-                GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed(CurrentPlayer, u, 10)
-                { CustomPathingRestrictions = new() {
-                    (prev, next) => 
-                    { 
-                        foreach (var i in BoardCoords.Indicies)
-                            if (next.Position[i] == u.Position[i]) return true;
-                        return false;
-                    }
-                }
-                ,MinDistance = 0}, a => GameAction.Declare(a));
-            }
-            
+            if (sel.Selection is not Unit u) return;
+            //funny lazer  test
+            await GameAction.Declare(
+                await GameAction.Move.Prompt(
+                new GameAction.Move.PromptArgs.Pathed
+                (CurrentPlayer, u, 4)
+                /*{
+                    
+                    CustomPathingRestrictions = new()
+                    {
+                        (prev, next) =>
+                        {
+                            foreach (var i in BoardCoords.Indicies)
+                                if (next.Position[i] == u.Position[i]) return true;
+                            return false;
+                        }
+                    },
+                    MinDistance = 0
+                } */
+                , _ => print("MOVE CANCELLED")));
+
         };
 
         //TEST UNDO
@@ -139,30 +150,32 @@ public class GameManager : MonoBehaviour
         };
 
         //TEST EFFECT
-        INPUT.Test.effect.performed += _ =>
+        INPUT.Test.effect.performed += async _ =>
         {
-            SELECTOR.Prompt(board.Units, __Confirm);
+            var sel = await SELECTOR.Prompt(board.Units);
+            if (sel.Selection is not Unit u) return;
 
-            void __Confirm(Selector.SelectorArgs sel)
-            {
-                if (sel.Selection is not Unit u) return;
-                GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
-            }
+            await GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
         };
 
         //TEST TURN
-        INPUT.Test.turn.performed += _ =>
+        INPUT.Test.turn.performed += async _ =>
         {
-            NextTurn();
+            await NextTurn();
         };
 
         //TEST ABILITIES
-        INPUT.Test.ability1.performed += _ => __AbilityTest(0);
-        INPUT.Test.ability2.performed += _ => __AbilityTest(2);
-        void __AbilityTest(int id)
+        INPUT.Test.ability1.performed += async _ => await __AbilityTest(0);
+        INPUT.Test.ability2.performed += async _ => await __AbilityTest(2);
+        async Task __AbilityTest(int id)
         {
-            GameAction.PlayAbility.Prompt(new GameAction.PlayAbility.PromptArgs(CurrentPlayer, AbilityRegistry.Registry[id], board), a => GameAction.Declare(a), _ => Debug.Log("ABILITY CANCELLED"));
+            await GameAction.Declare
+                (await GameAction.PlayAbility.Prompt
+                    (new GameAction.PlayAbility.PromptArgs
+                    (CurrentPlayer, AbilityRegistry.Registry[id], board),
+                    _ => Debug.Log("ABILITY CANCELLED")));
         }
+
     }
 
     //TBI
@@ -176,15 +189,16 @@ public class GameManager : MonoBehaviour
     /// Declares a <see cref="GameAction.Turn"/> action, transfering the turn to the next Player in the turn rotation. <br></br>
     /// > Also declares <see cref="GameAction.EnergyChange"/> resultant actions for standard energy gain.
     /// </summary>
-    private void NextTurn()
+    private async Task NextTurn()
     {
         var cnode = _turnOrder.Find(CurrentPlayer);
         var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
-        GameAction.Declare(new GameAction.Turn(CurrentPlayer, nextPlayer)
-            .AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2))
-            .AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0))
-            );
+        GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
+        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2));
+        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0));
+        await GameAction.Declare(turnAction);
+
     }
 
     /// <summary>

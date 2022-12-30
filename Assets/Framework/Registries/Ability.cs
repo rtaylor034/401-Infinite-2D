@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public abstract class Ability
     /// - <paramref name="action"/> : the <see cref="GameAction.PlayAbility"/> that played this ability.
     /// </remarks>
     /// <param name="action"></param>
-    public delegate void PlayAction(GameAction.PlayAbility action);
+    public delegate Task PlayAction(GameAction.PlayAbility action);
 
     /// <summary>
     /// A <see cref="PlayAction"/> that does nothing.<br></br>
@@ -28,7 +29,7 @@ public abstract class Ability
     /// <remarks>
     /// <c>_ => { };</c>
     /// </remarks>
-    public readonly static PlayAction NO_ACTION = _ => { };
+    public readonly static PlayAction NO_ACTION = _ => Task.CompletedTask;
     /// <summary>
     /// The display name of this ability.
     /// </summary>
@@ -51,11 +52,13 @@ public abstract class Ability
         Special
     }
 
-    public Ability(string name, ETypeIdentity typeIdentity)
+    protected Ability(string name, ETypeIdentity typeIdentity)
     {
         Name = name;
         TypeIdentity = typeIdentity;
     }
+
+
 
     /// <summary>
     /// [ : ] <see cref="Ability"/> <br></br>

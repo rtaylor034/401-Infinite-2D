@@ -24,7 +24,7 @@ public partial class Passive
             }
         }
 
-        private void Effect(GameAction.Move.PromptArgs args)
+        private async Task Effect(GameAction.Move.PromptArgs args)
         {
             if (args is not GameAction.Move.PromptArgs.Pathed pathed) return;
 
@@ -32,6 +32,7 @@ public partial class Passive
             {
                 pathed.Distance += 1;
             }
+            
         }
     }
 

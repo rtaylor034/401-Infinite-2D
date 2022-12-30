@@ -34,14 +34,6 @@ public partial class Passive
         {
             if (args.Performer != EmpoweredPlayer) return;
 
-            if (args is GameAction.Move.PromptArgs.Pathed pathed)
-            {
-                foreach (var move in await GameAction.Move.PromptSplit(pathed, args.MovingUnit.Allies))
-                {
-
-                }
-            }
-            
             
 
             args.ReturnCode = -1;

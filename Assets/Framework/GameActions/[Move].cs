@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public partial class GameAction
@@ -68,12 +69,19 @@ public partial class GameAction
                 public int MinDistance { get; private set; } = 0;
                 public Func<Unit, Board.ContinuePathCondition> PathingCondition { get; private set; } = STD_COLLISION;
                 public Func<Unit, Board.ContinuePathCondition> PathingOverride { get; private set; } = _ => (_, _) => false;
+                public Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>> DirectionalBlocks { get; private set; } = _ => new (Vector3Int, ERadiusRule)[0];
                 //add all individiual weight functions together to get final weight
                 public Func<Unit, Board.PathWeightFunction> PathingWeightFunction { get; private set; } = _ => (_, _) => 1;
 
                 public static readonly Func<Unit, Board.ContinuePathCondition> STD_COLLISION = unit => (_, hex) =>
                 !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
 
+                public enum ERadiusRule : sbyte
+                {
+                    Toward = -1,
+                    Around = 0,
+                    Away = 1
+                }
             }
         }
     }

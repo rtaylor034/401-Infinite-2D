@@ -32,10 +32,10 @@ public partial class GameAction
         }
 
         public abstract record Info
-        {
+        {   
             public HashSet<Unit> MovingUnits { get; private set; }
-            public Predicate<Hex> FinalCondition { get; private set; }
-            public Predicate<Hex> FinalOverride { get; private set; }
+            public Func<Unit, Predicate<Hex>> FinalCondition { get; private set; }
+            public Func<Unit, Predicate<Hex>> FinalOverride { get; private set; }
 
             public Info(IEnumerable<Unit> movingUnits)
             {
@@ -55,9 +55,10 @@ public partial class GameAction
             public record Pathed : Info
             {
                 public (int Min, int Max) DistanceRange { get; private set; }
-                public Board.ContinuePathCondition PathingCondition { get; private set; }
-                public Board.ContinuePathCondition PathingOverride { get; private set; }
-                public Board.PathWeightFunction PathingWeightFunction { get; private set; }
+                public Func<Unit, Board.ContinuePathCondition> PathingCondition { get; private set; }
+                public Func<Unit, Board.ContinuePathCondition> PathingOverride { get; private set; }
+                //add all individiual weight functions together to get final weight
+                public Func<Unit, Board.PathWeightFunction> PathingWeightFunction { get; private set; }
             }
         }
     }

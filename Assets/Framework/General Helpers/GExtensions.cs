@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class GExtensions
 {
 
+    #region General Enumerable
     /// <summary>
     /// Checks if this has exactly one element.
     /// </summary>
@@ -42,7 +44,9 @@ public static class GExtensions
     {
         yield return item;
     }
+    #endregion
 
+    #region Delegates
     /// <summary>
     /// [Shorthand] <br></br>
     /// <c>.GetInvocationList().Cast&lt;<typeparamref name="T"/>&gt;()</c>
@@ -54,7 +58,7 @@ public static class GExtensions
     {
         return del.GetInvocationList().Cast<T>();
     }
-
+    
     public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters) =>
         GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
 
@@ -64,6 +68,34 @@ public static class GExtensions
         for(int i = 0; i < o.Length; i++)
         {
             o[i] = (T)methods[i].DynamicInvoke(parameters);
+        }
+        return o;
+    }
+    #endregion
+
+    #region Boolean Logic
+    public static bool GateAND(this IEnumerable<bool> bools, bool invert = false)
+    {
+        foreach (bool value in bools)
+            if (value == invert) return invert;
+        return !invert;
+    }
+
+    public static bool GateOR(this IEnumerable<bool> bools, bool invert = false)
+    {
+        foreach (bool value in bools)
+            if (value == !invert) return !invert;
+        return invert;
+    }
+    #endregion
+
+    public delegate bool CompareStatement<T>(T value, T allOthers);
+    public static T ValueCompare<T>(this IEnumerable<T> values, CompareStatement<T> statement)
+    {
+        var o = values.GetEnumerator().Current;
+        foreach(T t in values)
+        {
+            if (!statement(o, t)) o = t;
         }
         return o;
     }

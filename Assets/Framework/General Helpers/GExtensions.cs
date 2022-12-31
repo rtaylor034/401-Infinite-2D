@@ -90,7 +90,7 @@ public static class GExtensions
     #endregion
 
     public delegate bool CompareStatement<T>(T value, T allOthers);
-    public static T ValueCompare<T>(this IEnumerable<T> values, CompareStatement<T> statement)
+    public static T CompareAndSelect<T>(this IEnumerable<T> values, CompareStatement<T> statement)
     {
         var o = values.GetEnumerator().Current;
         foreach(T t in values)

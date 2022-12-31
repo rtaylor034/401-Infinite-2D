@@ -74,6 +74,7 @@ public static class GExtensions
     #endregion
 
     #region Boolean Logic
+
     public static bool GateAND(this IEnumerable<bool> bools, bool invert = false)
     {
         foreach (bool value in bools)

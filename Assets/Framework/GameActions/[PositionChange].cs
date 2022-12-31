@@ -17,15 +17,17 @@ public abstract partial class GameAction
     public class PositionChange : GameAction
     {
         public Unit AffectedUnit { get; private set; }
-        public Vector3Int Change { get; private set; }
+        public Vector3Int FromPos { get; private set; }
+        public Vector3Int ToPos { get; private set; }
 
-        protected override void InternalPerform() => AffectedUnit.UpdatePosition(AffectedUnit.Position + Change);
-        protected override void InternalUndo() => AffectedUnit.UpdatePosition(AffectedUnit.Position - Change);
+        protected override void InternalPerform() => AffectedUnit.UpdatePosition(ToPos);
+        protected override void InternalUndo() => AffectedUnit.UpdatePosition(FromPos);
 
-        public PositionChange(Player performer, Unit unit, Vector3Int change) : base(performer)
+        public PositionChange(Player performer, Unit unit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
         {
             AffectedUnit = unit;
-            Change = change;
+            FromPos = fromPos;
+            ToPos = toPos;
         }
     }
 

@@ -42,6 +42,7 @@ public static class GExtensions
     {
         yield return item;
     }
+
     /// <summary>
     /// [Shorthand] <br></br>
     /// <c>.GetInvocationList().Cast&lt;<typeparamref name="T"/>&gt;()</c>
@@ -52,5 +53,19 @@ public static class GExtensions
     public static IEnumerable<T> CastedInvocationList<T>(this T del) where T : MulticastDelegate
     {
         return del.GetInvocationList().Cast<T>();
+    }
+
+    public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters)
+    {
+        return GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
+    }
+    public static T[] GetInvocationValues<T>(this IList<Delegate> methods, params object[] parameters)
+    {
+        var o = new T[methods.Count()];
+        for(int i = 0; i < o.Length; i++)
+        {
+            o[i] = (T)methods[i].DynamicInvoke(parameters);
+        }
+        return o;
     }
 }

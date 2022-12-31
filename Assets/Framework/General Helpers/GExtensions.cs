@@ -55,10 +55,9 @@ public static class GExtensions
         return del.GetInvocationList().Cast<T>();
     }
 
-    public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters)
-    {
-        return GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
-    }
+    public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters) =>
+        GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
+
     public static T[] GetInvocationValues<T>(this IList<Delegate> methods, params object[] parameters)
     {
         var o = new T[methods.Count()];

@@ -13,7 +13,6 @@ public class BaseHex : Hex
 
     public Player.ETeam Team => _team;
 
-    //TBI
     public bool IsGuarded
     {
         get

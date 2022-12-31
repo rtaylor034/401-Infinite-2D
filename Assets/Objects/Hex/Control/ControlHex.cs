@@ -14,7 +14,7 @@ public class ControlHex : Hex
             foreach (Hex hex in _board.HexDict.Values)
             {
                 if (hex is not ControlHex chex) continue;
-                if (chex.Occupant is not null && !teams.Add(chex.Occupant.Team)) return true;
+                if (chex.Occupant != null && !teams.Add(chex.Occupant.Team)) return true;
             }
             return false;
         } }

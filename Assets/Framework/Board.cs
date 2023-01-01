@@ -141,8 +141,10 @@ public class Board : MonoBehaviour
     public delegate bool ContinuePathCondition(Hex prev, Hex next);
     public delegate int PathWeightFunction(Hex prev, Hex next);
     public delegate bool FinalPathCondition(Hex hex);
-    //Not particularly effecient, but straightforward.
-    public HashSet<Hex> PathFind(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
+
+    //Old pathfinding algorithm (uncool and cringe)
+    /*
+    public HashSet<Hex> PathFindOLD(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
     {
         HashSet<Hex> o = new() { HexAt(startPos) };
         HashSet<Hex> traversed = new();
@@ -172,8 +174,9 @@ public class Board : MonoBehaviour
         o.RemoveWhere(hex => !finalCondition(hex));
         return o;
     }
+    */
 
-    public Dictionary<Hex, int> PathFindO(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)
+    public Dictionary<Hex, int> PathFind(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)
     {
         Dictionary<Hex, int> o = new();
         Dictionary<Hex, int> tickers = new() { { HexAt(startPos), 0} };

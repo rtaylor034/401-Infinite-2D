@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -51,7 +52,14 @@ public partial class GameAction
 
                 if (info is PathedInfo pathed)
                 {
-
+                    bool pathingCondition(Hex p, Hex n) => pathed.PathingCondition
+                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
+                        .GetInvocationValues<bool>(p, n)
+                        .GateAND() ||
+                        pathed.PathingOverride
+                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
+                        .GetInvocationValues<bool>(p, n)
+                        .GateOR();
                 }
             }
             throw new NotImplementedException();

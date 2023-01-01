@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
@@ -59,6 +60,7 @@ public static class GExtensions
         return del.GetInvocationList().Cast<T>();
     }
     
+    //make this suck but not suck by making a unique function for ever Func<> combination!! WOOHOO YEA I LOVE C#
     public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters) =>
         GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
 
@@ -72,6 +74,10 @@ public static class GExtensions
         return o;
     }
 
+    public static Func<TResult> GetCombinedFunction<TResult>(this Func<TResult> multicastFunction, Func<TResult[], TResult> combineFunction)
+    {
+        return () => combineFunction(multicastFunction.GetInvocationValues<TResult>());
+    }
     #endregion
 
     #region Boolean Logic
@@ -101,4 +107,5 @@ public static class GExtensions
         }
         return o;
     }
+
 }

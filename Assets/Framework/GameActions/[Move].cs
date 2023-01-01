@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
@@ -52,7 +53,7 @@ public partial class GameAction
 
                 if (info is PathedInfo pathed)
                 {
-                    bool pathingCondition(Hex p, Hex n) => pathed.PathingCondition
+                    bool pathCondition(Hex p, Hex n) => pathed.PathingCondition
                         .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
                         .GetInvocationValues<bool>(p, n)
                         .GateAND() ||
@@ -60,6 +61,10 @@ public partial class GameAction
                         .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
                         .GetInvocationValues<bool>(p, n)
                         .GateOR();
+                    int weightFunction(Hex p, Hex n) => pathed.PathingWeightFunction
+                        .GetInvocationValues<Board.PathWeightFunction>(movingUnit)
+                        .GetInvocationValues<int>(p, n).Sum();
+
                 }
             }
             throw new NotImplementedException();

@@ -15,7 +15,12 @@ public partial class GameAction
     /// </summary>
     public abstract class Move : GameAction
     {
-        public MoveInfo Info { get; private set; }
+        public delegate Task PromptEventHandler(Info info);
+
+        private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
+        public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
+
+        public Info MoveInfo { get; private set; }
         public List<PositionChange> PositionChanges => new(_positionChanges);
         private readonly List<PositionChange> _positionChanges;
 
@@ -27,21 +32,43 @@ public partial class GameAction
                 await AddResultant(change);
         }
 
-        public Move(Player performer, MoveInfo moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
+        public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
         {
             _positionChanges = new(positionChanges);
             Info = moveInfo;
 
         }
 
-        public static async Task<Move> Prompt(Player performer, MoveInfo moveInfo, Action<Selector.SelectionArgs> cancelCallback)
+        public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback)
         {
+            await InvokePromptEvent(info);
+
+            Queue<Unit> queue = new(info.MovingUnits);
+            while (queue.Count > 0)
+            {
+                Unit movingUnit = queue.Dequeue();
+                HashSet<Hex> availableHexes = new();
+
+                if (info is PathedInfo pathed)
+                {
+
+                }
+            }
             throw new NotImplementedException();
         }
 
-        public abstract record MoveInfo
+        private static async Task InvokePromptEvent(Info args)
+        {
+            foreach (var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
+            {
+                await subscriber(args);
+            }
+        }
+
+        public abstract record Info
         {   
             public HashSet<Unit> MovingUnits { get; private set; }
+            public virtual bool Forced { get; private set; } = false;
             public Func<Unit, Predicate<Hex>> FinalCondition { get; private set; } =
                 OCCUPIABLE_CHECK + GUARDED_BASE_CHECK;
             public Func<Unit, Predicate<Hex>> FinalOverride { get; private set; } = _ => _ => false;
@@ -50,17 +77,17 @@ public partial class GameAction
             hex.IsOccupiable;
             public static readonly Func<Unit, Predicate<Hex>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
-            protected MoveInfo(IEnumerable<Unit> movingUnits)
+            protected Info(IEnumerable<Unit> movingUnits)
             {
                 MovingUnits = new(movingUnits);
             }
 
         }
-
-        public record PositionalInfo : MoveInfo
+        public record PositionalInfo : Info
         {
             public Vector3Int Anchor { get; private set; }
             public HashSet<Vector3Int> PositionOffsets { get; private set; }
+            public new bool Forced { get; private set; } = true;
 
             public static HashSet<Vector3Int> IN_FRONT => new() { BoardCoords.up };
             public static HashSet<Vector3Int> BEHIND => new() { -BoardCoords.up };
@@ -69,8 +96,7 @@ public partial class GameAction
             public PositionalInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
             public PositionalInfo(params Unit[] movingUnits) : base(movingUnits) { }
         }
-
-        public record PathedInfo : MoveInfo
+        public record PathedInfo : Info
         {
             public int Distance { get; private set; }
             public int MinDistance { get; private set; } = 0;
@@ -93,5 +119,6 @@ public partial class GameAction
             public PathedInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
             public PathedInfo(params Unit[] movingUnits) : base(movingUnits) { }
         }
+
     }
 }

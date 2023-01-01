@@ -71,6 +71,7 @@ public static class GExtensions
         }
         return o;
     }
+
     #endregion
 
     #region Boolean Logic

@@ -53,6 +53,17 @@ public partial class GameAction
 
                 if (info is PathedInfo pathed)
                 {
+                    bool pathCondition(Hex p, Hex n) => pathed.PathingConditions
+                        .InvokeAll(movingUnit).Cast<Func<Hex, Hex, bool>>().ToArray()
+                        .InvokeAll(p, n)
+                        .GateAND();
+                        pathed.PathingOverride
+                        .InvokeAll(movingUnit).Cast<Func<Hex, Hex, bool>>().ToArray()
+                        .InvokeAll(p, n)
+                        .GateAND();
+                    int weightFunction(Hex p, Hex n) => pathed.PathingWeightFunction
+                        .GetInvocationValues<Board.PathWeightFunction>(movingUnit)
+                        .GetInvocationValues<int>(p, n).Sum();
 
                 }
             }
@@ -64,6 +75,7 @@ public partial class GameAction
             foreach (var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
             {
                 await subscriber(args);
+                
             }
         }
 
@@ -102,11 +114,15 @@ public partial class GameAction
         {
             public int Distance { get; private set; }
             public int MinDistance { get; private set; } = 0;
-            public Func<Unit, Board.ContinuePathCondition> PathingCondition { get; private set; } = STD_COLLISION;
-            public Func<Unit, Board.ContinuePathCondition> PathingOverride { get; private set; } = _ => (_, _) => false;
-            public Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>> DirectionalBlocks { get; private set; } = _ => new (Vector3Int, ERadiusRule)[0];
-            //add all individiual weight functions together to get final weight
-            public Func<Unit, Board.PathWeightFunction> PathingWeightFunction { get; private set; } = _ => (_, _) => 1;
+            public List<Func<Unit, Board.ContinuePathCondition>> PathingConditions { get; private set; } = new()
+            { STD_COLLISION };
+            public List<Func<Unit, Board.ContinuePathCondition>> PathingOverrides { get; private set; } = new()
+            { _ => (_, _) => false };
+            public List<Func<Unit, Board.PathWeightFunction>> PathingWeightFunctions { get; private set; } = new()
+            { _ => (_, _) => 1 };
+            public List<Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; private set; } = new()
+            { _ => new (Vector3Int Anchor, ERadiusRule Rule)[0] };
+            
 
             public static readonly Func<Unit, Board.ContinuePathCondition> STD_COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));

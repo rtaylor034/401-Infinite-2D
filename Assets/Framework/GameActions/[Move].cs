@@ -53,17 +53,6 @@ public partial class GameAction
 
                 if (info is PathedInfo pathed)
                 {
-                    bool pathCondition(Hex p, Hex n) => pathed.PathingCondition
-                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
-                        .GetInvocationValues<bool>(p, n)
-                        .GateAND() ||
-                        pathed.PathingOverride
-                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
-                        .GetInvocationValues<bool>(p, n)
-                        .GateOR();
-                    int weightFunction(Hex p, Hex n) => pathed.PathingWeightFunction
-                        .GetInvocationValues<Board.PathWeightFunction>(movingUnit)
-                        .GetInvocationValues<int>(p, n).Sum();
 
                 }
             }

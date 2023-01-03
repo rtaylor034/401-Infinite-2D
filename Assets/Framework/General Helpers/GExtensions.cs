@@ -59,25 +59,34 @@ public static class GExtensions
     {
         return del.GetInvocationList().Cast<T>();
     }
-    
-    //make this suck but not suck by making a unique function for ever Func<> combination!! WOOHOO YEA I LOVE C#
-    public static T[] GetInvocationValues<T>(this Delegate @delegate, params object[] parameters) =>
-        GetInvocationValues<T>(@delegate.GetInvocationList(), parameters);
 
-    public static T[] GetInvocationValues<T>(this IList<Delegate> methods, params object[] parameters)
+    #region InvokeAll()
+    public static TResult[] InvokeAll<TResult>(this IList<Func<TResult>> list)
     {
-        var o = new T[methods.Count()];
-        for(int i = 0; i < o.Length; i++)
-        {
-            o[i] = (T)methods[i].DynamicInvoke(parameters);
-        }
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = list[i]();
         return o;
     }
-
-    public static Func<TResult> GetCombinedFunction<TResult>(this Func<TResult> multicastFunction, Func<TResult[], TResult> combineFunction)
+    public static TResult[] InvokeAll<T1, TResult>(this IList<Func<T1, TResult>> list, T1 arg1)
     {
-        return () => combineFunction(multicastFunction.GetInvocationValues<TResult>());
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = list[i](arg1);
+        return o;
     }
+    public static TResult[] InvokeAll<T1, T2, TResult>(this IList<Func<T1, T2, TResult>> list, T1 arg1, T2 arg2)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = list[i](arg1, arg2);
+        return o;
+    }
+    public static TResult[] InvokeAll<T1, T2, T3, TResult>(this IList<Func<T1, T2, T3, TResult>> list, T1 arg1, T2 arg2, T3 arg3)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = list[i](arg1, arg2, arg3);
+        return o;
+    }
+    #endregion
+
     #endregion
 
     #region Boolean Logic

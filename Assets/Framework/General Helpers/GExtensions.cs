@@ -61,6 +61,7 @@ public static class GExtensions
     }
 
     #region InvokeAll()
+    //Add more when needed
     public static TResult[] InvokeAll<TResult>(this IList<Func<TResult>> list)
     {
         var o = new TResult[list.Count];
@@ -83,6 +84,34 @@ public static class GExtensions
     {
         var o = new TResult[list.Count];
         for (int i = 0; i < list.Count; i++) o[i] = list[i](arg1, arg2, arg3);
+        return o;
+    }
+    #endregion
+
+    #region InvokeAwaitAll()
+    //Add more when needed
+    public static async Task<TResult[]> InvokeAwaitAll<TResult>(this IList<Func<Task<TResult>>> list)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = await list[i]();
+        return o;
+    }
+    public static async Task<TResult[]> InvokeAwaitAll<T1, TResult>(this IList<Func<T1, Task<TResult>>> list, T1 arg1)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = await list[i](arg1);
+        return o;
+    }
+    public static async Task<TResult[]> InvokeAwaitAll<T1, T2, TResult>(this IList<Func<T1, T2, Task<TResult>>> list, T1 arg1, T2 arg2)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = await list[i](arg1, arg2);
+        return o;
+    }
+    public static async Task<TResult[]> InvokeAwaitAll<T1, T2, T3, TResult>(this IList<Func<T1, T2, T3, Task<TResult>>> list, T1 arg1, T2 arg2, T3 arg3)
+    {
+        var o = new TResult[list.Count];
+        for (int i = 0; i < list.Count; i++) o[i] = await list[i](arg1, arg2, arg3);
         return o;
     }
     #endregion

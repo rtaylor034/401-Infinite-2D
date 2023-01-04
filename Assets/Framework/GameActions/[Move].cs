@@ -141,7 +141,7 @@ public partial class GameAction
 
                     HashSet<Selectable> available = new(pathsFound.Keys);
                     foreach (Unit u in queue) available.Add(u);
-                    if (min == 0) available.Add(movingUnit.Board.HexAt(movingUnit.Position);
+                    if (min == 0) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
 
                     var selArgs = await GameManager.SELECTOR.Prompt(available);
 
@@ -180,14 +180,47 @@ public partial class GameAction
                 }
                 return (finalActions.Count > 0) ? new(performer, info, finalActions) : null;
             }
-            Task<Move> __HandlePositional(PositionalInfo positional)
+            async Task<Move> __HandlePositional(PositionalInfo positional)
             {
                 Stack<PositionChange> moves = new();
 
                 while (queue.Count > 0)
                 {
+                    movingUnit = queue.Dequeue();
+                    HashSet<Selectable> available = new(movingUnit.Board.HexesAt(positional.PositionOffsets.Offset(positional.Anchor)));
+                    foreach (Unit u in queue) available.Add(u);
+                    if (!positional.Forced) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
+
+                    var selArgs = await GameManager.SELECTOR.Prompt(available);
+
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (selArgs.WasEmpty) continue;
+                    if (selArgs.WasCancelled)
+                    {
+                        var action = moves.Pop();
+                        queue.Enqueue(action.AffectedUnit);
+                        queue.CycleTo(action.AffectedUnit);
+                        action.InternalUndo();
+                        continue;
+                    }
+
+                    var selection = selArgs.Selection;
+                    if (selection is Unit unit)
+                    {
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(unit);
+                        continue;
+                    }
+                    if (selection is Hex hex)
+                    {
+                        if (hex.Position == movingUnit.Position) continue;
+                        PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
+                        moves.Push(changeAction);
+                        changeAction.InternalPerform();
+                    }
 
                 }
+                return (moves.Count > 0) ? new(performer, info, moves) : null;
             }
 
             

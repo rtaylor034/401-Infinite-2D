@@ -41,14 +41,14 @@ public partial class Passive
                 {
                     if (hex.Occupant != null && hex.Occupant.Team == EmpoweredPlayer.Team)
                     {
+                        await action.AddResultant(new StateSet(this, false));
                         await action.AddResultant(new GameAction.EnergyChange
                             (EmpoweredPlayer, EmpoweredPlayer, e => e + 1));
-                        await GameAction.Move.Prompt(EmpoweredPlayer,
-                            new GameAction.Move.PathedInfo(hex.Occupant, m.AffectedUnit)
+                        await action.AddResultant(await GameAction.Move.Prompt(EmpoweredPlayer,
+                            new GameAction.Move.PathedInfo(m.AffectedUnit, hex.Occupant)
                             {
                                 Distance = 2
-                            });
-                        await action.AddResultant(new StateSet(this, false));
+                            }));
                         break;
                     }
 

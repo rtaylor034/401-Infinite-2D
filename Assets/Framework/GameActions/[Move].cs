@@ -140,6 +140,7 @@ public partial class GameAction
                     Dictionary<Hex, int> pathsFound = movingUnit.Board.PathFind(movingUnit.Position, (min, max), __GetPathCondition(movingUnit), __GetFinalCondition(movingUnit), __GetWeightFunction(movingUnit));
 
                     HashSet<Selectable> available = new(pathsFound.Keys);
+                    if (available.Count == 0) continue;
                     foreach (Unit u in queue) available.Add(u);
                     if (min == 0) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
 
@@ -169,6 +170,7 @@ public partial class GameAction
                         if (hex.Position == movingUnit.Position) continue;
                         PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
                         moves.Push((changeAction, pathsFound[hex]));
+                        traversed += pathsFound[hex];
                         changeAction.InternalPerform();
                     }
                 }

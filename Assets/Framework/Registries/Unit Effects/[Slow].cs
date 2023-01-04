@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -24,7 +25,15 @@ public partial class UnitEffect
 
         private Task Effect(GameAction.Move.Info info)
         {
-            throw new System.NotImplementedException();
+            Task O = Task.CompletedTask;
+            if (info is not GameAction.Move.PathedInfo pathed) return O;
+
+            //doubles the weight at the time of evaluation
+            var funcs = pathed.PathingWeightFunctions.InvokeAll(AffectedUnit);
+            pathed.PathingWeightFunctions.Add(unit => (p, n) =>
+            (unit == AffectedUnit) ? funcs.InvokeAll(p, n).Sum() : 0);
+
+            return O;
         }
     }
 }

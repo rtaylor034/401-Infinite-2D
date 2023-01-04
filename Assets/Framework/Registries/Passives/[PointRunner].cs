@@ -30,32 +30,11 @@ public partial class Passive
 
         private async Task Effect(GameAction action)
         {
-            
+            throw new System.NotImplementedException();
             if (action is not GameAction.Move move || action.Performer != EmpoweredPlayer) return;
 
             if (!Triggerable) return;
-
-            var u = move.MovedUnit;
-            if (u.Team != action.Performer.Team) return;
-
-            foreach(Hex hex in u.Board.HexesAt(move.ToPos.GetAdjacent()))
-            {
-                if (hex.Occupant == null) continue;
-                if (hex.Occupant.Team == u.Team && hex.Occupant != u)
-                {
-                    await move.AddResultant(new StateSet(this, false));
-
-                    foreach(var split in await GameAction.Move.PromptSplit(
-                        new GameAction.Move.PromptArgs.Pathed(EmpoweredPlayer, u, 2),
-                        hex.Occupant.Wrapped()))
-                    {
-                        await move.AddResultant(split);
-                    }
-                    
-                }
-                
-            }
-
+            
         }
 
         private async Task Refresh(GameAction action)

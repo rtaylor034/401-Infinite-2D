@@ -22,17 +22,9 @@ public partial class UnitEffect
             }
         }
 
-        private Task Effect(GameAction.Move.PromptArgs args)
+        private Task Effect(GameAction.Move.Info info)
         {
-            var O = Task.CompletedTask;
-            if (args.MovingUnit != AffectedUnit) return O;
-            if (args is not GameAction.Move.PromptArgs.Pathed move) return O;
-
-            //Rounded Down
-            move.Distance /= 2;
-            move.MinDistance /= 2;
-
-            return O;
+            throw new System.NotImplementedException();
         }
     }
 }

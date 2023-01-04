@@ -24,15 +24,9 @@ public partial class Passive
             }
         }
 
-        private async Task Effect(GameAction.Move.PromptArgs args)
+        private async Task Effect(GameAction.Move.Info info)
         {
-            if (args is not GameAction.Move.PromptArgs.Pathed pathed) return;
-
-            if (pathed.Performer == EmpoweredPlayer && pathed.MovingUnit.Team == EmpoweredPlayer.Team)
-            {
-                pathed.Distance += 1;
-            }
-            
+            throw new System.NotImplementedException();
         }
     }
 

@@ -29,6 +29,11 @@ public abstract partial class GameAction
             FromPos = fromPos;
             ToPos = toPos;
         }
+
+        public override string ToString()
+        {
+            return $"<POSITION> {AffectedUnit}: {FromPos} -> {ToPos}" + base.ToString();
+        }
     }
 
 }

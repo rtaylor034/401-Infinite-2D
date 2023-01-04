@@ -146,4 +146,19 @@ public static class GExtensions
         return o;
     }
 
+    #region Queue
+    public static bool CycleTo<T>(this Queue<T> queue, T element)
+    {
+        for (int i = 0; i < queue.Count; i++)
+        {
+            if (queue.Peek().Equals(element)) return true;
+            queue.Cycle();
+        }
+        return false;
+    }
+    public static void Cycle<T>(this Queue<T> queue, uint n = 1)
+    {
+        for (uint i = 0; i < n; i++) queue.Enqueue(queue.Dequeue());
+    }
+    #endregion
 }

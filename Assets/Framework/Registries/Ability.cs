@@ -16,7 +16,7 @@ public abstract class Ability
     /// [Delegate]
     /// </summary>
     /// <remarks>
-    /// <c><see langword="void"/> PlayActionMethod(<see cref="GameAction.PlayAbility"/> <paramref name="action"/>) { }</c> <br></br>
+    /// <c>(<see langword="async"/>) <see cref="Task"/> PlayActionMethod(<see cref="GameAction.PlayAbility"/> <paramref name="action"/>) { }</c> <br></br>
     /// - <paramref name="action"/> : the <see cref="GameAction.PlayAbility"/> that played this ability.
     /// </remarks>
     /// <param name="action"></param>

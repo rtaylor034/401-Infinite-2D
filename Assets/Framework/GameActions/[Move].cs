@@ -18,12 +18,37 @@ public partial class GameAction
     /// </summary>
     public class Move : GameAction
     {
+        /// <summary>
+        /// [Delegate]
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="info"></param>
+        /// <remarks>
+        /// <c>(<see langword="async"/>) <see cref="Task"/> PromptEventHandlerMethod(<see cref="Player"/> <paramref name="performer"/>, <see cref="Info"/> <paramref name="info"/>) { }</c> <br></br>
+        /// - <paramref name="performer"/> : The <see cref="Player"/> that is performing the Move.<br></br>
+        /// - <paramref name="info"/> : the <see cref="Info"/> object passed to Prompt(). (Mutable)
+        /// </remarks>
         public delegate Task PromptEventHandler(Player performer, Info info);
 
         private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
+        /// <summary>
+        /// [<see langword="async"/> Event] <br></br> <br></br>
+        /// Occurs when <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/> is called. <br></br>
+        /// > Allows mutation of the <see cref="Info"/> before it read by Prompt().
+        /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="PromptEventHandler"/>
+        /// </remarks>
         public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
 
+        /// <summary>
+        /// The information about this <see cref="Move"/>.
+        /// </summary>
         public Info MoveInfo { get; private set; }
+        /// <summary>
+        /// The list of <see cref="PositionChange"/> actions that resulted from this Move.<br></br>
+        /// <i>(These are in this Move's ResultantActions)</i>
+        /// </summary>
         public List<PositionChange> PositionChanges => new(_positionChanges);
         private readonly List<PositionChange> _positionChanges;
 

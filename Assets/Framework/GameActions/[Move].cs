@@ -95,11 +95,27 @@ public partial class GameAction
                 while (queue.Count > 0)
                 {
                     movingUnit = queue.Dequeue();
+                    Board.ContinuePathCondition __GenerateDirectionals(Unit unit)
+                    {
+                        List<Func<Hex, Hex, bool>> blockedConditions = new();
+                        var blocks = pathed.DirectionalBlocks.InvokeAll(unit);
+                        foreach (var block in blocks)
+                        {
+                            foreach(var (anchor, rule) in block)
+                            {
+                                blockedConditions.Add((p, n) =>
+                                anchor.RadiusBetween(n.Position) - anchor.RadiusBetween(p.Position) == (sbyte)rule);
+                            }
+                        }
+                        return (p, n) => blockedConditions.Count == 0 || !blockedConditions.InvokeAll(p, n).GateOR();
+                    }
                     Board.ContinuePathCondition __GetPathCondition(Unit unit) => (Hex p, Hex n) =>
-                        pathed.PathingConditions
+                        (pathed.PathingConditions
                         .InvokeAll(unit).Cast<Func<Hex, Hex, bool>>().ToArray()
                         .InvokeAll(p, n)
-                        .GateAND() ||
+                        .GateAND() &&
+                        __GenerateDirectionals(unit)(p, n))
+                        ||
                         pathed.PathingOverrides
                         .InvokeAll(unit).Cast<Func<Hex, Hex, bool>>().ToArray()
                         .InvokeAll(p, n)
@@ -166,7 +182,12 @@ public partial class GameAction
             }
             Task<Move> __HandlePositional(PositionalInfo positional)
             {
+                Stack<PositionChange> moves = new();
 
+                while (queue.Count > 0)
+                {
+
+                }
             }
 
             
@@ -224,12 +245,14 @@ public partial class GameAction
             public List<Func<Unit, Board.PathWeightFunction>> PathingWeightFunctions { get; private set; } = new()
             { _ => (_, _) => 1 };
             public List<Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; private set; } = new()
-            { _ => new (Vector3Int Anchor, ERadiusRule Rule)[0] };
+            { _ => DIRECTIONAL_NONE };
             
 
             public static readonly Func<Unit, Board.ContinuePathCondition> STD_COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
+            public static readonly IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new(Vector3Int Anchor, ERadiusRule Rule)[0];
 
+            //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
             public enum ERadiusRule : sbyte
             {
                 Toward = -1,

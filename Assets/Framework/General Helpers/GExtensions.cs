@@ -123,15 +123,15 @@ public static class GExtensions
     public static bool GateAND(this IEnumerable<bool> bools, bool invert = false)
     {
         foreach (bool value in bools)
-            if (value == invert) return invert;
-        return !invert;
+            if (value == invert) return false;
+        return true;
     }
 
     public static bool GateOR(this IEnumerable<bool> bools, bool invert = false)
     {
         foreach (bool value in bools)
-            if (value == !invert) return !invert;
-        return invert;
+            if (value == !invert) return true;
+        return false;
     }
     #endregion
 

@@ -245,8 +245,7 @@ public partial class GameAction
         {
             public HashSet<Unit> MovingUnits { get; set; }
             public virtual bool Forced { get; set; } = false;
-            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = new()
-            { OCCUPIABLE_CHECK, GUARDED_BASE_CHECK };
+            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = STD_FINALCONDITIONS;
             public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
             { _ => _ => false };
 
@@ -254,6 +253,9 @@ public partial class GameAction
             hex.IsOccupiable;
             public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
+            public static readonly List<Func<Unit, Func<Hex, bool>>> STD_FINALCONDITIONS = new()
+                { OCCUPIABLE_CHECK, GUARDED_BASE_CHECK };
+
             protected Info(IEnumerable<Unit> movingUnits)
             {
                 MovingUnits = new(movingUnits);
@@ -278,19 +280,21 @@ public partial class GameAction
             public int Distance { get; set; }
             public int MinDistance { get; set; } = 0;
             public int MaxDistancePerUnit { get; set; } = 1000;
-            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = new()
-            { STD_COLLISION };
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = STD_PATHINGCONDITIONS;
+            
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()
             { _ => (_, _) => false };
             public List<Func<Unit, Func<Hex, Hex, int>>> PathingWeightFunctions { get; set; } = new()
             { _ => (_, _) => 1 };
-            public List<Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; private set; } = new()
+            public List<Func<Unit, HashSet<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; set; } = new()
             { _ => DIRECTIONAL_NONE };
             
-
-            public static readonly Func<Unit, Func<Hex, Hex, bool>> STD_COLLISION = unit => (_, hex) =>
+            public static readonly Func<Unit, Func<Hex, Hex, bool>> COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
-            public static readonly IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new(Vector3Int Anchor, ERadiusRule Rule)[0];
+            public static readonly HashSet<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new();
+
+            public static readonly List<Func<Unit, Func<Hex, Hex, bool>>> STD_PATHINGCONDITIONS = new()
+                { COLLISION };
 
             //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
             public enum ERadiusRule : sbyte

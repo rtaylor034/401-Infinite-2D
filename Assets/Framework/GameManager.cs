@@ -125,19 +125,18 @@ public class GameManager : MonoBehaviour
                 await GameAction.Move.Prompt(CurrentPlayer,
                 new GameAction.Move.PathedInfo(u)
                 {
-                    Distance = 4
-                    /*
-                    CustomPathingRestrictions = new()
+                    Distance = 4,
+                    MinDistance = 1
+                    /*PathingConditions = new(GameAction.Move.PathedInfo.STD_PATHINGCONDITIONS)
                     {
-                        (prev, next) =>
+                        _ => (prev, next) =>
                         {
                             foreach (var i in BoardCoords.Indicies)
                                 if (next.Position[i] == u.Position[i]) return true;
                             return false;
                         }
-                    },
-                    MinDistance = 0
-                    */
+                    }*/
+
                 }
                 , _ => print("MOVE CANCELLED")));
 

@@ -23,7 +23,7 @@ public partial class UnitEffect
             }
         }
 
-        private Task Effect(GameAction.Move.Info info)
+        private Task Effect(Player performer, GameAction.Move.Info info)
         {
             Task O = Task.CompletedTask;
             if (info is not GameAction.Move.PathedInfo pathed) return O;
@@ -31,7 +31,7 @@ public partial class UnitEffect
             //doubles the weight at the time of evaluation
             var funcs = pathed.PathingWeightFunctions.InvokeAll(AffectedUnit);
             pathed.PathingWeightFunctions.Add(unit => (p, n) =>
-            (unit == AffectedUnit) ? funcs.InvokeAll(p, n).Sum() : 0);
+            (unit == AffectedUnit && performer.Team == AffectedUnit.Team) ? funcs.InvokeAll(p, n).Sum() : 0);
 
             return O;
         }

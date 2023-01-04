@@ -27,12 +27,14 @@ public partial class Passive
             }
         }
 
-        //TODO: Make an OnPromptEvent sytem similar to OnEvaluateEvent thats all dynamic and async and shit.
-        //very good yes nice
-        //How is this gunna handle when PromptSplit is called with Units of differing teams? make a PromptArgs.Split perhaps idk.
-        private async Task Effect(GameAction.Move.Info info)
+        private Task Effect(Player performer, GameAction.Move.Info info)
         {
-            throw new NotImplementedException();
+            var O = Task.CompletedTask;
+            if (performer != EmpoweredPlayer) return O;
+
+            foreach (var u in new List<Unit>(info.MovingUnits)) info.MovingUnits.UnionWith(u.Allies);
+
+            return O;
         }
 
     }

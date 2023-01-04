@@ -18,7 +18,7 @@ public partial class GameAction
     /// </summary>
     public class Move : GameAction
     {
-        public delegate Task PromptEventHandler(Info info);
+        public delegate Task PromptEventHandler(Player performer, Info info);
 
         private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
         public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
@@ -45,7 +45,7 @@ public partial class GameAction
         //for cancelCallback, ReturnCode 1 means move was Forced, but there was no valid move.
         public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback = null)
         {
-            await InvokePromptEvent(info);
+            await InvokePromptEvent(performer, info);
 
             //variables used by both Handlers
             Queue<Unit> queue = new(info.MovingUnits);
@@ -217,6 +217,7 @@ public partial class GameAction
                         PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
                         moves.Push(changeAction);
                         changeAction.InternalPerform();
+                        break;
                     }
 
                 }
@@ -226,11 +227,11 @@ public partial class GameAction
             
         }
 
-        private static async Task InvokePromptEvent(Info args)
+        private static async Task InvokePromptEvent(Player performer, Info args)
         {
             foreach (var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
             {
-                await subscriber(args);
+                await subscriber(performer, args);
             }
         }
 
@@ -274,7 +275,7 @@ public partial class GameAction
         {
             public int Distance { get; set; }
             public int MinDistance { get; set; } = 0;
-            public int MaxDistancePerUnit { get; set; } = int.MaxValue;
+            public int MaxDistancePerUnit { get; set; } = 1000;
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = new()
             { STD_COLLISION };
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()

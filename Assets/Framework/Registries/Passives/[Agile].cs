@@ -24,9 +24,15 @@ public partial class Passive
             }
         }
 
-        private async Task Effect(GameAction.Move.Info info)
+        private Task Effect(Player performer, GameAction.Move.Info info)
         {
-            throw new System.NotImplementedException();
+            var O = Task.CompletedTask;
+            if (performer != EmpoweredPlayer) return O;
+            if (info is not GameAction.Move.PathedInfo pathed) return O;
+
+            pathed.Distance += 1;
+            pathed.MaxDistancePerUnit += 1;
+            return O;
         }
     }
 

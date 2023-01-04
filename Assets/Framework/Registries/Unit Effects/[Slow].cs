@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,15 +23,15 @@ public partial class UnitEffect
             }
         }
 
-        private Task Effect(GameAction.Move.PromptArgs args)
+        private Task Effect(Player performer, GameAction.Move.Info info)
         {
-            var O = Task.CompletedTask;
-            if (args.MovingUnit != AffectedUnit) return O;
-            if (args is not GameAction.Move.PromptArgs.Pathed move) return O;
+            Task O = Task.CompletedTask;
+            if (info is not GameAction.Move.PathedInfo pathed) return O;
 
-            //Rounded Down
-            move.Distance /= 2;
-            move.MinDistance /= 2;
+            //doubles the weight at the time of evaluation
+            var funcs = pathed.PathingWeightFunctions.InvokeAll(AffectedUnit);
+            pathed.PathingWeightFunctions.Add(unit => (p, n) =>
+            (unit == AffectedUnit && performer.Team == AffectedUnit.Team) ? funcs.InvokeAll(p, n).Sum() : 0);
 
             return O;
         }

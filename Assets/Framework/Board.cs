@@ -180,7 +180,7 @@ public class Board : MonoBehaviour
     {
         Dictionary<Hex, int> o = new();
         Dictionary<Hex, int> tickers = new() { { HexAt(startPos), 0} };
-        for (int r = 0; r < range.max;)
+        for (int r = 0; r <= range.max;)
         {
             int minWeight = int.MaxValue;
             foreach (Hex h in new List<Hex>(tickers.Keys))

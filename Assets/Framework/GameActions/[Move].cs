@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -15,9 +16,9 @@ public partial class GameAction
     /// <summary>
     /// [ : ] <see cref="GameAction"/>
     /// </summary>
-    public abstract class Move : GameAction
+    public class Move : GameAction
     {
-        public delegate Task PromptEventHandler(Info info);
+        public delegate Task PromptEventHandler(Player performer, Info info);
 
         private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
         public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
@@ -26,8 +27,8 @@ public partial class GameAction
         public List<PositionChange> PositionChanges => new(_positionChanges);
         private readonly List<PositionChange> _positionChanges;
 
-        protected override void InternalPerform() => throw new System.NotImplementedException();
-        protected override void InternalUndo() => throw new System.NotImplementedException();
+        protected override void InternalPerform() { }
+        protected override void InternalUndo() { }
         protected override async Task InternalEvaluate()
         {
             foreach (var change in _positionChanges)
@@ -37,59 +38,224 @@ public partial class GameAction
         public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
         {
             _positionChanges = new(positionChanges);
-            Info = moveInfo;
+            MoveInfo = moveInfo;
 
         }
 
-        public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback)
+        //for cancelCallback, ReturnCode 1 means move was Forced, but there was no valid move.
+        public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback = null)
         {
-            await InvokePromptEvent(info);
+            await InvokePromptEvent(performer, info);
 
+            //variables used by both Handlers
             Queue<Unit> queue = new(info.MovingUnits);
-            while (queue.Count > 0)
+            Unit movingUnit;
+            Board.FinalPathCondition __GetFinalCondition(Unit unit) => (Hex h) =>
+                info.FinalConditions
+                .InvokeAll(unit)
+                .InvokeAll(h)
+                .GateAND() ||
+                info.FinalOverrides
+                .InvokeAll(unit)
+                .InvokeAll(h)
+                .GateOR();
+            bool __CheckCancel(Selector.SelectionArgs selArgs)
             {
-                Unit movingUnit = queue.Dequeue();
-                HashSet<Hex> availableHexes = new();
-
-                if (info is PathedInfo pathed)
+                if (selArgs.WasEmpty)
                 {
-                    bool pathCondition(Hex p, Hex n) => pathed.PathingCondition
-                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
-                        .GetInvocationValues<bool>(p, n)
-                        .GateAND() ||
-                        pathed.PathingOverride
-                        .GetInvocationValues<Board.ContinuePathCondition>(movingUnit)
-                        .GetInvocationValues<bool>(p, n)
+                    if (info.Forced) selArgs.ReturnCode = 1;
+                    cancelCallback?.Invoke(selArgs); return true;
+                }
+                if (selArgs.WasCancelled)
+                {
+                    if (info.Forced)
+                    {
+                        Debug.Log("You cannot cancel a forced Move.");
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(movingUnit);
+                        return true;
+                    }
+                    cancelCallback?.Invoke(selArgs); return true;
+                }
+                return false;
+            }
+
+            //compiler-sugar'd beyond readability.
+            return info switch
+            {
+                PathedInfo pa => await __HandlePathed(pa),
+                PositionalInfo po => await __HandlePositional(po),
+                _ => throw new ArgumentException("Move Info not recognized?"),
+            };
+
+            async Task<Move> __HandlePathed(PathedInfo pathed)
+            {
+                int traversed = 0;
+                Stack<(PositionChange PosChange, int Dist)> moves = new();
+                while (queue.Count > 0)
+                {
+                    movingUnit = queue.Dequeue();
+                    Board.ContinuePathCondition __GenerateDirectionals(Unit unit)
+                    {
+                        List<Func<Hex, Hex, bool>> blockedConditions = new();
+                        var blocks = pathed.DirectionalBlocks.InvokeAll(unit);
+                        foreach (var block in blocks)
+                        {
+                            foreach(var (anchor, rule) in block)
+                            {
+                                blockedConditions.Add((p, n) =>
+                                anchor.RadiusBetween(n.Position) - anchor.RadiusBetween(p.Position) == (sbyte)rule);
+                            }
+                        }
+                        return (p, n) => blockedConditions.Count == 0 || !blockedConditions.InvokeAll(p, n).GateOR();
+                    }
+                    Board.ContinuePathCondition __GetPathCondition(Unit unit) => (Hex p, Hex n) =>
+                        (pathed.PathingConditions
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
+                        .GateAND() &&
+                        __GenerateDirectionals(unit)(p, n))
+                        ||
+                        pathed.PathingOverrides
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
                         .GateOR();
-                    int weightFunction(Hex p, Hex n) => pathed.PathingWeightFunction
-                        .GetInvocationValues<Board.PathWeightFunction>(movingUnit)
-                        .GetInvocationValues<int>(p, n).Sum();
+                    Board.PathWeightFunction __GetWeightFunction(Unit unit) => (Hex p, Hex n) =>
+                        pathed.PathingWeightFunctions
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
+                        .Sum();
+
+                    int max = Math.Min(pathed.MaxDistancePerUnit, pathed.Distance - traversed);
+
+                    int min = pathed.MinDistance - traversed;
+                    if (min > 0) foreach(Unit u in queue)
+                    {
+                        var potentia = u.Board.PathFind(movingUnit.Position, (1, max), __GetPathCondition(u), __GetFinalCondition(u), __GetWeightFunction(u)).Values;
+                        if (potentia.Count == 0) continue;
+                        min -= potentia.Max();
+                    }
+                    min = (min < 0) ? 0 : min;
+
+                    Dictionary<Hex, int> pathsFound = movingUnit.Board.PathFind(movingUnit.Position, (min, max), __GetPathCondition(movingUnit), __GetFinalCondition(movingUnit), __GetWeightFunction(movingUnit));
+
+                    HashSet<Selectable> available = new(pathsFound.Keys);
+                    if (available.Count == 0) continue;
+                    foreach (Unit u in queue) available.Add(u);
+                    if (min == 0) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
+
+                    var selArgs = await GameManager.SELECTOR.Prompt(available);
+
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (selArgs.WasEmpty) continue;
+                    if (selArgs.WasCancelled)
+                    {
+                        var (action, travel) = moves.Pop();
+                        queue.Enqueue(action.AffectedUnit);
+                        queue.CycleTo(action.AffectedUnit);
+                        traversed -= travel;
+                        action.InternalUndo();
+                        continue;
+                    }
+
+                    var selection = selArgs.Selection;
+                    if (selection is Unit unit)
+                    {
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(unit);
+                        continue;
+                    }
+                    if (selection is Hex hex)
+                    {
+                        if (hex.Position == movingUnit.Position) continue;
+                        PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
+                        moves.Push((changeAction, pathsFound[hex]));
+                        traversed += pathsFound[hex];
+                        changeAction.InternalPerform();
+                    }
+                }
+                List<PositionChange> finalActions = new();
+                foreach(var (action, _) in moves)
+                {
+                    action.InternalUndo();
+                    finalActions.Add(action);
+                }
+                return (finalActions.Count > 0) ? new(performer, info, finalActions) : null;
+            }
+            async Task<Move> __HandlePositional(PositionalInfo positional)
+            {
+                Stack<PositionChange> moves = new();
+
+                while (queue.Count > 0)
+                {
+                    movingUnit = queue.Dequeue();
+                    HashSet<Selectable> available = new(movingUnit.Board.HexesAt(positional.PositionOffsets.Offset(positional.Anchor)));
+                    foreach (Unit u in queue) available.Add(u);
+                    if (!positional.Forced) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
+
+                    var selArgs = await GameManager.SELECTOR.Prompt(available);
+
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (selArgs.WasEmpty) continue;
+                    if (selArgs.WasCancelled)
+                    {
+                        var action = moves.Pop();
+                        queue.Enqueue(action.AffectedUnit);
+                        queue.CycleTo(action.AffectedUnit);
+                        action.InternalUndo();
+                        continue;
+                    }
+
+                    var selection = selArgs.Selection;
+                    if (selection is Unit unit)
+                    {
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(unit);
+                        continue;
+                    }
+                    if (selection is Hex hex)
+                    {
+                        if (hex.Position == movingUnit.Position) continue;
+                        PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
+                        moves.Push(changeAction);
+                        changeAction.InternalPerform();
+                        break;
+                    }
 
                 }
+                return (moves.Count > 0) ? new(performer, info, moves) : null;
             }
-            throw new NotImplementedException();
+
+            
         }
 
-        private static async Task InvokePromptEvent(Info args)
+        private static async Task InvokePromptEvent(Player performer, Info args)
         {
             foreach (var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
             {
-                await subscriber(args);
+                await subscriber(performer, args);
             }
         }
 
+        public override string ToString()
+        {
+            return $"<MOVE> ({string.Join(", ",MoveInfo.MovingUnits)})" + base.ToString();
+        }
         public abstract record Info
-        {   
-            public HashSet<Unit> MovingUnits { get; private set; }
-            public virtual bool Forced { get; private set; } = false;
-            public Func<Unit, Predicate<Hex>> FinalCondition { get; private set; } =
-                OCCUPIABLE_CHECK + GUARDED_BASE_CHECK;
-            public Func<Unit, Predicate<Hex>> FinalOverride { get; private set; } = _ => _ => false;
+        {
+            public HashSet<Unit> MovingUnits { get; set; }
+            public virtual bool Forced { get; set; } = false;
+            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = STD_FINALCONDITIONS;
+            public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
+            { _ => _ => false };
 
-            public static readonly Func<Unit, Predicate<Hex>> OCCUPIABLE_CHECK = _ => hex =>
+            public static readonly Func<Unit, Func<Hex, bool>> OCCUPIABLE_CHECK = _ => hex =>
             hex.IsOccupiable;
-            public static readonly Func<Unit, Predicate<Hex>> GUARDED_BASE_CHECK = unit => hex =>
+            public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
+            public static readonly List<Func<Unit, Func<Hex, bool>>> STD_FINALCONDITIONS = new()
+                { OCCUPIABLE_CHECK, GUARDED_BASE_CHECK };
+
             protected Info(IEnumerable<Unit> movingUnits)
             {
                 MovingUnits = new(movingUnits);
@@ -98,9 +264,9 @@ public partial class GameAction
         }
         public record PositionalInfo : Info
         {
-            public Vector3Int Anchor { get; private set; }
-            public HashSet<Vector3Int> PositionOffsets { get; private set; }
-            public new bool Forced { get; private set; } = true;
+            public Vector3Int Anchor { get; set; }
+            public HashSet<Vector3Int> PositionOffsets { get; set; }
+            public new bool Forced { get; set; } = true;
 
             public static HashSet<Vector3Int> IN_FRONT => new() { BoardCoords.up };
             public static HashSet<Vector3Int> BEHIND => new() { -BoardCoords.up };
@@ -111,17 +277,26 @@ public partial class GameAction
         }
         public record PathedInfo : Info
         {
-            public int Distance { get; private set; }
-            public int MinDistance { get; private set; } = 0;
-            public Func<Unit, Board.ContinuePathCondition> PathingCondition { get; private set; } = STD_COLLISION;
-            public Func<Unit, Board.ContinuePathCondition> PathingOverride { get; private set; } = _ => (_, _) => false;
-            public Func<Unit, IEnumerable<(Vector3Int Anchor, ERadiusRule Rule)>> DirectionalBlocks { get; private set; } = _ => new (Vector3Int, ERadiusRule)[0];
-            //add all individiual weight functions together to get final weight
-            public Func<Unit, Board.PathWeightFunction> PathingWeightFunction { get; private set; } = _ => (_, _) => 1;
-
-            public static readonly Func<Unit, Board.ContinuePathCondition> STD_COLLISION = unit => (_, hex) =>
+            public int Distance { get; set; }
+            public int MinDistance { get; set; } = 0;
+            public int MaxDistancePerUnit { get; set; } = 1000;
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = STD_PATHINGCONDITIONS;
+            
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()
+            { _ => (_, _) => false };
+            public List<Func<Unit, Func<Hex, Hex, int>>> PathingWeightFunctions { get; set; } = new()
+            { _ => (_, _) => 1 };
+            public List<Func<Unit, HashSet<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; set; } = new()
+            { _ => DIRECTIONAL_NONE };
+            
+            public static readonly Func<Unit, Func<Hex, Hex, bool>> COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
+            public static readonly HashSet<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new();
 
+            public static readonly List<Func<Unit, Func<Hex, Hex, bool>>> STD_PATHINGCONDITIONS = new()
+                { COLLISION };
+
+            //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
             public enum ERadiusRule : sbyte
             {
                 Toward = -1,

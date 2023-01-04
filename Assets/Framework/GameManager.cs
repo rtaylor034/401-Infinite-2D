@@ -122,22 +122,22 @@ public class GameManager : MonoBehaviour
             if (sel.Selection is not Unit u) return;
             //funny lazer  test
             await GameAction.Declare(
-                await GameAction.Move.Prompt(
-                new GameAction.Move.PromptArgs.Pathed
-                (CurrentPlayer, u, 4)
-                /*{
-                    
-                    CustomPathingRestrictions = new()
+                await GameAction.Move.Prompt(CurrentPlayer,
+                new GameAction.Move.PathedInfo(u)
+                {
+                    Distance = 4,
+                    MinDistance = 1
+                    /*PathingConditions = new(GameAction.Move.PathedInfo.STD_PATHINGCONDITIONS)
                     {
-                        (prev, next) =>
+                        _ => (prev, next) =>
                         {
                             foreach (var i in BoardCoords.Indicies)
                                 if (next.Position[i] == u.Position[i]) return true;
                             return false;
                         }
-                    },
-                    MinDistance = 0
-                } */
+                    }*/
+
+                }
                 , _ => print("MOVE CANCELLED")));
 
         };

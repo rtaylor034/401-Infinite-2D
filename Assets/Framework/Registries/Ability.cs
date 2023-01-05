@@ -58,8 +58,6 @@ public abstract class Ability
         TypeIdentity = typeIdentity;
     }
 
-
-
     /// <summary>
     /// [ : ] <see cref="Ability"/> <br></br>
     /// <see cref="Unsourced"/> abilities are played without a Source.

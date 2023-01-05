@@ -291,6 +291,9 @@ public partial class GameAction
             /// > <see cref="PathedInfo"/> : The Move is split among these Units.<br></br>
             /// > <see cref="PositionalInfo"/> : A single Unit out of these Units is chosen to Move.
             /// </summary>
+            /// <remarks>
+            /// <i>Set from constructor.</i>
+            /// </remarks>
             public HashSet<Unit> MovingUnits { get; set; }
             /// <summary>
             /// If TRUE, this Move cannot be cancelled.
@@ -300,18 +303,43 @@ public partial class GameAction
             /// </remarks>
             public virtual bool Forced { get; set; } = false;
             /// <summary>
-            /// 
+            /// A <see cref="Hex"/> must pass ALL of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move.<br></br>
+            /// > Each element is a function, that given the <see cref="Unit"/> that would Move, returns a condition.
             /// </summary>
-            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = STANDARD_FINALCONDITIONS;
+            /// <remarks>
+            /// Default: <c>{ <see cref="STANDARD_VALID_HEX"/> }</c>
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = new()
+            { STANDARD_VALID_HEX };
+            /// <summary>
+            /// A <see cref="Hex"/> can pass ANY of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move (overriding FinalConditions).<br></br>
+            /// > Each element is a function, that given the <see cref="Unit"/> that would Move, returns a condition.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => <see langword="false"/> }</c>
+            /// </remarks>
             public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
             { _ => _ => false };
 
+            /// <summary>
+            /// A FinalCondition that returns:<br></br>
+            /// <see langword="true"/> : If the <see cref="Hex"/> is occupiable. (<see cref="Hex.IsOccupiable"/>)<br></br>
+            /// <see langword="false"/> : [otherwise]<br></br>
+            /// <i>(Regardless of moving <see cref="Unit"/>)</i>
+            /// </summary>
             public static readonly Func<Unit, Func<Hex, bool>> OCCUPIABLE_CHECK = _ => hex =>
             hex.IsOccupiable;
+            /// <summary>
+            /// A FinalCondition that returns:<br></br>
+            /// <see langword="true"/> : [otherwise]<br></br>
+            /// <see langword="false"/> : If the <see cref="Hex"/> is an enemy Base relative to the moving <see cref="Unit"/> and is guarded. (<see cref="BaseHex.IsGuarded"/>)
+            /// </summary>
             public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
-            public static readonly List<Func<Unit, Func<Hex, bool>>> STANDARD_FINALCONDITIONS = new()
-                { OCCUPIABLE_CHECK, GUARDED_BASE_CHECK };
+
+            public static readonly Func<Unit, Func<Hex, bool>> STANDARD_VALID_HEX = unit => hex =>
+            new Func<Unit, Func<Hex, bool>>[] { GUARDED_BASE_CHECK, OCCUPIABLE_CHECK }
+            .InvokeAll(unit).InvokeAll(hex).GateAND();
 
             protected Info(IEnumerable<Unit> movingUnits)
             {
@@ -340,7 +368,8 @@ public partial class GameAction
             public int Distance { get; set; }
             public int MinDistance { get; set; } = 0;
             public int MaxDistancePerUnit { get; set; } = 1000;
-            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = STD_PATHINGCONDITIONS;
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = new()
+            { STANDARD_COLLISION };
             
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()
             { _ => (_, _) => false };
@@ -349,12 +378,9 @@ public partial class GameAction
             public List<Func<Unit, HashSet<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; set; } = new()
             { _ => DIRECTIONAL_NONE };
             
-            public static readonly Func<Unit, Func<Hex, Hex, bool>> COLLISION = unit => (_, hex) =>
+            public static readonly Func<Unit, Func<Hex, Hex, bool>> STANDARD_COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
             public static readonly HashSet<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new();
-
-            public static readonly List<Func<Unit, Func<Hex, Hex, bool>>> STD_PATHINGCONDITIONS = new()
-                { COLLISION };
 
             //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
             public enum ERadiusRule : sbyte

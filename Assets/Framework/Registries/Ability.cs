@@ -240,7 +240,7 @@ public abstract class Ability
         {
             bool __IsCollision(Hex h)
             {
-                return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == p.Team);
+                return h.BlocksTargeting && (h.Occupant == null || h.Occupant.Team == p.Team);
             }
             List<Vector3Int[]> edges;
             foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))

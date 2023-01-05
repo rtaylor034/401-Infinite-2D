@@ -142,40 +142,6 @@ public class Board : MonoBehaviour
     public delegate int PathWeightFunction(Hex prev, Hex next);
     public delegate bool FinalPathCondition(Hex hex);
 
-    //Old pathfinding algorithm (uncool and cringe)
-    /*
-    public HashSet<Hex> PathFindOLD(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
-    {
-        HashSet<Hex> o = new() { HexAt(startPos) };
-        HashSet<Hex> traversed = new();
-        __Recur(o, range.Item2);
-        void __Recur(HashSet<Hex> roots, int r)
-        {
-            if (range.Item2 - range.Item1 > r) o.UnionWith(roots);
-            if (r == 0) return;
-            traversed.UnionWith(roots);
-            HashSet<Hex> branches = new();
-            foreach (Hex prev in roots)
-            {
-                foreach (Vector3Int nPos in prev.Position.GetAdjacent())
-                {
-                    Hex next = HexAt(nPos, false);
-                    if (next is null) continue;
-                    if (pathCondition(prev, next))
-                    {
-                        branches.Add(next);
-                    }
-                }
-            }
-            branches.ExceptWith(traversed);
-            branches.ExceptWith(roots);
-            if (branches.Count > 0) __Recur(branches, r - 1);
-        }
-        o.RemoveWhere(hex => !finalCondition(hex));
-        return o;
-    }
-    */
-
     public Dictionary<Hex, int> PathFind(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)
     {
         Dictionary<Hex, int> o = new();

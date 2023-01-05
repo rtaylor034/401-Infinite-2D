@@ -60,6 +60,14 @@ public partial class GameAction
                 await AddResultant(change);
         }
 
+        /// <summary>
+        /// Creates a <see cref="Move"/> with <paramref name="moveInfo"/>, resulting in the <see cref="PositionChange"/> actions <paramref name="positionChanges"/>, by <paramref name="performer"/>.
+        /// <br></br><br></br>
+        /// > Use <b><see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/></b> unless creating an action that already exists.
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="moveInfo"></param>
+        /// <param name="positionChanges"></param>
         public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
         {
             _positionChanges = new(positionChanges);
@@ -67,7 +75,17 @@ public partial class GameAction
 
         }
 
-        //for cancelCallback, ReturnCode 1 means move was Forced, but there was no valid move.
+        /// <summary>
+        /// Prompts <paramref name="performer"/> to make a Move based on <paramref name="info"/> and returns the <see cref="Move"/> action when a selection is made.<br></br>
+        /// > If the Move is cancelled, <paramref name="cancelCallback"/> is called with the cancelled <see cref="Selector.SelectionArgs"/> and <see langword="null"/> is returned.
+        /// </summary>
+        /// <remarks>
+        /// <i>(See <see cref="PositionalInfo"/> or <see cref="PathedInfo"/>)</i>
+        /// </remarks>
+        /// <param name="performer"></param>
+        /// <param name="info"></param>
+        /// <param name="cancelCallback"></param>
+        /// <exception cref="ArgumentException"></exception>
         public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback = null)
         {
             await InvokePromptEvent(performer, info);
@@ -268,9 +286,23 @@ public partial class GameAction
         }
         public abstract record Info
         {
+            /// <summary>
+            /// The Units that are being prompted to Move.<br></br>
+            /// > <see cref="PathedInfo"/> : The Move is split among these Units.<br></br>
+            /// > <see cref="PositionalInfo"/> : A single Unit out of these Units is chosen to Move.
+            /// </summary>
             public HashSet<Unit> MovingUnits { get; set; }
+            /// <summary>
+            /// If TRUE, this Move cannot be cancelled.
+            /// </summary>
+            /// <remarks>
+            /// Default : <c><see langword="false"/></c>
+            /// </remarks>
             public virtual bool Forced { get; set; } = false;
-            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = STD_FINALCONDITIONS;
+            /// <summary>
+            /// 
+            /// </summary>
+            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = STANDARD_FINALCONDITIONS;
             public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
             { _ => _ => false };
 
@@ -278,7 +310,7 @@ public partial class GameAction
             hex.IsOccupiable;
             public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
-            public static readonly List<Func<Unit, Func<Hex, bool>>> STD_FINALCONDITIONS = new()
+            public static readonly List<Func<Unit, Func<Hex, bool>>> STANDARD_FINALCONDITIONS = new()
                 { OCCUPIABLE_CHECK, GUARDED_BASE_CHECK };
 
             protected Info(IEnumerable<Unit> movingUnits)
@@ -287,6 +319,9 @@ public partial class GameAction
             }
 
         }
+        /// <summary>
+        /// [ : ] <see cref="Info"/><br></br>
+        /// </summary>
         public record PositionalInfo : Info
         {
             public Vector3Int Anchor { get; set; }

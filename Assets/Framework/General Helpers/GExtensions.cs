@@ -18,7 +18,7 @@ public static class GExtensions
     /// <param name="enumberable"></param>
     /// <param name="element"></param>
     /// <remarks>
-    /// If TRUE, <paramref name="element"/> is set to the element. (will be garbage value if FALSE).
+    /// > If TRUE, <paramref name="element"/> is set to the element. (will be garbage value if FALSE).
     /// </remarks>
     public static bool IsSingleElement<T>(this IEnumerable<T> enumerable, out T element)
     {

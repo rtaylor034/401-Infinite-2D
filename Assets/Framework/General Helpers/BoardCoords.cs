@@ -191,7 +191,7 @@ public static class BoardCoords
         foreach (Vector3Int h in possibleSpaces)
         {
             Vector3Int rh = h - pos2;
-            for (int pn = 0; pn < 5; pn++)
+            for (int pn = 0; pn < 6; pn++)
             {
                 if (Mathf.Sign(Vector2.SignedAngle(CartesianCoordsOf(rh) + new Vector2(Mathf.Cos(pn * 60 * Mathf.Deg2Rad), Mathf.Sin(pn * 60 * Mathf.Deg2Rad)), CartesianCoordsOf(rpos1))) !=
                     Mathf.Sign(Vector2.SignedAngle(CartesianCoordsOf(rh) + new Vector2(Mathf.Cos((pn + 1) * 60 * Mathf.Deg2Rad), Mathf.Sin((pn + 1) * 60 * Mathf.Deg2Rad)), CartesianCoordsOf(rpos1))))

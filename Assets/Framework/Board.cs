@@ -138,44 +138,57 @@ public class Board : MonoBehaviour
         return new Vector3(fpos.x, fpos.y, zPos);
     }
 
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="bool"/> ContinuePathCondition(<see cref="Hex"/> <paramref name="prev"/>, <see cref="Hex"/> <paramref name="next"/>) { }</c><br></br>
+    /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
+    /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
+    /// <see langword="return"/> -> Whether or not this should be a valid step.
+    ///</remarks>
+    /// <param name="prev"></param>
+    /// <param name="next"></param>
     public delegate bool ContinuePathCondition(Hex prev, Hex next);
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="int"/> PathWeightFunctionMethod(<see cref="Hex"/> <paramref name="prev"/>, <see cref="Hex"/> <paramref name="next"/>) { }</c><br></br>
+    /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
+    /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
+    /// <see langword="return"/> -> The "weight" of this step, or how much range this step subtracts when taken.<br></br>
+    /// <i>e.g. A weight of 1 is a regular step, a weight of 2 would mean it would take 2 'steps' just to traverse 1 Hex.</i>
+    /// </remarks>
+    /// <param name="prev"></param>
+    /// <param name="next"></param>
     public delegate int PathWeightFunction(Hex prev, Hex next);
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="bool"/> FinalPathConditionMethod(<see cref="Hex"/> <paramref name="hex"/>) { }</c><br></br>
+    /// - <paramref name="hex"/> : A given <see cref="Hex"/> out of all Hexes that were found during pathfinding.<br></br>
+    /// <see langword="return"/> -> whether or not <paramref name="hex"/> should be included in the final output.
+    /// </remarks>
+    /// <param name="hex"></param>
     public delegate bool FinalPathCondition(Hex hex);
 
-    //Old pathfinding algorithm (uncool and cringe)
-    /*
-    public HashSet<Hex> PathFindOLD(Vector3Int startPos, (int, int) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition)
-    {
-        HashSet<Hex> o = new() { HexAt(startPos) };
-        HashSet<Hex> traversed = new();
-        __Recur(o, range.Item2);
-        void __Recur(HashSet<Hex> roots, int r)
-        {
-            if (range.Item2 - range.Item1 > r) o.UnionWith(roots);
-            if (r == 0) return;
-            traversed.UnionWith(roots);
-            HashSet<Hex> branches = new();
-            foreach (Hex prev in roots)
-            {
-                foreach (Vector3Int nPos in prev.Position.GetAdjacent())
-                {
-                    Hex next = HexAt(nPos, false);
-                    if (next is null) continue;
-                    if (pathCondition(prev, next))
-                    {
-                        branches.Add(next);
-                    }
-                }
-            }
-            branches.ExceptWith(traversed);
-            branches.ExceptWith(roots);
-            if (branches.Count > 0) __Recur(branches, r - 1);
-        }
-        o.RemoveWhere(hex => !finalCondition(hex));
-        return o;
-    }
-    */
-
+    /// <summary>
+    /// Finds all hexes that are within <paramref name="range"/>.min and <paramref name="range"/>.max steps from <paramref name="startPos"/>.<br></br>
+    /// Every step must respect the <paramref name="pathCondition"/> and <paramref name="weightFunction"/>, and then found Hexes must pass the <paramref name="finalCondition"/> afterward.
+    /// </summary>
+    /// <remarks>
+    /// (See <see cref="ContinuePathCondition"/>)<br></br>
+    /// (See <see cref="FinalPathCondition"/>) <br></br>
+    /// (See <see cref="PathWeightFunction"/>) <br></br>
+    /// </remarks>
+    /// <param name="startPos"></param>
+    /// <param name="range"></param>
+    /// <param name="pathCondition"></param>
+    /// <param name="finalCondition"></param>
+    /// <param name="weightFunction"></param>
+    ///
     public Dictionary<Hex, int> PathFind(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)
     {
         Dictionary<Hex, int> o = new();

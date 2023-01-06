@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
 /// </summary>
@@ -126,7 +125,7 @@ public class GameManager : MonoBehaviour
                 new GameAction.Move.PathedInfo(u)
                 {
                     Distance = 4,
-                    MinDistance = 1
+                    MinDistance = 1,
                     /*PathingConditions = new(GameAction.Move.PathedInfo.STD_PATHINGCONDITIONS)
                     {
                         _ => (prev, next) =>

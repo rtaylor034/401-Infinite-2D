@@ -16,7 +16,7 @@ public abstract class Ability
     /// [Delegate]
     /// </summary>
     /// <remarks>
-    /// <c><see langword="void"/> PlayActionMethod(<see cref="GameAction.PlayAbility"/> <paramref name="action"/>) { }</c> <br></br>
+    /// <c>(<see langword="async"/>) <see cref="Task"/> PlayActionMethod(<see cref="GameAction.PlayAbility"/> <paramref name="action"/>) { }</c> <br></br>
     /// - <paramref name="action"/> : the <see cref="GameAction.PlayAbility"/> that played this ability.
     /// </remarks>
     /// <param name="action"></param>
@@ -57,8 +57,6 @@ public abstract class Ability
         Name = name;
         TypeIdentity = typeIdentity;
     }
-
-
 
     /// <summary>
     /// [ : ] <see cref="Ability"/> <br></br>
@@ -240,10 +238,7 @@ public abstract class Ability
         /// </remarks>
         public static readonly TargetingCondition STANDARD_COLLISION = (p, s, t) =>
         {
-            bool __IsCollision(Hex h)
-            {
-                return h.BlocksTargeting && (h.Occupant is null || h.Occupant.Team == p.Team);
-            }
+            bool __IsCollision(Hex h) => h.BlocksTargeting && (h.Occupant == null || h.Occupant.Team == p.Team);
             List<Vector3Int[]> edges;
             foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))
             {

@@ -120,13 +120,10 @@ public abstract partial class GameAction
     /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
     /// (Adds to <see cref="ResultantActions"/>)
     /// </summary>
-    /// <remarks>
-    /// Use AddResultant() if adding a resultant *before* this <see cref="GameAction"/> has been performed. <br></br>
-    /// Use AddLateResultant() if adding a resultant *after* this <see cref="GameAction"/> has been performed.
-    /// <br></br><br></br>
-    /// <i>i.e. If using a Prompt(), use AddLateResultant(), otherwise use AddResultant().</i>
-    /// </remarks>
     /// <param name="action"></param>
+    /// <returns>
+    /// <see langword="this"/> <see cref="GameAction"/>
+    /// </returns>
     public async Task<GameAction> AddResultant(GameAction action)
     {
         if (action is not null)

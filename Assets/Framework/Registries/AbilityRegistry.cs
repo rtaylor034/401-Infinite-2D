@@ -56,8 +56,11 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[0], 1)));
+                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                        new GameAction.Move.PathedInfo(a.ParticipatingUnits[0])
+                        {
+                            Distance = 1
+                        }));
                 }),
 
                 new Ability.Sourced.TargetingCondition[]
@@ -78,8 +81,11 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[0], 3)));
+                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                        new GameAction.Move.PathedInfo(a.ParticipatingUnits[0])
+                        {
+                            Distance = 3
+                        }));
                 })
 
 
@@ -110,8 +116,11 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(new GameAction.Move.PromptArgs.Pathed
-                        (a.Performer, a.ParticipatingUnits[1], 5)));
+                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                        new GameAction.Move.PathedInfo(a.ParticipatingUnits[1])
+                        {
+                            Distance = 5
+                        }));
                 }),
 
                 new Ability.Sourced.TargetingCondition[]

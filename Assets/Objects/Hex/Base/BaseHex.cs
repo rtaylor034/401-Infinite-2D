@@ -13,7 +13,6 @@ public class BaseHex : Hex
 
     public Player.ETeam Team => _team;
 
-    //TBI
     public bool IsGuarded
     {
         get
@@ -21,7 +20,7 @@ public class BaseHex : Hex
             foreach (Hex hex in _board.HexDict.Values)
             {
                 if (hex is not BaseHex bhex) continue;
-                if (bhex.Occupant is not null && bhex.Occupant.Team == _team) return true;
+                if (bhex.Occupant != null && bhex.Occupant.Team == _team) return true;
             }
             return false;
         }

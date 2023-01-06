@@ -1,694 +1,593 @@
-using Mono.Cecil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
-using static System.Collections.Specialized.BitVector32;
+using UnityEngine.EventSystems;
+using UnityEngine.Scripting.APIUpdating;
 
-public abstract partial class GameAction
+public partial class GameAction
 {
+
     /// <summary>
     /// [ : ] <see cref="GameAction"/>
     /// </summary>
     public class Move : GameAction
     {
-        public delegate Task PromptEventHandler(PromptArgs args);
+        /// <summary>
+        /// [Delegate]
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="info"></param>
+        /// <remarks>
+        /// <c>(<see langword="async"/>) <see cref="Task"/> PromptEventHandlerMethod(<see cref="Player"/> <paramref name="performer"/>, <see cref="Info"/> <paramref name="info"/>) { }</c> <br></br>
+        /// - <paramref name="performer"/> : The <see cref="Player"/> that is performing the Move.<br></br>
+        /// - <paramref name="info"/> : the <see cref="Info"/> object passed to Prompt(). (Mutable)
+        /// </remarks>
+        public delegate Task PromptEventHandler(Player performer, Info info);
+
         private readonly static List<PromptEventHandler> _onPromptEventSubscribers = new();
+        /// <summary>
+        /// [<see langword="async"/> Event] <br></br> <br></br>
+        /// Occurs when <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/> is called. <br></br>
+        /// > Allows mutation of the <see cref="Info"/> before it read by Prompt().
+        /// </summary>
+        /// <remarks>
+        /// <inheritdoc cref="PromptEventHandler"/>
+        /// </remarks>
         public static GuardedCollection<PromptEventHandler> OnPromptEvent = new(_onPromptEventSubscribers);
 
         /// <summary>
-        /// The <see cref="Unit"/> that is Moved by this action.
+        /// The information about this <see cref="Move"/>.
         /// </summary>
-        public Unit MovedUnit { get; private set; }
+        public Info MoveInfo { get; private set; }
         /// <summary>
-        /// The position that MovedUnit was at before this action. <br></br>
-        /// <i>MovedUnit is Moved to this position when this action is undone.</i>
+        /// The list of <see cref="PositionChange"/> actions that resulted from this Move.<br></br>
+        /// <i>(These are in this Move's ResultantActions)</i>
         /// </summary>
-        public Vector3Int FromPos { get; private set; }
-        /// <summary>
-        /// The position that MovedUnit was Moved to, due to this action. <br></br>
-        /// <i>MovedUnit is Moved to this position when this action is performed.</i>
-        /// </summary>
-        public Vector3Int ToPos { get; private set; }
-        /// <summary>
-        /// The distance that this Move traversed.
-        /// </summary>
-        /// <remarks>
-        /// <c>=> FromPos.RadiusBetween(ToPos)</c>
-        /// </remarks>
-        public int MovedDistance => FromPos.RadiusBetween(ToPos);
+        public List<PositionChange> PositionChanges => new(_positionChanges);
+        private readonly List<PositionChange> _positionChanges;
 
+        protected override void InternalPerform() { }
+        protected override void InternalUndo() { }
+        protected override async Task InternalEvaluate()
+        {
+            foreach (var change in _positionChanges)
+                await AddResultant(change);
+        }
 
         /// <summary>
-        /// Moves <paramref name="movedUnit"/> from <paramref name="fromPos"/> to <paramref name="toPos"/>, by <paramref name="performer"/>. <br></br> <br></br>
-        /// > Unless you are creating a <see cref="Move"/> that has already happened, use
-        /// <b><see cref="Prompt(PromptArgs, Action{Move})"/></b>.
+        /// Creates a <see cref="Move"/> with <paramref name="moveInfo"/>, resulting in the <see cref="PositionChange"/> actions <paramref name="positionChanges"/>, by <paramref name="performer"/>.
+        /// <br></br><br></br>
+        /// > Use <b><see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/></b> unless creating an action that already exists.
+        /// </summary>
+        /// <param name="performer"></param>
+        /// <param name="moveInfo"></param>
+        /// <param name="positionChanges"></param>
+        public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
+        {
+            _positionChanges = new(positionChanges);
+            MoveInfo = moveInfo;
+
+        }
+
+        /// <summary>
+        /// Prompts <paramref name="performer"/> to make a Move based on <paramref name="info"/> and returns the <see cref="Move"/> action when a selection is made.<br></br>
+        /// > If the Move is cancelled, <paramref name="cancelCallback"/> is called with the cancelled <see cref="Selector.SelectionArgs"/> and <see langword="null"/> is returned.
         /// </summary>
         /// <remarks>
-        /// <i><see cref="Move"/> object is created within Prompt()</i>
+        /// <i>(See <see cref="PositionalInfo"/> or <see cref="PathedInfo"/>)</i>
         /// </remarks>
         /// <param name="performer"></param>
-        /// <param name="movedUnit"></param>
-        /// <param name="fromPos"></param>
-        /// <param name="toPos"></param>
-        public Move(Player performer, Unit movedUnit, Vector3Int fromPos, Vector3Int toPos) : base(performer)
-        {
-            MovedUnit = movedUnit;
-            FromPos = fromPos;
-            ToPos = toPos;
-        }
-        protected override void InternalPerform()
-        {
-            MovedUnit.UpdatePosition(ToPos);
-        }
-        protected override void InternalUndo()
-        {
-            MovedUnit.UpdatePosition(FromPos);
-        }
-
-        /// <summary>
-        /// Prompts for a split move between (and starting with) the <see cref="Unit"/> specified in <paramref name="args"/> and <paramref name="otherSplitUnits"/>. <br></br>
-        /// Max distance per <see cref="Unit"/> is <paramref name="maxPerUnit"/>.
-        /// </summary>
-        /// <remarks>
-        /// <i>It is OK if <paramref name="args"/>.MovingUnit is included in <paramref name="otherSplitUnits"/>.</i>
-        /// </remarks>
-        /// <param name="args"></param>
-        /// <param name="otherSplitUnits"></param>
-        /// <param name="maxPerUnit"></param>
+        /// <param name="info"></param>
         /// <param name="cancelCallback"></param>
-        /// <param name="callPromptEvent"></param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<Move>> PromptSplit(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
+        /// <exception cref="ArgumentException"></exception>
+        public static async Task<Move> Prompt(Player performer, Info info, Action<Selector.SelectionArgs> cancelCallback = null)
         {
-            //dumb as hell, but idk a better way to ensure complete safety.
-            if (args.ReturnCode == -1) return null;
-            if (callPromptEvent) await InvokePromptEvent(args);
-            if (args.ReturnCode == -1) return null;
+            await InvokePromptEvent(performer, info);
 
-            Stack<Move> moves = new();
-            Queue<Unit> units = new();
-            units.Enqueue(args.MovingUnit);
-            foreach (Unit u in otherSplitUnits) if (u != args.MovingUnit) units.Enqueue(u);
-
-            int required = args.MinDistance;
-            int distLeft = args.Distance;
-
-            void __UpdateSplit(Move move, bool undo = false)
+            //variables used by both Handlers
+            Queue<Unit> queue = new(info.MovingUnits);
+            Unit movingUnit;
+            Board.FinalPathCondition __GetFinalCondition(Unit unit) => (Hex h) =>
+                info.FinalConditions
+                .InvokeAll(unit)
+                .InvokeAll(h)
+                .GateAND() ||
+                info.FinalOverrides
+                .InvokeAll(unit)
+                .InvokeAll(h)
+                .GateOR();
+            bool __CheckCancel(Selector.SelectionArgs selArgs)
             {
-                if (undo)
+                if (selArgs.WasEmpty)
                 {
-                    distLeft += move.MovedDistance;
-                    required += move.MovedDistance;
+                    if (info.Forced) selArgs.ReturnCode = 1;
+                    cancelCallback?.Invoke(selArgs); return true;
                 }
-                else
+                if (selArgs.WasCancelled)
                 {
-                    distLeft -= move.MovedDistance;
-                    required -= move.MovedDistance;
+                    if (info.Forced)
+                    {
+                        Debug.Log("You cannot cancel a forced Move.");
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(movingUnit);
+                        return true;
+                    }
+                    cancelCallback?.Invoke(selArgs); return true;
                 }
+                return false;
             }
 
-            while (units.Count > 0)
+            //compiler-sugar'd beyond readability.
+            return info switch
             {
-                int dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
-                args.Distance = dist;
-                args.MinDistance = required - ((units.Count - 1) * dist);
-                args.MovingUnit = units.Peek();
+                PathedInfo pa => await __HandlePathed(pa),
+                PositionalInfo po => await __HandlePositional(po),
+                _ => throw new ArgumentException("Move Info not recognized?"),
+            };
 
-                HashSet<Selectable> selectables = new(GetPossibleHexes(args));
-                foreach (Unit u in units) selectables.Add(u);
-                selectables.Remove(args.MovingUnit);
-
-                Selector.SelectionArgs sel = await GetSelection(selectables);
-
-                if (sel.Selection is Unit unit)
+            async Task<Move> __HandlePathed(PathedInfo pathed)
+            {
+                int traversed = 0;
+                Stack<(PositionChange PosChange, int Dist)> moves = new();
+                while (queue.Count > 0)
                 {
-                    while (units.Peek() != unit) units.Enqueue(units.Dequeue());
-                    continue;
-                }
-                if (sel.Selection is Hex hex)
-                {
-                    Move move = new(args.Performer, args.MovingUnit, args.MovingUnit.Position, hex.Position);
-                    moves.Push(move);
-                    move.InternalPerform();
-                    __UpdateSplit(move);
-
-                    units.Dequeue();
-
-                    continue;
-                }
-
-                if (moves.Count > 0)
-                {
-                    Move cancel = moves.Pop();
-                    cancel.InternalUndo();
-                    __UpdateSplit(cancel, true);
-
-                    //weirdchamp code, should just use a list :P
-                    Queue<Unit> oldUnits = new(units);
-                    units.Clear();
-                    units.Enqueue(cancel.MovedUnit);
-                    foreach (Unit old in oldUnits) units.Enqueue(old);
-                    continue;
-                }
-                if (args.Forced)
-                {
-                    if (!sel.WasEmpty)
+                    movingUnit = queue.Dequeue();
+                    Board.ContinuePathCondition __GenerateDirectionals(Unit unit)
                     {
-                        Debug.Log("you cannot cancel a forced move");
+                        List<Func<Hex, Hex, bool>> blockedConditions = new();
+                        var blocks = pathed.DirectionalBlocks.InvokeAll(unit);
+                        foreach (var block in blocks)
+                        {
+                            foreach(var (anchor, rule) in block)
+                            {
+                                blockedConditions.Add((p, n) =>
+                                anchor.RadiusBetween(n.Position) - anchor.RadiusBetween(p.Position) == (sbyte)rule);
+                            }
+                        }
+                        return (p, n) => blockedConditions.Count == 0 || !blockedConditions.InvokeAll(p, n).GateOR();
+                    }
+                    Board.ContinuePathCondition __GetPathCondition(Unit unit) => (Hex p, Hex n) =>
+                        (pathed.PathingConditions
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
+                        .GateAND() &&
+                        __GenerateDirectionals(unit)(p, n))
+                        ||
+                        pathed.PathingOverrides
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
+                        .GateOR();
+                    Board.PathWeightFunction __GetWeightFunction(Unit unit) => (Hex p, Hex n) =>
+                        pathed.PathingWeightFunctions
+                        .InvokeAll(unit)
+                        .InvokeAll(p, n)
+                        .Sum();
+
+                    int max = Math.Min(pathed.MaxDistancePerUnit, pathed.Distance - traversed);
+
+                    int min = pathed.MinDistance - traversed;
+                    if (min > 0) foreach(Unit u in queue)
+                    {
+                        var potentia = u.Board.PathFind(movingUnit.Position, (1, max), __GetPathCondition(u), __GetFinalCondition(u), __GetWeightFunction(u)).Values;
+                        if (potentia.Count == 0) continue;
+                        min -= potentia.Max();
+                    }
+                    min = (min < 0) ? 0 : min;
+
+                    Dictionary<Hex, int> pathsFound = movingUnit.Board.PathFind(movingUnit.Position, (min, max), __GetPathCondition(movingUnit), __GetFinalCondition(movingUnit), __GetWeightFunction(movingUnit));
+
+                    HashSet<Selectable> available = new(pathsFound.Keys);
+                    if (available.Count == 0) continue;
+                    foreach (Unit u in queue) available.Add(u);
+                    if (min == 0) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
+
+                    var selArgs = await GameManager.SELECTOR.Prompt(available);
+
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (selArgs.WasEmpty) continue;
+                    if (selArgs.WasCancelled)
+                    {
+                        var (action, travel) = moves.Pop();
+                        queue.Enqueue(action.AffectedUnit);
+                        queue.CycleTo(action.AffectedUnit);
+                        traversed -= travel;
+                        action.InternalUndo();
                         continue;
                     }
-                    sel.ReturnCode = 1;
-                }
 
-                cancelCallback?.Invoke(sel);
-                break;
-            }
-
-            //undo because moves were artificially performed
-            foreach (Move move in moves) move.InternalUndo();
-
-            return moves.Where(m => m.MovedDistance > 0);
-        }
-
-        public static async Task<IEnumerable<Move>> PromptSplitO(PromptArgs.Pathed args, IEnumerable<Unit> otherSplitUnits, int maxPerUnit = int.MaxValue, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
-        {
-            //dumb as hell, but idk a better way to ensure complete safety.
-            if (args.ReturnCode == -1) return null;
-            if (callPromptEvent) await InvokePromptEvent(args);
-            if (args.ReturnCode == -1) return null;
-
-            Stack<Move> moves = new();
-            Queue<Unit> units = new();
-            units.Enqueue(args.MovingUnit);
-            foreach (Unit u in otherSplitUnits) if (u != args.MovingUnit) units.Enqueue(u);
-
-            int required = args.MinDistance;
-            int distLeft = args.Distance;
-
-            void __UpdateSplit(Move move, bool undo = false)
-            {
-                if (undo)
-                {
-                    distLeft += move.MovedDistance;
-                    required += move.MovedDistance;
-                }
-                else
-                {
-                    distLeft -= move.MovedDistance;
-                    required -= move.MovedDistance;
-                }
-            }
-
-            while (units.Count > 0)
-            {
-                int dist = (distLeft <= maxPerUnit) ? distLeft : maxPerUnit;
-                args.Distance = dist;
-                args.MinDistance = required - ((units.Count - 1) * dist);
-                args.MovingUnit = units.Peek();
-
-                HashSet<Selectable> selectables = new(GetPossibleHexes(args));
-                foreach (Unit u in units) selectables.Add(u);
-                selectables.Remove(args.MovingUnit);
-
-                Selector.SelectionArgs sel = await GetSelection(selectables);
-
-                if (sel.Selection is Unit unit)
-                {
-                    while (units.Peek() != unit) units.Enqueue(units.Dequeue());
-                    continue;
-                }
-                if (sel.Selection is Hex hex)
-                {
-                    Move move = new(args.Performer, args.MovingUnit, args.MovingUnit.Position, hex.Position);
-                    moves.Push(move);
-                    move.InternalPerform();
-                    __UpdateSplit(move);
-
-                    units.Dequeue();
-
-                    continue;
-                }
-
-                if (moves.Count > 0)
-                {
-                    Move cancel = moves.Pop();
-                    cancel.InternalUndo();
-                    __UpdateSplit(cancel, true);
-
-                    //weirdchamp code, should just use a list :P
-                    Queue<Unit> oldUnits = new(units);
-                    units.Clear();
-                    units.Enqueue(cancel.MovedUnit);
-                    foreach (Unit old in oldUnits) units.Enqueue(old);
-                    continue;
-                }
-                if (args.Forced)
-                {
-                    if (!sel.WasEmpty)
+                    var selection = selArgs.Selection;
+                    if (selection is Unit unit)
                     {
-                        Debug.Log("you cannot cancel a forced move");
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(unit);
                         continue;
                     }
-                    sel.ReturnCode = 1;
-                }
-
-                cancelCallback?.Invoke(sel);
-                break;
-            }
-
-            //undo because moves were artificially performed
-            foreach (Move move in moves) move.InternalUndo();
-
-            return moves.Where(m => m.MovedDistance > 0);
-        }
-
-        /// <summary>
-        /// Prompts to create a <see cref="Move"/> action based on <paramref name="args"/>. <br></br>
-        /// > Calls <paramref name="confirmCallback"/> with the created <see cref="Move"/> once all selections are made. <br></br>
-        /// > If any selection is cancelled or invalid, <paramref name="cancelCallback"/> will be called with the invalid <see cref="Selector.SelectorArgs"/> instead.
-        /// </summary>
-        /// <remarks>
-        /// <paramref name="cancelCallback"/>.ReturnCode: <br></br>
-        /// 1 - Move was Forced, but no valid Hexes could be found. <br></br>
-        /// <br></br>
-        /// <i>(See <see cref="PromptArgs.Pathed"/> / <see cref="PromptArgs.Positional"/>)</i>
-        /// </remarks>
-        /// <param name="args"></param>
-        /// <param name="confirmCallback"></param>
-        public static async Task<Move> Prompt(PromptArgs args, Action<Selector.SelectionArgs> cancelCallback = null, bool callPromptEvent = true)
-        {
-
-            async Task<Move> __Prompt()
-            {
-                //dumb as hell, but idk a better way to ensure complete safety.
-                if (args.ReturnCode == -1) return null;
-                if (callPromptEvent) await InvokePromptEvent(args);
-                if (args.ReturnCode == -1) return null;
-
-                HashSet<Selectable> possibleHexes = new(GetPossibleHexes(args));
-
-                Selector.SelectionArgs sel = await GetSelection(possibleHexes);
-
-                var u = args.MovingUnit;
-                if (sel.Selection is not null)
-                    return new(args.Performer, u, u.Position, (sel.Selection as Hex).Position);
-
-                if (args.Forced)
-                {
-                    if (!sel.WasEmpty)
+                    if (selection is Hex hex)
                     {
-                        Debug.Log("you cannot cancel a forced move");
-                        return await __Prompt();
+                        if (hex.Position == movingUnit.Position) continue;
+                        PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
+                        moves.Push((changeAction, pathsFound[hex]));
+                        traversed += pathsFound[hex];
+                        changeAction.InternalPerform();
                     }
-                    sel.ReturnCode = 1;
                 }
-
-                cancelCallback?.Invoke(sel);
-                return null;
-            }
-
-            return await __Prompt();
-        }
-        
-        private static async Task InvokePromptEvent(PromptArgs args)
-        {
-            foreach(var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
-            {
-                await subscriber.Invoke(args);
-            }
-        }
-
-        #region Method Helpers
-        private static async Task<Selector.SelectionArgs> GetSelection(IEnumerable<Selectable> selectables)
-        {
-            return selectables.IsSingleElement(out var single) ?
-                    GameManager.SELECTOR.SpoofSelection(single) :
-                    await GameManager.SELECTOR.Prompt(selectables);
-        }
-        private static HashSet<Selectable> GetPossibleHexes(PromptArgs args)
-        {
-            bool __FinalCondition(Hex h) => GetCombinedFinalConditon(args)(h);
-            Unit u = args.MovingUnit;
-
-            HashSet<Selectable> o;
-            if (args is PromptArgs.Pathed p)
-            {
-                o = new(u.Board.PathFind(u.Position, (p.MinDistance - 1, p.Distance), GetCombinedPathingCondition(p), __FinalCondition));
-                if (p.MinDistance <= 0) o.Add(p.MovingUnit.Board.HexAt(p.MovingUnit.Position));
-            }
-            else if (args is PromptArgs.Positional a)
-            {
-                o = new(u.Board.HexesAt(GetPositionalPositions(a)).Where(__FinalCondition));
-                if (!args.Forced) o.Add(a.MovingUnit.Board.HexAt(a.MovingUnit.Position));
-            }
-            else throw new ArgumentException("PromptArgs not recognized?");
-
-            return o;
-        }
-        private static Board.ContinuePathCondition GetCombinedPathingCondition(PromptArgs.Pathed args)
-        {
-            Unit u = args.MovingUnit;
-            PromptArgs.Pathed.ECollisionIgnoresF ci = args.CollisionIgnores;
-            (PromptArgs.Pathed.EDirectionalsF, Vector3Int) dir = args.Directionals;
-            var dpos = dir.Item2;
-
-            return (p, n) =>
-            ((ci.HasFlag(PromptArgs.Pathed.ECollisionIgnoresF.Walls) || (HexCollision(p, n) && OpposingUnitCollision(u)(p, n))) &&
-            (ci.HasFlag(PromptArgs.Pathed.ECollisionIgnoresF.Bases) || GuardedBaseCollision(u)(p, n))
-            &&
-            ((dir.Item1 == PromptArgs.Pathed.EDirectionalsF.None) ||
-            (dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Away) && DirectionalAway(dpos)(p, n)) ||
-            (dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Toward) && DirectionalToward(dpos)(p, n)) ||
-            dir.Item1.HasFlag(PromptArgs.Pathed.EDirectionalsF.Around) && DirectionalAround(dpos)(p, n))
-            &&
-            __Combined(args.CustomPathingRestrictions)(p, n))
-            ||
-            __Combined(args.CustomPathingOverrides, true)(p, n);
-
-            Board.ContinuePathCondition __Combined(IEnumerable<Board.ContinuePathCondition> cond, bool invert = false)
-            {
-                return (invert) ?
-                (p, n) =>
+                List<PositionChange> finalActions = new();
+                foreach(var (action, _) in moves)
                 {
-                    foreach (var r in cond)
-                        if (r.Invoke(p, n)) return true;
-                    return false;
+                    action.InternalUndo();
+                    finalActions.Add(action);
                 }
-                :
-                (p, n) =>
+                return (finalActions.Count > 0) ? new(performer, info, finalActions) : null;
+            }
+            async Task<Move> __HandlePositional(PositionalInfo positional)
+            {
+                Stack<PositionChange> moves = new();
+
+                while (queue.Count > 0)
                 {
-                    foreach (var r in cond)
-                        if (!r.Invoke(p, n)) return false;
-                    return true;
-                };
+                    movingUnit = queue.Dequeue();
+                    HashSet<Selectable> available = new(movingUnit.Board.HexesAt(positional.PositionOffsets.Offset(positional.Anchor).Rotate(positional.Anchor, positional.PerspectiveRotation)));
+                    foreach (Unit u in queue) available.Add(u);
+                    if (!positional.Forced) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
+
+                    var selArgs = await GameManager.SELECTOR.Prompt(available);
+
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (selArgs.WasEmpty) continue;
+                    if (selArgs.WasCancelled)
+                    {
+                        var action = moves.Pop();
+                        queue.Enqueue(action.AffectedUnit);
+                        queue.CycleTo(action.AffectedUnit);
+                        action.InternalUndo();
+                        continue;
+                    }
+
+                    var selection = selArgs.Selection;
+                    if (selection is Unit unit)
+                    {
+                        queue.Enqueue(movingUnit);
+                        queue.CycleTo(unit);
+                        continue;
+                    }
+                    if (selection is Hex hex)
+                    {
+                        if (hex.Position == movingUnit.Position) continue;
+                        PositionChange changeAction = new(performer, movingUnit, movingUnit.Position, hex.Position);
+                        moves.Push(changeAction);
+                        changeAction.InternalPerform();
+                        break;
+                    }
+
+                }
+                return (moves.Count > 0) ? new(performer, info, moves) : null;
             }
         }
-        private static Board.FinalPathCondition GetCombinedFinalConditon(PromptArgs args)
+
+        private static async Task InvokePromptEvent(Player performer, Info args)
         {
-            return (h) => (__Combined(args.CustomFinalRestrictions)(h) && h.IsOccupiable) || __Combined(args.CustomFinalOverrides, true)(h);
-
-            Board.FinalPathCondition __Combined(IEnumerable<Board.FinalPathCondition> cond, bool invert = false)
+            foreach (var subscriber in new List<PromptEventHandler>(_onPromptEventSubscribers))
             {
-                return (invert) ?
-                (h) =>
-                {
-                    foreach (var r in cond)
-                        if (r.Invoke(h)) return true;
-                    return false;
-                }
-                :
-                (h) =>
-                {
-                    foreach (var r in cond)
-                        if (!r.Invoke(h)) return false;
-                    return true;
-                };
-            }
-
-        }
-        private static HashSet<Vector3Int> GetPositionalPositions(PromptArgs.Positional args)
-        {
-            HashSet<Vector3Int> o = new HashSet<Vector3Int>();
-            foreach (var pos in args.PositionalOffsets)
-            {
-                o.Add(pos + args.AnchorPosition);
-            }
-            BoardCoords.Rotate(o, args.AnchorPosition, Player.PerspectiveRotationOf(args.TeamRelativity));
-            return o;
-        }
-        #endregion
-        #region Standard Collision Conditions
-        private static Board.ContinuePathCondition HexCollision => (_, next) =>
-        !next.BlocksPathing;
-        private static Func<Unit, Board.ContinuePathCondition> OpposingUnitCollision => u => (_, next) =>
-        !(next.Occupant != null && next.Occupant.Team != u.Team);
-        private static Func<Unit, Board.ContinuePathCondition> GuardedBaseCollision => u => (_, next) =>
-        !(next is BaseHex bhex && bhex.Team != u.Team && bhex.IsGuarded);
-
-        #endregion
-        #region Standard Directional Conditions
-        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalAway => pos => (prev, next) =>
-        BoardCoords.RadiusBetween(pos, prev.Position) < BoardCoords.RadiusBetween(pos, next.Position);
-        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalAround => pos => (prev, next) =>
-        BoardCoords.RadiusBetween(pos, prev.Position) == BoardCoords.RadiusBetween(pos, next.Position);
-        private static Func<Vector3Int, Board.ContinuePathCondition> DirectionalToward => pos => (prev, next) =>
-        BoardCoords.RadiusBetween(pos, prev.Position) > BoardCoords.RadiusBetween(pos, next.Position);
-
-        #endregion
-
-        /// <summary>
-        /// <b>abstract</b> [ : ] <see cref="CallbackArgs"/>
-        /// </summary>
-        /// <remarks>
-        /// (See <see cref="PromptArgs.Pathed"/>, <see cref="PromptArgs.Positional"/>)<br></br>
-        /// <see cref="CallbackArgs.ReturnCode"/>: <br></br>
-        /// -1 : Technical Null (will force Prompt() to return <see langword="null"/>).
-        /// </remarks>
-        public abstract class PromptArgs : CallbackArgs
-        {
-            /// <summary>
-            /// The Player that is performing this <see cref="Move"/>.
-            /// </summary>
-            public Player Performer { get; set; }
-            /// <summary>
-            /// The Unit that is Moving.
-            /// </summary>
-            public Unit MovingUnit { get; set; }
-            /// <summary>
-            /// Hexes must pass all of these conditions to be included in the selection prompt.
-            /// </summary>
-            /// <remarks>
-            /// Default if empty: <c>(Hex h) => { return true; }</c> <br></br>
-            /// </remarks>
-            public List<Board.FinalPathCondition> CustomFinalRestrictions { get; set; } = new();
-
-            /// <summary>
-            /// Hexes that pass any of these conditions will override and pass the <see cref="Hex.IsOccupiable"/> check and CustomFinalRestrictions.
-            /// </summary>
-            /// <remarks>
-            /// Default if empty: <c>(Hex h) => { return false; }</c> <br></br>
-            /// </remarks>
-            public List<Board.FinalPathCondition> CustomFinalOverrides { get; set; } = new();
-
-            /// <summary>
-            /// If TRUE, This <see cref="Move"/> must be to one of the prompted hexes and cannot be cancelled.
-            /// </summary>
-            /// <remarks>
-            /// Default: <c>false</c>
-            /// </remarks>
-            public virtual bool Forced { get; set; } = false;
-
-            /// <remarks>
-            /// - <see cref="CustomFinalRestrictions"/> <br></br>
-            /// - <see cref="CustomFinalOverrides"/> <br></br>
-            /// - <see cref="Forced"/>
-            /// </remarks>
-            /// <param name="performer"></param>
-            /// <param name="movingUnit"></param>
-            protected PromptArgs(Player performer, Unit movingUnit)
-            {
-                Performer = performer;
-                MovingUnit = movingUnit;
-            }
-
-            /// <summary>
-            /// [ : ] <see cref="PromptArgs"/>
-            /// </summary>
-            public class Pathed : PromptArgs
-            {
-                /// <summary>
-                /// The (maximum) amount of Hexes that this Move can traverse.
-                /// </summary>
-                public int Distance { get; set; }
-                /// <summary>
-                /// The minimum amount of Hexes this <see cref="Move"/> can traverse.
-                /// </summary>
-                /// <remarks>
-                /// Default: <c>0</c>
-                /// </remarks>
-                public int MinDistance { get; set; } = 0;
-
-                /// <summary>
-                /// This <see cref="Move"/> will ignore these collisions. <br></br>
-                /// </summary>
-                /// <remarks>
-                /// Default: <c><see cref="ECollisionIgnoresF.None"/></c> <br></br>
-                /// <i>Walls, Guarded Bases, and enemy Units will have collision (block pathing) by default. <br></br>
-                /// (Wall Hexes and enemy Units are grouped as <see cref="ECollisionIgnoresF.Walls"/>) </i>
-                /// </remarks>
-                public ECollisionIgnoresF CollisionIgnores { get; set; } = ECollisionIgnoresF.None;
-
-                /// <summary>
-                /// This <see cref="Move"/> must respect (one of) the <see cref="EDirectionalsF"/> flags, relative to the <see cref="Vector3Int"/> position given. <br></br>
-                /// </summary>
-                /// <remarks>
-                /// Default: <c>(<see cref="EDirectionalsF.None"/>, <see cref="Vector3Int.zero"/>)</c>
-                /// </remarks>
-                public (EDirectionalsF, Vector3Int) Directionals { get; set; } = (EDirectionalsF.None, Vector3Int.zero);
-
-                /// <summary>
-                /// Each step of this <see cref="Move"/> (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) must pass all of these conditions to be a valid path. <br></br>
-                /// <i>Ex: <c>(p, n) => p.Position.x &lt; n.Position.x;</c> <br></br>
-                /// Every single step of this Move would need to be to a hex with a greater x coordinate.</i>
-                /// </summary>
-                /// <remarks>
-                /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return true; }</c> <br></br>
-                /// </remarks>
-                public List<Board.ContinuePathCondition> CustomPathingRestrictions { get; set; } = new();
-
-                /// <summary>
-                /// Steps (from <see cref="Hex"/> <b>p</b> to <see cref="Hex"/> <b>n</b>) in this <see cref="Move"/> that pass this condition will always be a valid path, overriding all restrictions/collision. <br></br>
-                /// <i>Ex: <c>(p, n) => p is <see cref="ControlHex"/>;</c> <br></br>
-                /// Any step off of a Control Hex would be a valid path, ignoring all collision/restrictions.</i>
-                /// </summary>
-                /// <remarks>
-                /// Default if empty: <c>(<see cref="Hex"/> p, <see cref="Hex"/> n) => { return false; }</c> <br></br>
-                /// </remarks>
-                public List<Board.ContinuePathCondition> CustomPathingOverrides { get; set; } = new();
-
-                /// <summary>
-                /// Flags for ignoring standard collision (Used in <see cref="CollisionIgnores"/>).
-                /// </summary>
-                /// <remarks>
-                /// <c>None</c> : Does not ignore any collision, standard pathing. <br></br>
-                /// <c>Walls</c> : Ignores <see cref="Hex.BlocksPathing"/> (treats as FALSE for all hexes), and ignores enemy Unit collision. <br></br>
-                /// <c>Bases</c> : Ignores <see cref="BaseHex.IsGuarded"/> (treats as FALSE for all hexes). <i>(Not recommended for use)</i>
-                /// </remarks>
-                [Flags]
-                public enum ECollisionIgnoresF : byte
-                {
-                    None = 0,
-                    Walls = 1,
-                    Bases = 2,
-                }
-                /// <summary>
-                /// Flags for directional Moves (used in <see cref="Directionals"/>). <br></br>
-                /// > Accompanied by a respected coordinate (<see cref="Vector3Int"/> <b>pos</b>).
-                /// </summary>
-                /// <remarks>
-                /// <c>None</c> : This <see cref="Move"/> may be in any direction. <br></br>
-                /// <c>Toward</c> : All steps in this <see cref="Move"/> must decrease the distance to <b>pos</b>. <br></br>
-                /// <c>Away</c> : All steps in this <see cref="Move"/> must increase the distance to <b>pos</b>. <br></br>
-                /// <c>Around</c> : All steps in this <see cref="Move"/> must not change the distance to <b>pos</b>.
-                /// </remarks>
-                [Flags]
-                public enum EDirectionalsF : byte
-                {
-                    None = 0,
-                    Toward = 1,
-                    Away = 2,
-                    Around = 4
-                }
-
-                /// <summary>
-                /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> up to <paramref name="distance"/> hexes with a valid path. <br></br>
-                /// <i>(i.e. <see cref="PromptArgs"/> for a pathed, Basic or Directional Move)</i>
-                /// </summary>
-                /// <remarks>
-                /// Additional Properties: <br></br>
-                /// - <see cref="MinDistance"/> <br></br>
-                /// - <see cref="CollisionIgnores"/> <br></br>
-                /// - <see cref="Directionals"/> <br></br>
-                /// - <see cref="CustomPathingRestrictions"/> <br></br>
-                /// - <see cref="CustomPathingOverrides"/> <br></br>
-                /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
-                /// </remarks>
-                /// <param name="performer"></param>
-                /// <param name="movingUnit"></param>
-                /// <param name="distance"></param>
-                public Pathed(Player performer, Unit movingUnit, int distance) : base(performer, movingUnit)
-                {
-                    Distance = distance;
-                }
-            }
-
-            /// <summary>
-            /// [ : ] <see cref="PromptArgs"/>
-            /// </summary>
-            public class Positional : PromptArgs
-            {
-                /// <summary>
-                /// The position that PositionalOffsets will offset to get the final prompted positions. <br></br>
-                /// <i>Ex: If moving BEHIND a <see cref="Unit"/> (<b>u</b>), <b>u</b>.Position would be the AnchorPosition.</i>
-                /// </summary>
-                /// <remarks>
-                /// (See <see cref="PositionalOffsets"/>)
-                /// </remarks>
-                public Vector3Int AnchorPosition { get; set; }
-
-                /// <summary>
-                /// The set of offsets that are added to AnchorPosition to get the final prompted positions. <br></br>
-                /// <i>Ex: If moving BEHIND a position, -<see cref="BoardCoords.up"/> would be the single element of PositionalOffsets.</i>
-                /// </summary>
-                /// <remarks>
-                /// (See <see cref="AnchorPosition"/>)
-                /// </remarks>
-                public HashSet<Vector3Int> PositionalOffsets { get; set; }
-
-                /// <summary>
-                /// PositionalOffsets are rotated to this Team to match their perspective. <br></br>
-                /// <i> Ex: If moving BEHIND a Red Unit, set this to <see cref="Player.ETeam.Red"/> so that the offset is rotated to match a Red Unit's view of behind.</i> <br></br>
-                /// </summary>
-                /// <remarks>
-                /// <i>IN_FRONT/BEHIND are perspective dependent, what is one to Blue, is the other to Red.</i>
-                /// </remarks>
-                public Player.ETeam TeamRelativity { get; set; }
-
-                /// <summary>
-                /// <inheritdoc cref="PromptArgs.Forced"/>
-                /// </summary>
-                /// <remarks>
-                /// Default: <c>true</c>
-                /// </remarks>
-                public override bool Forced { get; set; } = true;
-
-                /// <summary>
-                /// <see cref="PositionalOffsets"/> preset that includes all positions adjacent to to the anchor.
-                /// </summary>
-                public static IEnumerable<Vector3Int> ADJACENT => BoardCoords.GetAdjacent(Vector3Int.zero);
-                /// <summary>
-                /// <see cref="PositionalOffsets"/> preset that includes the single position that is in front of the anchor.
-                /// </summary>
-                public static IEnumerable<Vector3Int> IN_FRONT => new[] { BoardCoords.up };
-                /// <summary>
-                /// <see cref="PositionalOffsets"/> preset that includes the single position that is behind the anchor.
-                /// </summary>
-                public static IEnumerable<Vector3Int> BEHIND => new[] { -BoardCoords.up };
-
-                /// <summary>
-                /// Prompt <paramref name="performer"/> to Move <paramref name="movingUnit"/> to any position in <paramref name="positionalOffsets"/> relative to <paramref name="anchorPosition"/>, from the (rotational) perspective of <paramref name="teamRelativity"/>. <br></br>
-                /// <i>(i.e. <see cref="PromptArgs"/> for a Positional Move)</i>
-                /// </summary>
-                /// <remarks>
-                /// Additional Properties: <br></br>
-                /// <inheritdoc cref="PromptArgs(Player, Unit)"/>
-                /// </remarks>
-                /// <param name="performer"></param>
-                /// <param name="movingUnit"></param>
-                /// <param name="anchorPosition"></param>
-                /// <param name="positionalOffsets"></param>
-                /// <param name="teamRelativity"></param>
-                public Positional(Player performer, Unit movingUnit, Vector3Int anchorPosition, IEnumerable<Vector3Int> positionalOffsets, Player.ETeam teamRelativity) : base(performer, movingUnit)
-                {
-                    AnchorPosition = anchorPosition;
-                    PositionalOffsets = new HashSet<Vector3Int>(positionalOffsets);
-                    TeamRelativity = teamRelativity;
-                }
+                await subscriber(performer, args);
             }
         }
-
-
 
         public override string ToString()
         {
-            return $"<MOVE> {MovedUnit}: {FromPos} -> {ToPos}" + base.ToString();
+            return $"<MOVE> ({string.Join(", ",MoveInfo.MovingUnits)})" + base.ToString();
+        }
+        public abstract record Info
+        {
+            #region Documentation Helpers
+#pragma warning disable IDE0052
+#pragma warning disable IDE1006
+
+            /// <summary>
+            /// </summary>
+            /// <remarks>
+            /// <c>Function(<see cref="Unit"/> u) { }</c><br></br>
+            /// - u : A given <see cref="Unit"/> out of the moving Units.<br></br>
+            /// <see langword="return"/> -> <br></br>
+            /// </remarks>
+            private static readonly bool __DOC__UnitFunction;
+
+#pragma warning restore IDE0052
+#pragma warning restore IDE1006
+            #endregion
+
+            /// <summary>
+            /// The Units that are being prompted to Move.<br></br>
+            /// > <see cref="PathedInfo"/> : The Move is split among these Units.<br></br>
+            /// > <see cref="PositionalInfo"/> : A single Unit out of these Units is chosen to Move.
+            /// </summary>
+            public HashSet<Unit> MovingUnits { get; set; }
+            /// <summary>
+            /// If TRUE, this Move cannot be cancelled.
+            /// </summary>
+            /// <remarks>
+            /// Default : <c><see langword="false"/></c>
+            /// </remarks>
+            public virtual bool Forced { get; set; } = false;
+            /// <summary>
+            /// A <see cref="Hex"/> must pass ALL of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move.<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ <see cref="STANDARD_VALID_HEX"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.FinalPathCondition"/> )
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = new()
+            { STANDARD_VALID_HEX };
+            /// <summary>
+            /// A <see cref="Hex"/> can pass ANY of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move (overriding FinalConditions).<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => <see langword="false"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.FinalPathCondition"/> )
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
+            { _ => _ => false };
+
+            /// <summary>
+            /// The condition that checks if a <see cref="Hex"/> is occupiable (regardless of <see cref="Unit"/>).<br></br>
+            /// <i>(Part of <see cref="STANDARD_VALID_HEX"/>)</i>
+            /// </summary>
+            /// <remarks>
+            /// <c>_ => hex => hex.IsOccupiable;</c>
+            /// </remarks>
+            public static readonly Func<Unit, Func<Hex, bool>> OCCUPIABLE_CHECK = _ => hex =>
+            hex.IsOccupiable;
+            /// <summary>
+            /// The condition that checks if a <see cref="Hex"/> is a BaseHex and is guarded against the moving <see cref="Unit"/>.<br></br>
+            /// <i>(Part of <see cref="STANDARD_VALID_HEX"/>)</i>
+            /// </summary>
+            /// <remarks>
+            /// <c>unit => hex => <br></br>!(hex is BaseHex bhex &amp;&amp; bhex.IsGuarded &amp;&amp; bhex.Team != unit.Team);</c>
+            /// </remarks>
+            public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
+            !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
+
+            /// <summary>
+            /// The standard FinalCondition that all Moves implicitly have. (unless explicitly ommitted)
+            /// </summary>
+            /// <remarks>
+            /// <c>unit => hex => ... </c><br></br>
+            /// <i>Combines <see cref="GUARDED_BASE_CHECK"/> and <see cref="OCCUPIABLE_CHECK"/>.</i>
+            /// </remarks>
+            public static readonly Func<Unit, Func<Hex, bool>> STANDARD_VALID_HEX = unit => hex =>
+            new Func<Unit, Func<Hex, bool>>[] { GUARDED_BASE_CHECK, OCCUPIABLE_CHECK }
+            .InvokeAll(unit).InvokeAll(hex).GateAND();
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <remarks>
+            /// - <see cref="Forced"/><br></br>
+            /// - <see cref="FinalConditions"/><br></br>
+            /// - <see cref="FinalOverrides"/><br></br>
+            /// - <see cref="MovingUnits"/> (Set by constructor)
+            /// </remarks>
+            /// <param name="movingUnits"></param>
+            protected Info(IEnumerable<Unit> movingUnits)
+            {
+                MovingUnits = new(movingUnits);
+            }
+
+        }
+        /// <summary>
+        /// [ : ] <see cref="Info"/><br></br>
+        /// </summary>
+        public record PositionalInfo : Info
+        {
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// PositionOffsets are relative to this position.<br></br>
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="PositionOffsets"/>)
+            /// </remarks>
+            public Vector3Int Anchor { get; set; }
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The set of positions that this Move can move too, relative to Anchor.
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="Anchor"/>)<br></br><br></br>
+            /// <i>
+            /// Standard PositionOffsets: <br></br>
+            /// - <see cref="IN_FRONT"/> <br></br>
+            /// - <see cref="BEHIND"/> <br></br>
+            /// - <see cref="ADJACENT"/>
+            /// </i>
+            /// </remarks>
+            public HashSet<Vector3Int> PositionOffsets { get; set; }
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The team-relative rotation of this positional Move.<br></br>
+            /// <i>(Should be relative to the team of the *anchor* Unit of the positional)</i>
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="Player.PerspectiveRotationOf(Player.ETeam)"/>)
+            /// </remarks>
+            public int PerspectiveRotation { get; set; }
+
+            /// <summary>
+            /// The standard PositionOffsets for "in front".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { <see cref="BoardCoords"/>.up };</c>
+            /// </remarks>
+            public static HashSet<Vector3Int> IN_FRONT => new() { BoardCoords.up };
+            /// <summary>
+            /// The standard PositionOffsets for "behind".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { -<see cref="BoardCoords"/>.up };</c>
+            /// </remarks>
+            public static HashSet<Vector3Int> BEHIND => new() { -BoardCoords.up };
+            /// <summary>
+            /// The standard PositionOffsets for "adjacent".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { <see cref="Vector3Int"/>.zero.GetAdjacent() };</c>
+            /// </remarks>
+            public static HashSet<Vector3Int> ADJACENT => new(Vector3Int.zero.GetAdjacent());
+
+            /// <summary>
+            /// Creates a <see cref="Info"/> containing information about a positional Move.<br></br>
+            /// > Used with <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/>
+            /// </summary>
+            /// <remarks>
+            /// Required Properties:<br></br>
+            /// - <see cref="Anchor"/><br></br>
+            /// - <see cref="PositionOffsets"/><br></br>
+            /// - <see cref="PerspectiveRotation"/><br></br><br></br>
+            /// Defaulted Properties:<br></br>
+            /// <inheritdoc cref="Info.Info(IEnumerable{Unit})"/>
+            /// </remarks>
+            /// <param name="movingUnits"></param>
+            public PositionalInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
+            /// <inheritdoc cref="PositionalInfo.PositionalInfo(IEnumerable{Unit})"/>
+            public PositionalInfo(params Unit[] movingUnits) : base(movingUnits) { }
+        }
+        public record PathedInfo : Info
+        {
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The (maximum) amount of steps this Move can take.
+            /// </summary>
+            public int Distance { get; set; }
+            /// <summary>
+            /// The minimum amount of steps this Move can take.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>0</c>
+            /// </remarks>
+            public int MinDistance { get; set; } = 0;
+            /// <summary>
+            /// The maximum amount of steps an individual Unit can take in this Move.<br></br>
+            /// (For Moves that are split between multiple MovingUnits)
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>1000</c>
+            /// </remarks>
+            public int MaxDistancePerUnit { get; set; } = 1000;
+            /// <summary>
+            /// A step must pass ALL of these conditions (<see cref="Board.ContinuePathCondition"/>) to be considered a valid step in this Move.<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ <see cref="STANDARD_COLLISION"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.ContinuePathCondition"/> )
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = new()
+            { STANDARD_COLLISION };
+            /// <summary>
+            /// A step can pass ANY of these conditions (<see cref="Board.ContinuePathCondition"/>) to be considered a valid step in this Move.<br></br>
+            /// (Overrides <see cref="PathingConditions"/>)<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => <see langword="false"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.ContinuePathCondition"/> )
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()
+            { _ => (_, _) => false };
+            /// <summary>
+            /// The SUM of these weight functions will be used when pathfinding for this Move.<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a weight function that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => 1 }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.PathWeightFunction"/> )
+            /// </remarks>
+            public List<Func<Unit, Func<Hex, Hex, int>>> PathingWeightFunctions { get; set; } = new()
+            { _ => (_, _) => 1 };
+            /// <summary>
+            /// A step will be invalidated if it follows ANY of these (Anchor, Radius Rule) pairs.<br></br>
+            /// <i>(i.e. A set of conditions that return false for going Away/Around/Toward an Anchor)</i><br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a weight function that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => <see cref="DIRECTIONAL_NONE"/> }</c><br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// A set of <see cref="ERadiusRule"/>(s) and their respective Anchors that this Move must not follow.
+            /// <br></br><br></br>
+            /// <i><b>DEV:</b> Yea its kinda weird having it be must *not* follow, but trust it makes more sense in terms of expandibility.</i>
+            /// </remarks>
+            public List<Func<Unit, HashSet<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; set; } = new()
+            { _ => DIRECTIONAL_NONE };
+
+            /// <summary>
+            /// The standard condition for checking Hex and Enemy Unit collision.<br></br>
+            /// (Default element of <see cref="PathingConditions"/>)
+            /// </summary>
+            /// <remarks>
+            /// <c>unit => (_, hex) => <br></br>
+            /// !(hex.BlocksPathing || (hex.Occupant != null &amp;&amp; hex.Occupant.Team != unit.Team));</c>
+            /// </remarks>
+            public static readonly Func<Unit, Func<Hex, Hex, bool>> STANDARD_COLLISION = unit => (_, hex) =>
+            !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
+            /// <summary>
+            /// Represents 'no directional block at all'.
+            /// </summary>
+            /// <remarks>
+            /// <c><see langword="new"/> HashSet&lt;(<see cref="Vector3Int"/> Anchor, <see cref="ERadiusRule"/> Rule)&gt;()</c>
+            /// </remarks>
+            public static readonly HashSet<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new();
+
+            /// <summary>
+            /// Enum for <see cref="DirectionalBlocks"/>.<br></br>
+            /// - <see cref="Toward"/> : Steps decreasing in distance (radius) to Anchor. <br></br>
+            /// - <see cref="Away"/> : Steps increasing in distance (radius) to Anchor. <br></br>
+            /// - <see cref="Around"/> : Steps staying the same distance (radius) to Anchor.
+            /// </summary>
+            //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
+            public enum ERadiusRule : sbyte
+            {
+                Toward = -1,
+                Around = 0,
+                Away = 1
+            }
+
+            /// <summary>
+            /// Creates a <see cref="Info"/> containing information about a pathed Move.<br></br>
+            /// > Used with <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/>
+            /// </summary>
+            /// <remarks>
+            /// Required Properties:<br></br>
+            /// - <see cref="Distance"/><br></br><br></br>
+            /// Defaulted Properties:<br></br>
+            /// - <see cref="MinDistance"/><br></br>
+            /// - <see cref="MaxDistancePerUnit"/><br></br>
+            /// - <see cref="PathingConditions"/><br></br>
+            /// - <see cref="PathingOverrides"/><br></br>
+            /// - <see cref="PathingWeightFunctions"/><br></br>
+            /// - <see cref="DirectionalBlocks"/><br></br>
+            /// <inheritdoc cref="Info.Info(IEnumerable{Unit})"/>
+            /// </remarks>
+            /// <param name="movingUnits"></param>
+            public PathedInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
+            /// <inheritdoc cref="PathedInfo.PathedInfo(IEnumerable{Unit})"/>
+            public PathedInfo(params Unit[] movingUnits) : base(movingUnits) { }
         }
 
     }
-
 }

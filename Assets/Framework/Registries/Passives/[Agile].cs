@@ -24,15 +24,15 @@ public partial class Passive
             }
         }
 
-        private async Task Effect(GameAction.Move.PromptArgs args)
+        private Task Effect(Player performer, GameAction.Move.Info info)
         {
-            if (args is not GameAction.Move.PromptArgs.Pathed pathed) return;
+            var O = Task.CompletedTask;
+            if (performer != EmpoweredPlayer) return O;
+            if (info is not GameAction.Move.PathedInfo pathed) return O;
 
-            if (pathed.Performer == EmpoweredPlayer && pathed.MovingUnit.Team == EmpoweredPlayer.Team)
-            {
-                pathed.Distance += 1;
-            }
-            
+            pathed.Distance += 1;
+            pathed.MaxDistancePerUnit += 1;
+            return O;
         }
     }
 

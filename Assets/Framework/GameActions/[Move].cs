@@ -285,6 +285,8 @@ public partial class GameAction
         public abstract record Info
         {
             #region Documentation Helpers
+#pragma warning disable IDE0052
+#pragma warning disable IDE1006
 
             /// <summary>
             /// </summary>
@@ -293,8 +295,12 @@ public partial class GameAction
             /// - u : A given <see cref="Unit"/> out of the moving Units.<br></br>
             /// <see langword="return"/> -> <br></br>
             /// </remarks>
-            private static bool __DOC__UnitFunction;
+            private static readonly bool __DOC__UnitFunction;
+
+#pragma warning restore IDE0052
+#pragma warning restore IDE1006
             #endregion
+
             /// <summary>
             /// The Units that are being prompted to Move.<br></br>
             /// > <see cref="PathedInfo"/> : The Move is split among these Units.<br></br>

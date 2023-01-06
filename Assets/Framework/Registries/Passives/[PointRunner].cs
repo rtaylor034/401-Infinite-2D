@@ -47,9 +47,7 @@ public partial class Passive
                         await action.AddResultant(await GameAction.Move.Prompt(EmpoweredPlayer,
                             new GameAction.Move.PathedInfo(m.AffectedUnit, hex.Occupant)
                             {
-                                Distance = 2,
-                                PathingConditions = { GameAction.Move.PathedInfo.STANDARD_COLLISION }
-                                
+                                Distance = 2
                             }));
                         break;
                     }

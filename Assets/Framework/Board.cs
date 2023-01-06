@@ -174,6 +174,21 @@ public class Board : MonoBehaviour
     /// <param name="hex"></param>
     public delegate bool FinalPathCondition(Hex hex);
 
+    /// <summary>
+    /// Finds all hexes that are within <paramref name="range"/>.min and <paramref name="range"/>.max steps from <paramref name="startPos"/>.<br></br>
+    /// Every step must respect the <paramref name="pathCondition"/> and <paramref name="weightFunction"/>, and then found Hexes must pass the <paramref name="finalCondition"/> afterward.
+    /// </summary>
+    /// <remarks>
+    /// (See <see cref="ContinuePathCondition"/>)<br></br>
+    /// (See <see cref="FinalPathCondition"/>) <br></br>
+    /// (See <see cref="PathWeightFunction"/>) <br></br>
+    /// </remarks>
+    /// <param name="startPos"></param>
+    /// <param name="range"></param>
+    /// <param name="pathCondition"></param>
+    /// <param name="finalCondition"></param>
+    /// <param name="weightFunction"></param>
+    ///
     public Dictionary<Hex, int> PathFind(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)
     {
         Dictionary<Hex, int> o = new();

@@ -142,7 +142,7 @@ public class Board : MonoBehaviour
     /// [Delegate]
     /// </summary>
     /// <remarks>
-    /// <c>bool ContinuePathCondition(<see cref="Hex"/>, <paramref name="prev"/>, <see cref="Hex"/>, <paramref name="next"/>) { }</c><br></br>
+    /// <c><see cref="bool"/> ContinuePathCondition(<see cref="Hex"/> <paramref name="prev"/>, <see cref="Hex"/> <paramref name="next"/>) { }</c><br></br>
     /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
     /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
     /// <see langword="return"/> -> Whether or not this should be a valid step.
@@ -154,7 +154,7 @@ public class Board : MonoBehaviour
     /// [Delegate]
     /// </summary>
     /// <remarks>
-    /// <c>int PathWeightFunctionMethod(<see cref="Hex"/>, <paramref name="prev"/>, <see cref="Hex"/>, <paramref name="next"/>) { }</c><br></br>
+    /// <c><see cref="int"/> PathWeightFunctionMethod(<see cref="Hex"/> <paramref name="prev"/>, <see cref="Hex"/> <paramref name="next"/>) { }</c><br></br>
     /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
     /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
     /// <see langword="return"/> -> The "weight" of this step, or how much range this step subtracts when taken.<br></br>
@@ -167,8 +167,8 @@ public class Board : MonoBehaviour
     /// [Delegate]
     /// </summary>
     /// <remarks>
-    /// <c>bool FinalPathConditionMethod(<see cref="Hex"/>, <paramref name="hex"/>) { }</c><br></br>
-    /// - <paramref name="hex"/> : Any given <see cref="Hex"/> out of all Hexes that were found during pathfinding.<br></br>
+    /// <c><see cref="bool"/> FinalPathConditionMethod(<see cref="Hex"/> <paramref name="hex"/>) { }</c><br></br>
+    /// - <paramref name="hex"/> : A given <see cref="Hex"/> out of all Hexes that were found during pathfinding.<br></br>
     /// <see langword="return"/> -> whether or not <paramref name="hex"/> should be included in the final output.
     /// </remarks>
     /// <param name="hex"></param>

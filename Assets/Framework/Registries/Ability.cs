@@ -238,10 +238,7 @@ public abstract class Ability
         /// </remarks>
         public static readonly TargetingCondition STANDARD_COLLISION = (p, s, t) =>
         {
-            bool __IsCollision(Hex h)
-            {
-                return h.BlocksTargeting && (h.Occupant == null || h.Occupant.Team == p.Team);
-            }
+            bool __IsCollision(Hex h) => h.BlocksTargeting && (h.Occupant == null || h.Occupant.Team == p.Team);
             List<Vector3Int[]> edges;
             foreach(var hex in s.Board.HexesAt(BoardCoords.LineIntersections(s.Position, t.Position, out edges)))
             {

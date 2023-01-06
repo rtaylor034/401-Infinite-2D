@@ -232,7 +232,7 @@ public partial class GameAction
                 while (queue.Count > 0)
                 {
                     movingUnit = queue.Dequeue();
-                    HashSet<Selectable> available = new(movingUnit.Board.HexesAt(positional.PositionOffsets.Offset(positional.Anchor)));
+                    HashSet<Selectable> available = new(movingUnit.Board.HexesAt(positional.PositionOffsets.Offset(positional.Anchor).Rotate(positional.Anchor, positional.PerspectiveRotation)));
                     foreach (Unit u in queue) available.Add(u);
                     if (!positional.Forced) available.Add(movingUnit.Board.HexAt(movingUnit.Position));
 
@@ -268,8 +268,6 @@ public partial class GameAction
                 }
                 return (moves.Count > 0) ? new(performer, info, moves) : null;
             }
-
-            
         }
 
         private static async Task InvokePromptEvent(Player performer, Info args)
@@ -286,14 +284,22 @@ public partial class GameAction
         }
         public abstract record Info
         {
+            #region Documentation Helpers
+
+            /// <summary>
+            /// </summary>
+            /// <remarks>
+            /// <c>Function(<see cref="Unit"/> u) { }</c><br></br>
+            /// - u : A given <see cref="Unit"/> out of the moving Units.<br></br>
+            /// <see langword="return"/> -> <br></br>
+            /// </remarks>
+            private static bool __DOC__UnitFunction;
+            #endregion
             /// <summary>
             /// The Units that are being prompted to Move.<br></br>
             /// > <see cref="PathedInfo"/> : The Move is split among these Units.<br></br>
             /// > <see cref="PositionalInfo"/> : A single Unit out of these Units is chosen to Move.
             /// </summary>
-            /// <remarks>
-            /// <i>Set from constructor.</i>
-            /// </remarks>
             public HashSet<Unit> MovingUnits { get; set; }
             /// <summary>
             /// If TRUE, this Move cannot be cancelled.
@@ -304,43 +310,69 @@ public partial class GameAction
             public virtual bool Forced { get; set; } = false;
             /// <summary>
             /// A <see cref="Hex"/> must pass ALL of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move.<br></br>
-            /// > Each element is a function, that given the <see cref="Unit"/> that would Move, returns a condition.
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
             /// </summary>
             /// <remarks>
             /// Default: <c>{ <see cref="STANDARD_VALID_HEX"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.FinalPathCondition"/> )
             /// </remarks>
             public List<Func<Unit, Func<Hex, bool>>> FinalConditions { get; set; } = new()
             { STANDARD_VALID_HEX };
             /// <summary>
             /// A <see cref="Hex"/> can pass ANY of these conditions (<see cref="Board.FinalPathCondition"/>) to be considered a valid Move (overriding FinalConditions).<br></br>
-            /// > Each element is a function, that given the <see cref="Unit"/> that would Move, returns a condition.
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
             /// </summary>
             /// <remarks>
             /// Default: <c>{ _ => (_, _) => <see langword="false"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.FinalPathCondition"/> )
             /// </remarks>
             public List<Func<Unit, Func<Hex, bool>>> FinalOverrides { get; set; } = new()
             { _ => _ => false };
 
             /// <summary>
-            /// A FinalCondition that returns:<br></br>
-            /// <see langword="true"/> : If the <see cref="Hex"/> is occupiable. (<see cref="Hex.IsOccupiable"/>)<br></br>
-            /// <see langword="false"/> : [otherwise]<br></br>
-            /// <i>(Regardless of moving <see cref="Unit"/>)</i>
+            /// The condition that checks if a <see cref="Hex"/> is occupiable (regardless of <see cref="Unit"/>).<br></br>
+            /// <i>(Part of <see cref="STANDARD_VALID_HEX"/>)</i>
             /// </summary>
+            /// <remarks>
+            /// <c>_ => hex => hex.IsOccupiable;</c>
+            /// </remarks>
             public static readonly Func<Unit, Func<Hex, bool>> OCCUPIABLE_CHECK = _ => hex =>
             hex.IsOccupiable;
             /// <summary>
-            /// A FinalCondition that returns:<br></br>
-            /// <see langword="true"/> : [otherwise]<br></br>
-            /// <see langword="false"/> : If the <see cref="Hex"/> is an enemy Base relative to the moving <see cref="Unit"/> and is guarded. (<see cref="BaseHex.IsGuarded"/>)
+            /// The condition that checks if a <see cref="Hex"/> is a BaseHex and is guarded against the moving <see cref="Unit"/>.<br></br>
+            /// <i>(Part of <see cref="STANDARD_VALID_HEX"/>)</i>
             /// </summary>
+            /// <remarks>
+            /// <c>unit => hex => <br></br>!(hex is BaseHex bhex &amp;&amp; bhex.IsGuarded &amp;&amp; bhex.Team != unit.Team);</c>
+            /// </remarks>
             public static readonly Func<Unit, Func<Hex, bool>> GUARDED_BASE_CHECK = unit => hex =>
             !(hex is BaseHex bhex && bhex.IsGuarded && bhex.Team != unit.Team);
 
+            /// <summary>
+            /// The standard FinalCondition that all Moves implicitly have. (unless explicitly ommitted)
+            /// </summary>
+            /// <remarks>
+            /// <c>unit => hex => ... </c><br></br>
+            /// <i>Combines <see cref="GUARDED_BASE_CHECK"/> and <see cref="OCCUPIABLE_CHECK"/>.</i>
+            /// </remarks>
             public static readonly Func<Unit, Func<Hex, bool>> STANDARD_VALID_HEX = unit => hex =>
             new Func<Unit, Func<Hex, bool>>[] { GUARDED_BASE_CHECK, OCCUPIABLE_CHECK }
             .InvokeAll(unit).InvokeAll(hex).GateAND();
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <remarks>
+            /// - <see cref="Forced"/><br></br>
+            /// - <see cref="FinalConditions"/><br></br>
+            /// - <see cref="FinalOverrides"/><br></br>
+            /// - <see cref="MovingUnits"/> (Set by constructor)
+            /// </remarks>
+            /// <param name="movingUnits"></param>
             protected Info(IEnumerable<Unit> movingUnits)
             {
                 MovingUnits = new(movingUnits);
@@ -352,36 +384,175 @@ public partial class GameAction
         /// </summary>
         public record PositionalInfo : Info
         {
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// PositionOffsets are relative to this position.<br></br>
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="PositionOffsets"/>)
+            /// </remarks>
             public Vector3Int Anchor { get; set; }
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The set of positions that this Move can move too, relative to Anchor.
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="Anchor"/>)<br></br><br></br>
+            /// <i>
+            /// Standard PositionOffsets: <br></br>
+            /// - <see cref="IN_FRONT"/> <br></br>
+            /// - <see cref="BEHIND"/> <br></br>
+            /// - <see cref="ADJACENT"/>
+            /// </i>
+            /// </remarks>
             public HashSet<Vector3Int> PositionOffsets { get; set; }
-            public new bool Forced { get; set; } = true;
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The team-relative rotation of this positional Move.<br></br>
+            /// <i>(Should be relative to the team of the *anchor* Unit of the positional)</i>
+            /// </summary>
+            /// <remarks>
+            /// (See <see cref="Player.PerspectiveRotationOf(Player.ETeam)"/>)
+            /// </remarks>
+            public int PerspectiveRotation { get; set; }
 
+            /// <summary>
+            /// The standard PositionOffsets for "in front".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { <see cref="BoardCoords"/>.up };</c>
+            /// </remarks>
             public static HashSet<Vector3Int> IN_FRONT => new() { BoardCoords.up };
+            /// <summary>
+            /// The standard PositionOffsets for "behind".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { -<see cref="BoardCoords"/>.up };</c>
+            /// </remarks>
             public static HashSet<Vector3Int> BEHIND => new() { -BoardCoords.up };
+            /// <summary>
+            /// The standard PositionOffsets for "adjacent".
+            /// </summary>
+            /// <remarks>
+            /// <c>=> <see langword="new"/>() { <see cref="Vector3Int"/>.zero.GetAdjacent() };</c>
+            /// </remarks>
             public static HashSet<Vector3Int> ADJACENT => new(Vector3Int.zero.GetAdjacent());
 
+            /// <summary>
+            /// Creates a <see cref="Info"/> containing information about a positional Move.<br></br>
+            /// > Used with <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/>
+            /// </summary>
+            /// <remarks>
+            /// Required Properties:<br></br>
+            /// - <see cref="Anchor"/><br></br>
+            /// - <see cref="PositionOffsets"/><br></br>
+            /// - <see cref="PerspectiveRotation"/><br></br><br></br>
+            /// Defaulted Properties:<br></br>
+            /// <inheritdoc cref="Info.Info(IEnumerable{Unit})"/>
+            /// </remarks>
+            /// <param name="movingUnits"></param>
             public PositionalInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
+            /// <inheritdoc cref="PositionalInfo.PositionalInfo(IEnumerable{Unit})"/>
             public PositionalInfo(params Unit[] movingUnits) : base(movingUnits) { }
         }
         public record PathedInfo : Info
         {
+            /// <summary>
+            /// <b>Required*</b><br></br>
+            /// The (maximum) amount of steps this Move can take.
+            /// </summary>
             public int Distance { get; set; }
+            /// <summary>
+            /// The minimum amount of steps this Move can take.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>0</c>
+            /// </remarks>
             public int MinDistance { get; set; } = 0;
+            /// <summary>
+            /// The maximum amount of steps an individual Unit can take in this Move.<br></br>
+            /// (For Moves that are split between multiple MovingUnits)
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>1000</c>
+            /// </remarks>
             public int MaxDistancePerUnit { get; set; } = 1000;
+            /// <summary>
+            /// A step must pass ALL of these conditions (<see cref="Board.ContinuePathCondition"/>) to be considered a valid step in this Move.<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ <see cref="STANDARD_COLLISION"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.ContinuePathCondition"/> )
+            /// </remarks>
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingConditions { get; set; } = new()
             { STANDARD_COLLISION };
-            
+            /// <summary>
+            /// A step can pass ANY of these conditions (<see cref="Board.ContinuePathCondition"/>) to be considered a valid step in this Move.<br></br>
+            /// (Overrides <see cref="PathingConditions"/>)<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a condition that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => <see langword="false"/> }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.ContinuePathCondition"/> )
+            /// </remarks>
             public List<Func<Unit, Func<Hex, Hex, bool>>> PathingOverrides { get; set; } = new()
             { _ => (_, _) => false };
+            /// <summary>
+            /// The SUM of these weight functions will be used when pathfinding for this Move.<br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a weight function that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => (_, _) => 1 }</c>
+            /// <br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// ( <inheritdoc cref="Board.PathWeightFunction"/> )
+            /// </remarks>
             public List<Func<Unit, Func<Hex, Hex, int>>> PathingWeightFunctions { get; set; } = new()
             { _ => (_, _) => 1 };
+            /// <summary>
+            /// A step will be invalidated if it follows ANY of these (Anchor, Radius Rule) pairs.<br></br>
+            /// <i>(i.e. A set of conditions that return false for going Away/Around/Toward an Anchor)</i><br></br>
+            /// > Each element is a function of the given <see cref="Unit"/> that would Move, returning a weight function that applies to that Unit.
+            /// </summary>
+            /// <remarks>
+            /// Default: <c>{ _ => <see cref="DIRECTIONAL_NONE"/> }</c><br></br><br></br>
+            /// <inheritdoc cref="Info.__DOC__UnitFunction"/>
+            /// A set of <see cref="ERadiusRule"/>(s) and their respective Anchors that this Move must not follow.
+            /// <br></br><br></br>
+            /// <i><b>DEV:</b> Yea its kinda weird having it be must *not* follow, but trust it makes more sense in terms of expandibility.</i>
+            /// </remarks>
             public List<Func<Unit, HashSet<(Vector3Int Anchor, ERadiusRule Rule)>>> DirectionalBlocks { get; set; } = new()
             { _ => DIRECTIONAL_NONE };
-            
+
+            /// <summary>
+            /// The standard condition for checking Hex and Enemy Unit collision.<br></br>
+            /// (Default element of <see cref="PathingConditions"/>)
+            /// </summary>
+            /// <remarks>
+            /// <c>unit => (_, hex) => <br></br>
+            /// !(hex.BlocksPathing || (hex.Occupant != null &amp;&amp; hex.Occupant.Team != unit.Team));</c>
+            /// </remarks>
             public static readonly Func<Unit, Func<Hex, Hex, bool>> STANDARD_COLLISION = unit => (_, hex) =>
             !(hex.BlocksPathing || (hex.Occupant != null && hex.Occupant.Team != unit.Team));
+            /// <summary>
+            /// Represents 'no directional block at all'.
+            /// </summary>
+            /// <remarks>
+            /// <c><see langword="new"/> HashSet&lt;(<see cref="Vector3Int"/> Anchor, <see cref="ERadiusRule"/> Rule)&gt;()</c>
+            /// </remarks>
             public static readonly HashSet<(Vector3Int Anchor, ERadiusRule Rule)> DIRECTIONAL_NONE = new();
 
+            /// <summary>
+            /// Enum for <see cref="DirectionalBlocks"/>.<br></br>
+            /// - <see cref="Toward"/> : Steps decreasing in distance (radius) to Anchor. <br></br>
+            /// - <see cref="Away"/> : Steps increasing in distance (radius) to Anchor. <br></br>
+            /// - <see cref="Around"/> : Steps staying the same distance (radius) to Anchor.
+            /// </summary>
             //it is important that these values are -1, 0, and 1. (they are casted when generating conditions).
             public enum ERadiusRule : sbyte
             {
@@ -390,7 +561,25 @@ public partial class GameAction
                 Away = 1
             }
 
+            /// <summary>
+            /// Creates a <see cref="Info"/> containing information about a pathed Move.<br></br>
+            /// > Used with <see cref="Prompt(Player, Info, Action{Selector.SelectionArgs})"/>
+            /// </summary>
+            /// <remarks>
+            /// Required Properties:<br></br>
+            /// - <see cref="Distance"/><br></br><br></br>
+            /// Defaulted Properties:<br></br>
+            /// - <see cref="MinDistance"/><br></br>
+            /// - <see cref="MaxDistancePerUnit"/><br></br>
+            /// - <see cref="PathingConditions"/><br></br>
+            /// - <see cref="PathingOverrides"/><br></br>
+            /// - <see cref="PathingWeightFunctions"/><br></br>
+            /// - <see cref="DirectionalBlocks"/><br></br>
+            /// <inheritdoc cref="Info.Info(IEnumerable{Unit})"/>
+            /// </remarks>
+            /// <param name="movingUnits"></param>
             public PathedInfo(IEnumerable<Unit> movingUnits) : base(movingUnits) { }
+            /// <inheritdoc cref="PathedInfo.PathedInfo(IEnumerable{Unit})"/>
             public PathedInfo(params Unit[] movingUnits) : base(movingUnits) { }
         }
 

@@ -138,8 +138,40 @@ public class Board : MonoBehaviour
         return new Vector3(fpos.x, fpos.y, zPos);
     }
 
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c>bool ContinuePathCondition(<see cref="Hex"/>, <paramref name="prev"/>, <see cref="Hex"/>, <paramref name="next"/>) { }</c><br></br>
+    /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
+    /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
+    /// <see langword="return"/> -> Whether or not this should be a valid step.
+    ///</remarks>
+    /// <param name="prev"></param>
+    /// <param name="next"></param>
     public delegate bool ContinuePathCondition(Hex prev, Hex next);
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c>int PathWeightFunctionMethod(<see cref="Hex"/>, <paramref name="prev"/>, <see cref="Hex"/>, <paramref name="next"/>) { }</c><br></br>
+    /// - <paramref name="prev"/> : The <see cref="Hex"/> that is being stepped off-of during any given step of pathfinding.<br></br>
+    /// - <paramref name="next"/> : The <see cref="Hex"/> that is being stepped onto during that same step of pathfinding.<br></br>
+    /// <see langword="return"/> -> The "weight" of this step, or how much range this step subtracts when taken.<br></br>
+    /// <i>e.g. A weight of 1 is a regular step, a weight of 2 would mean it would take 2 'steps' just to traverse 1 Hex.</i>
+    /// </remarks>
+    /// <param name="prev"></param>
+    /// <param name="next"></param>
     public delegate int PathWeightFunction(Hex prev, Hex next);
+    /// <summary>
+    /// [Delegate]
+    /// </summary>
+    /// <remarks>
+    /// <c>bool FinalPathConditionMethod(<see cref="Hex"/>, <paramref name="hex"/>) { }</c><br></br>
+    /// - <paramref name="hex"/> : Any given <see cref="Hex"/> out of all Hexes that were found during pathfinding.<br></br>
+    /// <see langword="return"/> -> whether or not <paramref name="hex"/> should be included in the final output.
+    /// </remarks>
+    /// <param name="hex"></param>
     public delegate bool FinalPathCondition(Hex hex);
 
     public Dictionary<Hex, int> PathFind(Vector3Int startPos, (int min, int max) range, ContinuePathCondition pathCondition, FinalPathCondition finalCondition, PathWeightFunction weightFunction)

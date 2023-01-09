@@ -84,8 +84,5 @@ public static class PlayerExtensions
     /// <param name="player"></param>
     /// <param name="anchor"></param>
     /// <returns></returns>
-    public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Player player, Vector3Int anchor)
-    {
-        return coords.Rotate(anchor, player.PerspectiveRotation);
-    }
+    public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Player player, Vector3Int anchor) => coords.Rotate(anchor, player.PerspectiveRotation);
 }

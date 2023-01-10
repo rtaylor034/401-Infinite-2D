@@ -6,7 +6,7 @@ using UnityEngine;
 public class Unit : Selectable
 {
     public int HP { get; private set; }
-    public Player.ETeam Team { get; private set; }
+    public Team Team { get; private set; }
     public int MaxHP { get; private set; }
     public int ID { get; private set; }
 
@@ -67,7 +67,7 @@ public class Unit : Selectable
     /// <param name="team"></param>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
+    public Unit Init(Board board, int maxhp, Team team, Vector3Int pos)
     {
         _board = board;
         Position = pos;

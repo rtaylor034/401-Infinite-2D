@@ -106,7 +106,7 @@ public class GameManager : MonoBehaviour
         AbilityRegistry.Initialize(settings);
         PassiveRegistry.Initialize(settings);
 
-        board.CreateBoard();
+        board.CreateBoard(Map.MapList[0], Settings);
         
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));

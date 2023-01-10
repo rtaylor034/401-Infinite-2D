@@ -18,7 +18,7 @@ public struct Map
         for (int i = 0; i < spawns.Length; i++)
         {
             Spawns[i] = new Vector3Int[spawns[i].Length];
-            for (int h = 0; i < spawns[i].Length; h++)
+            for (int h = 0; h < spawns[i].Length; h++)
             {
                 Spawns[i][h] = (spawns[i][h].x * BoardCoords.up) - (spawns[i][h].y * BoardCoords.left);
             }
@@ -63,15 +63,15 @@ public struct Map
             new Vector2Int[][]
             { new Vector2Int[]
             {
-                new(3, 8),
-                new(4, 9),
-                new(4, 10)
+                new(3, 7),
+                new(4, 8),
+                new(4, 9)
             },
             new Vector2Int[]
             {
+                new(19, 7),
                 new(19, 8),
-                new(19, 9),
-                new(20, 10)
+                new(20, 9)
             }
             }
             ));

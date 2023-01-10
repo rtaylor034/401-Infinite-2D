@@ -12,8 +12,8 @@ public record GameSettings
 
     private GameSettings(List<Team> teams, List<int> turnOrder, int standardEffectDuration)
     {
-        List<ConstructorTemplate<Player>> orderInit = new(turnOrder.Count);
-        for (int i = 0; i < turnOrder.Count; i++) orderInit[i] = new(typeof(Player), teams[turnOrder[i]]);
+        List<ConstructorTemplate<Player>> orderInit = new();
+        for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(new(typeof(Player), teams[turnOrder[i]]));
 
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();

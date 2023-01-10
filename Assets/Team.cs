@@ -30,4 +30,5 @@ public class Team
             BaseHex = Color.Lerp(primary, Color.white, 0.1f);
         }
     }
+    public override string ToString() => Name;
 }

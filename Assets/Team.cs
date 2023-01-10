@@ -7,11 +7,13 @@ public class Team
 {
     public string Name { get; private set; }
     public Pallete Colors { get; private set; }
+    public int PerspectiveRotation { get; private set; }
 
-    public Team(string name, Color mainColor)
+    public Team(string name, Color mainColor, int perspective)
     {
         Name = name;
         Colors = new(mainColor);
+        PerspectiveRotation = perspective;
     }
 
     public struct Pallete

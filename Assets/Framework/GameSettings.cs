@@ -23,8 +23,8 @@ public record GameSettings
     public readonly static GameSettings STANDARD = new(
         teams: new()
         {
-            new("Blue", Color.blue),
-            new("Red", Color.red)
+            new("Blue", Color.blue, 0),
+            new("Red", Color.red, 3)
         },
         turnOrder: new()
         {

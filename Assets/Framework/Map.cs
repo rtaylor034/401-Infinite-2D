@@ -37,8 +37,8 @@ public struct Map
             "ww/" +
             "wwww/" +
             "wwwwww/" +
-            "oooooooB/" +
-            "woooooooBB/" +
+            "oooooooB0/" +
+            "woooooooB0B0/" +
             "ooooooooooow/" +
             "ooooooowooooww/" +
             "oowoowoowwooowww/" +
@@ -53,8 +53,8 @@ public struct Map
             " wwwooowwoowwooow/" +
             "   wwoooowooooooo/" +
             "     wooooooooooo/" +
-            "       RRoooooooo/" +
-            "         Rooooooo/" +
+            "       B1B1oooooooo/" +
+            "         B1ooooooo/" +
             "           wwwwww/" +
             "             wwww/" +
             "               ww"

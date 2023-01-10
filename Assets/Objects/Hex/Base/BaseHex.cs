@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -25,5 +26,6 @@ public class BaseHex : Hex, ITeamable
     public void SetTeam(Team team)
     {
         Team = team;
+        GetComponent<SpriteRenderer>().color = team.Colors.BaseHex;
     }
 }

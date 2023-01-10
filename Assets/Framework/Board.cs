@@ -43,7 +43,7 @@ public class Board : MonoBehaviour
             {
                 Unit u = Instantiate(_UnitObject, transform).Init(this, 3, map.Spawns[t][s]);
                 u.SetTeam(settings.Teams[t]);
-                u.transform.localPosition = GetLocalTransformAt(u.Position);
+                u.transform.localPosition = GetLocalTransformAt(u.Position, -1);
                 _units.Add(u);
             }
         }

@@ -10,7 +10,7 @@ public class ControlHex : Hex
 
     public bool IsLocked { get
         {
-            HashSet<Player.ETeam> teams = new();
+            HashSet<Team> teams = new();
             foreach (Hex hex in _board.HexDict.Values)
             {
                 if (hex is not ControlHex chex) continue;

@@ -26,26 +26,26 @@ public class Board : MonoBehaviour
     /// </summary>
     public HashSet<Unit> Units => new(_units);
     public Dictionary<Vector3Int, Hex> HexDict => new(_hexDict);
-    public void CreateBoard()
+    public void CreateBoard(Map map, GameSettings settings)
     {
-        GenerateMap(Map.MapList[0]);
-        GenerateUnits();
+        GenerateMap(map, settings);
+        GenerateUnits(map, settings);
     }
 
     /// <summary>
     /// Instantiates Units on every BaseHex on the board. (GenerateMap() must be called first).
     /// </summary>
-    private void GenerateUnits()
+    private void GenerateUnits(Map map, GameSettings settings)
     {
-        foreach (Hex hex in _hexDict.Values)
+        for (int t = 0; t < map.Spawns.Length; t++)
         {
-
-            if (hex is not BaseHex b) continue;
-
-            Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
-            u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
-            b.Occupant = u;
-            _units.Add(u);
+            for (int s = 0; s < map.Spawns[t].Length; s++)
+            {
+                Unit u = Instantiate(_UnitObject, transform).Init(this, 3, map.Spawns[t][s]);
+                u.SetTeam(settings.Teams[t]);
+                u.transform.localPosition = GetLocalTransformAt(u.Position, -1);
+                _units.Add(u);
+            }
         }
     }
 
@@ -54,7 +54,7 @@ public class Board : MonoBehaviour
     /// </summary>
     /// <param name="map"></param>
     /// <param name="hexSpacing"></param>
-    private void GenerateMap(Map map)
+    private void GenerateMap(Map map, GameSettings settings)
     {
         /*
          The first element(string) of map.HXN starts at 0,0,0(bottom left of map), and then each char in that string generates a Hex at that position.
@@ -71,18 +71,26 @@ public class Board : MonoBehaviour
             //for logging
             //Debug.Log($"generating row: [{hstr}]");
 
-            for (int x = 0; x < hstr.Length; x++)
+            int o = 0;
+            for (int xo = 0; xo < hstr.Length; xo++)
             {
+                int x = xo - o;
                 Vector3Int coords = (BoardCoords.up * u) - (BoardCoords.left * x);
-                Hex hexprefab = HXNKey.GetHex(hstr[x]);
+                Hex hexprefab = HXNKey.GetHex(hstr[xo]);
 
                 if (hexprefab == null) continue;
 
                 Hex hex = Instantiate(hexprefab, transform).Init(this, coords);
-
                 //Uses helper class BoardCoords 
                 hex.transform.localPosition = GetLocalTransformAt(coords);
                 _hexDict.Add(coords, hex);
+
+                if (hex is ITeamable thex)
+                {
+                    thex.SetTeam(settings.Teams[int.Parse(hstr[xo + 1].ToString())]);
+                    xo++;
+                    o++;
+                }
 
             }
 

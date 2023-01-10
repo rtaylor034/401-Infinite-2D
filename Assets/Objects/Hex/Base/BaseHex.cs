@@ -1,17 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
 /// [ : ] <see cref="Hex"/>
 /// </summary>
-public class BaseHex : Hex
+public class BaseHex : Hex, ITeamable
 {
-
-    [SerializeField]
-    private Player.ETeam _team;
-
-    public Player.ETeam Team => _team;
+    public Team Team { get; private set; }
 
     public bool IsGuarded
     {
@@ -20,10 +17,15 @@ public class BaseHex : Hex
             foreach (Hex hex in _board.HexDict.Values)
             {
                 if (hex is not BaseHex bhex) continue;
-                if (bhex.Occupant != null && bhex.Occupant.Team == _team) return true;
+                if (bhex.Occupant != null && bhex.Occupant.Team == Team) return true;
             }
             return false;
         }
     }
 
+    public void SetTeam(Team team)
+    {
+        Team = team;
+        GetComponent<SpriteRenderer>().color = team.Colors.BaseHex;
+    }
 }

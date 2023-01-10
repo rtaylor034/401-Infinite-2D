@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
-public class Unit : Selectable
+public class Unit : Selectable, ITeamable
 {
+
     public int HP { get; private set; }
-    public Player.ETeam Team { get; private set; }
+    public Team Team { get; private set; }
     public int MaxHP { get; private set; }
     public int ID { get; private set; }
 
@@ -67,17 +69,21 @@ public class Unit : Selectable
     /// <param name="team"></param>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public Unit Init(Board board, int maxhp, Player.ETeam team, Vector3Int pos)
+    public Unit Init(Board board, int maxhp, Vector3Int pos)
     {
         _board = board;
         Position = pos;
-        Team = team;
         MaxHP = maxhp;
         HP = MaxHP;
         ID = ++_idCount;
         return this;
     }
 
+    public void SetTeam(Team team)
+    {
+        Team = team;
+        GetComponent<SpriteRenderer>().color = team.Colors.Unit;
+    }
     public void TestMethod()
     {
         Debug.Log($"I am unit {ID} with {HP} HP.");

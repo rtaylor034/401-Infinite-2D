@@ -110,7 +110,7 @@ public partial class GameAction
 
                 var validTargets = board.Units.Where(u =>
                 {
-                    if (!a.HitArea.Offset(source.Position).Rotate(source.Position, player.PerspectiveRotation)
+                    if (!a.HitArea.Offset(source.Position).RotateForPerspective(player, source.Position)
                     .Contains(u.Position)) return false;
                     foreach (var condition in a.TargetingConditions)
                         if (!condition(player, source, u)) return false;

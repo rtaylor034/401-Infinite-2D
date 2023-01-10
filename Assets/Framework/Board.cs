@@ -42,7 +42,7 @@ public class Board : MonoBehaviour
 
             if (hex is not BaseHex b) continue;
 
-            Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Team, b.Position);
+            Unit u = Instantiate(_UnitObject, transform).Init(this, 3, b.Position);
             u.transform.localPosition = GetLocalTransformAt(b.Position, -1);
             b.Occupant = u;
             _units.Add(u);

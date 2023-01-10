@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// [ : ] <see cref="Hex"/>
 /// </summary>
-public class BaseHex : Hex
+public class BaseHex : Hex, ITeamable
 {
     public Team Team { get; private set; }
 
@@ -22,4 +22,8 @@ public class BaseHex : Hex
         }
     }
 
+    public void SetTeam(Team team)
+    {
+        Team = team;
+    }
 }

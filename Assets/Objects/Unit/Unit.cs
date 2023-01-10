@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Unit : Selectable
+public class Unit : Selectable, ITeamable
 {
     public int HP { get; private set; }
     public Team Team { get; private set; }
@@ -67,17 +67,20 @@ public class Unit : Selectable
     /// <param name="team"></param>
     /// <param name="pos"></param>
     /// <returns></returns>
-    public Unit Init(Board board, int maxhp, Team team, Vector3Int pos)
+    public Unit Init(Board board, int maxhp, Vector3Int pos)
     {
         _board = board;
         Position = pos;
-        Team = team;
         MaxHP = maxhp;
         HP = MaxHP;
         ID = ++_idCount;
         return this;
     }
 
+    public void SetTeam(Team team)
+    {
+        Team = team;
+    }
     public void TestMethod()
     {
         Debug.Log($"I am unit {ID} with {HP} HP.");

@@ -14,7 +14,7 @@ public class Team
         Colors = new(mainColor);
     }
 
-    public class Pallete
+    public struct Pallete
     {
         public Color Primary { get; private set; }
         public Color Unit { get; private set; }

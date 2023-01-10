@@ -3,23 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.ObjectModel;
 
-public class GameSettings
+public record GameSettings
 {
-
+    
     public ReadOnlyCollection<ConstructorTemplate<Player>> TurnOrder { get; private set; }
     public int StandardEffectDuration { get; private set; }
+    public ReadOnlyCollection<Team> Teams { get; private set; }
 
-    private GameSettings(List<ConstructorTemplate<Player>> turnOrder, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, int standardEffectDuration)
     {
-        TurnOrder = turnOrder.AsReadOnly();
+        List<ConstructorTemplate<Player>> orderInit = new(turnOrder.Count);
+        for (int i = 0; i < turnOrder.Count; i++) orderInit[i] = new(typeof(Player), teams[turnOrder[i]]);
+
+        Teams = teams.AsReadOnly();
+        TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;
     }
 
     public readonly static GameSettings STANDARD = new(
+        teams: new()
+        {
+            new("Blue", Color.blue),
+            new("Red", Color.red)
+        },
         turnOrder: new()
         {
-            new ConstructorTemplate<Player>(typeof(Player), Player.ETeam.Blue),
-            new ConstructorTemplate<Player>(typeof(Player), Player.ETeam.Red),
+            0,
+            1
         },
         standardEffectDuration: 1
         );

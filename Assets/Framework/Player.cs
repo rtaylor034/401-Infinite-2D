@@ -7,6 +7,8 @@ public class Player
 {
 
     public Team Team { get; private set; }
+    public List<ManualAction> ManualActions => new(_manualActions);
+    private List<ManualAction> _manualActions;
     public int Energy { get; private set; } = 0;
     public int ControlSpheres { get; private set; } = 0;
 
@@ -31,6 +33,10 @@ public class Player
     public void UpdateControlSpheres(int val)
     {
         ControlSpheres = val;
+    }
+    public void UpdateManualActions(List<ManualAction> val)
+    {
+        _manualActions = val;
     }
 
     /// <summary>

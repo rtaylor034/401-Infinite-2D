@@ -9,6 +9,7 @@ public record GameSettings
     public ReadOnlyCollection<ConstructorTemplate<Player>> TurnOrder { get; private set; }
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
+    public ReadOnlyCollection<ManualAction> DefaultManualActions { get; private set; }
 
     private GameSettings(List<Team> teams, List<int> turnOrder, int standardEffectDuration)
     {

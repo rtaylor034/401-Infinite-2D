@@ -166,6 +166,7 @@ public class GameManager : MonoBehaviour
         //TEST ABILITIES
         INPUT.Test.ability1.performed += async _ => await __AbilityTest(0);
         INPUT.Test.ability2.performed += async _ => await __AbilityTest(2);
+        INPUT.Test.ability3.performed += async _ => await __AbilityTest(1);
         async Task __AbilityTest(int id)
         {
             await GameAction.Declare

@@ -21,7 +21,7 @@ public static class AbilityRegistry
         * TYPE IDENTITY - Ability.ETypeIdentity
         * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
         * HIT AREA - HashSet<Vector3Int>
-        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction (void<GameAction.PlayAbility>)
+        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction <Task (GameAction.PlayAbility)>
         * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
         * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
         * 
@@ -30,7 +30,7 @@ public static class AbilityRegistry
         * TYPE IDENTITY - Ability.ETypeIdentity
         * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
         * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
-        * ON-PLAY ACTION - Ability.PlayAction <void(GameAction.PlayAbility)>
+        * ON-PLAY ACTION - Ability.PlayAction <Task (GameAction.PlayAbility)>
         */
 
         List<ConstructorTemplate<Ability>> masterList = new()

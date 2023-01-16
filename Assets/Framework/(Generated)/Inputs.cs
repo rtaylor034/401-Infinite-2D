@@ -168,6 +168,15 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ability3"",
+                    ""type"": ""Value"",
+                    ""id"": ""30e30422-6bfe-47df-91c1-63d25c9b0509"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -234,6 +243,17 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""ability2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""324fb796-1045-48ae-bb4a-ee4241830f47"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""ability3"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -317,6 +337,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         m_Test_turn = m_Test.FindAction("turn", throwIfNotFound: true);
         m_Test_ability1 = m_Test.FindAction("ability1", throwIfNotFound: true);
         m_Test_ability2 = m_Test.FindAction("ability2", throwIfNotFound: true);
+        m_Test_ability3 = m_Test.FindAction("ability3", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -439,6 +460,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
     private readonly InputAction m_Test_turn;
     private readonly InputAction m_Test_ability1;
     private readonly InputAction m_Test_ability2;
+    private readonly InputAction m_Test_ability3;
     public struct TestActions
     {
         private @Inputs m_Wrapper;
@@ -449,6 +471,7 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         public InputAction @turn => m_Wrapper.m_Test_turn;
         public InputAction @ability1 => m_Wrapper.m_Test_ability1;
         public InputAction @ability2 => m_Wrapper.m_Test_ability2;
+        public InputAction @ability3 => m_Wrapper.m_Test_ability3;
         public InputActionMap Get() { return m_Wrapper.m_Test; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -476,6 +499,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @ability2.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
                 @ability2.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
                 @ability2.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility2;
+                @ability3.started -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility3;
+                @ability3.performed -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility3;
+                @ability3.canceled -= m_Wrapper.m_TestActionsCallbackInterface.OnAbility3;
             }
             m_Wrapper.m_TestActionsCallbackInterface = instance;
             if (instance != null)
@@ -498,6 +524,9 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
                 @ability2.started += instance.OnAbility2;
                 @ability2.performed += instance.OnAbility2;
                 @ability2.canceled += instance.OnAbility2;
+                @ability3.started += instance.OnAbility3;
+                @ability3.performed += instance.OnAbility3;
+                @ability3.canceled += instance.OnAbility3;
             }
         }
     }
@@ -562,5 +591,6 @@ public partial class @Inputs : IInputActionCollection2, IDisposable
         void OnTurn(InputAction.CallbackContext context);
         void OnAbility1(InputAction.CallbackContext context);
         void OnAbility2(InputAction.CallbackContext context);
+        void OnAbility3(InputAction.CallbackContext context);
     }
 }

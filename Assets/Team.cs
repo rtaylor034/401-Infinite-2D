@@ -27,7 +27,7 @@ public class Team
             //placeholder colors for now
             Primary = primary;
             Unit = Color.Lerp(primary, Color.white, 0.2f);
-            BaseHex = Color.Lerp(primary, Color.black, 0.1f);
+            BaseHex = Color.Lerp(primary, Color.black, 0.0f);
         }
     }
     public override string ToString() => Name;

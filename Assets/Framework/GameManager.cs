@@ -14,8 +14,13 @@ public class GameManager : MonoBehaviour
 {
 
     [SerializeField]
-    private Board board;
+    private Board _boardPrefab;
+    //WE LEFT OFF HERE: current problem/thought being:
+    //Need a way to access the board from GameSettings, but also keep it dynamic for multi-board support (because were fucking stupid like that).
+    //probably considering making a Board prefab and then instantiating the board with code, and adding it to a list of "active boards" that is a public variable in GameManager, which only has 1 board, the main board.
 
+    public List<Board> ActiveBoards => new(_boards);
+    private List<Board> _boards;
     /// <summary>
     /// The <see cref="Player"/> that currently has control of the Turn.
     /// </summary>
@@ -82,11 +87,11 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        StartGame(GameSettings.STANDARD);
+        StartGame(GameSettings.STANDARD, new Map[] { Map.MapList[0] });
     }
     #endregion
 
-    private async void StartGame(GameSettings settings)
+    private async void StartGame(GameSettings settings, IList<Map> maps)
     {
         
         if (_gameActive) throw new Exception("Game is already active!");
@@ -106,7 +111,16 @@ public class GameManager : MonoBehaviour
         AbilityRegistry.Initialize(settings);
         PassiveRegistry.Initialize(settings);
 
-        board.CreateBoard(Map.MapList[0], Settings);
+        if (maps.Count != settings.BoardCount) throw new ArgumentException("Too many/little maps specified for this the specified GameSettings (maps.Count != settings.BoardCount)");
+        for(int i = 0; i < settings.BoardCount; i++)
+        {
+            //multiple boards would be instantiated at the same position, can fix later, but no need rn.
+            var board = Instantiate(_boardPrefab, transform);
+            board.CreateBoard(maps[i], settings);
+            _boards.Add(board);
+        }
+
+        
         
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));
@@ -116,10 +130,9 @@ public class GameManager : MonoBehaviour
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>
         {
-            var sel = await SELECTOR.Prompt(board.Units.Where(u => u.Team == CurrentPlayer.Team));
+            var sel = await SELECTOR.Prompt(_boards[0].Units.Where(u => u.Team == CurrentPlayer.Team));
 
             if (sel.Selection is not Unit u) return;
-            //funny lazer  test
             await GameAction.Declare(
                 await GameAction.Move.Prompt(CurrentPlayer,
                 new GameAction.Move.PathedInfo(u)
@@ -151,7 +164,7 @@ public class GameManager : MonoBehaviour
         //TEST EFFECT
         INPUT.Test.effect.performed += async _ =>
         {
-            var sel = await SELECTOR.Prompt(board.Units);
+            var sel = await SELECTOR.Prompt(_boards[0].Units);
             if (sel.Selection is not Unit u) return;
 
             await GameAction.Declare(new GameAction.InflictEffect(CurrentPlayer, new UnitEffect.Silence(1), u));
@@ -172,7 +185,7 @@ public class GameManager : MonoBehaviour
             await GameAction.Declare
                 (await GameAction.PlayAbility.Prompt
                     (new GameAction.PlayAbility.PromptArgs
-                    (CurrentPlayer, AbilityRegistry.Registry[id], board),
+                    (CurrentPlayer, AbilityRegistry.Registry[id], _boards[0]),
                     _ => Debug.Log("ABILITY CANCELLED")));
         }
 

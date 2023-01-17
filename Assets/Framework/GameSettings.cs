@@ -10,6 +10,7 @@ public record GameSettings
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
     public ReadOnlyCollection<ManualAction> DefaultManualActions { get; private set; }
+    public int BoardCount { get; private set; } = 1;
 
     private GameSettings(List<Team> teams, List<int> turnOrder, int standardEffectDuration)
     {

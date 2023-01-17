@@ -15,9 +15,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board _boardPrefab;
-    //WE LEFT OFF HERE: current problem/thought being:
-    //Need a way to access the board from GameSettings, but also keep it dynamic for multi-board support (because were fucking stupid like that).
-    //probably considering making a Board prefab and then instantiating the board with code, and adding it to a list of "active boards" that is a public variable in GameManager, which only has 1 board, the main board.
 
     public List<Board> ActiveBoards => new(_boards);
     private List<Board> _boards;
@@ -120,8 +117,6 @@ public class GameManager : MonoBehaviour
             _boards.Add(board);
         }
 
-        
-        
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));
         await NextTurn();

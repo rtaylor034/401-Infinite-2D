@@ -27,4 +27,12 @@ public record ManualAction
         EntryPoints = entryPoints;
         ActionFunction = actionFunction;
     }
+    public ManualAction(ManualAction orginal)
+    {
+        StandardType = orginal.StandardType;
+        EntryPoints = new(orginal.EntryPoints);
+        ActionFunction = new(orginal.ActionFunction);
+        PlayerConditions = new(orginal.PlayerConditions);
+        PlayerConditionOverrides = new(orginal.PlayerConditionOverrides);
+    }
 }

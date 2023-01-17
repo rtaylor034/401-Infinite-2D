@@ -52,7 +52,7 @@ public record GameSettings
                     })
                     )?.AddResultant(new GameAction.EnergyChange(player, player, e => e - 1));
                 },
-                PlayerConditions = new() {ManualAction.ONE_ENERGY_REQUIRED }
+                PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
             }
         },
         standardEffectDuration: 1

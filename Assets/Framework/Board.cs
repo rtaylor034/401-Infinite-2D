@@ -12,9 +12,9 @@ using static UnityEditor.PlayerSettings;
 public class Board : MonoBehaviour
 {
     [SerializeField]
-    private Unit _UnitObject;
+    private Unit _unitPrefab;
     [SerializeField]
-    public HXNKey HXNKey;
+    private HXNKey _HXNKey;
     [SerializeField]
     private float _hexSpacing = 0.54f;
 
@@ -41,7 +41,7 @@ public class Board : MonoBehaviour
         {
             for (int s = 0; s < map.Spawns[t].Length; s++)
             {
-                Unit u = Instantiate(_UnitObject, transform).Init(this, 3, map.Spawns[t][s]);
+                Unit u = Instantiate(_unitPrefab, transform).Init(this, 3, map.Spawns[t][s]);
                 u.SetTeam(settings.Teams[t]);
                 u.transform.localPosition = GetLocalTransformAt(u.Position, -1);
                 _units.Add(u);
@@ -76,7 +76,7 @@ public class Board : MonoBehaviour
             {
                 int x = xo - o;
                 Vector3Int coords = (BoardCoords.up * u) - (BoardCoords.left * x);
-                Hex hexprefab = HXNKey.GetHex(hstr[xo]);
+                Hex hexprefab = _HXNKey.GetHex(hstr[xo]);
 
                 if (hexprefab == null) continue;
 

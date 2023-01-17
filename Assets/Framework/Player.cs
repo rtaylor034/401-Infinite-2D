@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Player
@@ -39,6 +40,18 @@ public class Player
         _manualActions = val;
     }
 
+    public HashSet<Unit> GetAllyUnits(Board board) => GetAllyUnits(board.Wrapped());
+    public HashSet<Unit> GetAllyUnits(IEnumerable<Board> boards) => GetUnits(boards, true);
+    public HashSet<Unit> GetEnemyUnits(Board board) => GetEnemyUnits(board.Wrapped());
+    public HashSet<Unit> GetEnemyUnits(IEnumerable<Board> boards) => GetUnits(boards, false);
+
+    private HashSet<Unit> GetUnits(IEnumerable<Board> boards, bool allies)
+    {
+        HashSet<Unit> o = new();
+        foreach (Board board in boards)
+            o.UnionWith(board.Units.Where(u => (u.Team == Team) == allies));
+        return o;
+    }
     /// <summary>
     /// A dummy <see cref="Player"/> object with no behavior.
     /// </summary>

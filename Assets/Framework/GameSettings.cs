@@ -12,7 +12,7 @@ public record GameSettings
     public ReadOnlyCollection<ManualAction> DefaultManualActions { get; private set; }
     public int BoardCount { get; private set; } = 1;
 
-    private GameSettings(List<Team> teams, List<int> turnOrder, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, List<ManualAction> defaultManualActions, int standardEffectDuration)
     {
         List<ConstructorTemplate<Player>> orderInit = new();
         for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(new(typeof(Player), teams[turnOrder[i]]));
@@ -20,6 +20,7 @@ public record GameSettings
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;
+        DefaultManualActions = defaultManualActions.AsReadOnly();
     }
 
     public readonly static GameSettings STANDARD = new(
@@ -32,6 +33,25 @@ public record GameSettings
         {
             0,
             1
+        },
+        defaultManualActions: new()
+        {
+            new(ManualAction.EStandardType.Move, 
+                player => player.GetAllyUnits(GameManager.GAME.ActiveBoards[0]),
+                async (player, selectedUnit) =>
+                {
+                    if (selectedUnit is not Unit u) throw new System.Exception();
+                    
+                    return await (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
+                    {
+                        Distance = 4,
+                        MinDistance = 1
+                    })
+                    )?.AddResultant(new GameAction.EnergyChange(player, player, e => e - 1));
+                })
+            {
+                PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
+            }
         },
         standardEffectDuration: 1
         );

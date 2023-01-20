@@ -181,7 +181,7 @@ public abstract class Ability
         /// <summary>
         /// The effects that this ability inflicts upon the Target when played.
         /// </summary>
-        public List<ConstructorTemplate<UnitEffect>> TargetEffects { get; set; }
+        public List<ConstructionTemplate<UnitEffect>> TargetEffects { get; set; }
         /// <summary>
         /// A <see cref="Unit"/> must pass ALL of these conditions in order to be a valid Source.
         /// </summary>
@@ -277,7 +277,7 @@ public abstract class Ability
             base(name, typeIdentity)
         {
             HitArea = new HashSet<Vector3Int>(hitArea);
-            TargetEffects = new List<ConstructorTemplate<UnitEffect>>(targetEffects);
+            TargetEffects = new List<ConstructionTemplate<UnitEffect>>(targetEffects);
             TargetingConditions = new(targetingConditions);
             SourceConditions = new(sourceConditions);
             FollowUpMethod = followUpMethod;

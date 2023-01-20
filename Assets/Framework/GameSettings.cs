@@ -16,8 +16,12 @@ public record GameSettings
     private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, int standardEffectDuration)
     {
         List<ConstructionTemplate<Player>> orderInit = new();
-        for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(() => new Player(teams[turnOrder[i]]));
-
+        for (int i = 0; i < turnOrder.Count; i++)
+        {
+            var t = teams[turnOrder[i]];
+            orderInit.Add(() => new Player(t));
+        }
+        
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;

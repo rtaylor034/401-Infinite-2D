@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b768302ac7b28fc4293634a600e88c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _UnitObject: {fileID: 5356240054824606339, guid: c6d0968c994f72948bd9089651f3957d, type: 3}
-  HXNKey: {fileID: 11400000, guid: 6e2039e9300e06c4d92fe60dbe9951c4, type: 2}
+  _unitPrefab: {fileID: 5356240054824606339, guid: c6d0968c994f72948bd9089651f3957d, type: 3}
+  _HXNKey: {fileID: 11400000, guid: 6e2039e9300e06c4d92fe60dbe9951c4, type: 2}
   _hexSpacing: 0.54

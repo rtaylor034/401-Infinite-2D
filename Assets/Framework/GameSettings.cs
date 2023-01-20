@@ -7,16 +7,16 @@ using System;
 public record GameSettings
 {
 
-    public ReadOnlyCollection<ConstructorTemplate<Player>> TurnOrder { get; private set; }
+    public ReadOnlyCollection<ConstructionTemplate<Player>> TurnOrder { get; private set; }
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
-    public ReadOnlyCollection<Func<ManualAction>> DefaultManualActions { get; private set; }
+    public ReadOnlyCollection<ConstructionTemplate<ManualAction>> DefaultManualActions { get; private set; }
     public int BoardCount { get; private set; } = 1;
 
-    private GameSettings(List<Team> teams, List<int> turnOrder, List<Func<ManualAction>> defaultManualActions, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, int standardEffectDuration)
     {
-        List<ConstructorTemplate<Player>> orderInit = new();
-        for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(new(typeof(Player), teams[turnOrder[i]]));
+        List<ConstructionTemplate<Player>> orderInit = new();
+        for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(() => new Player(teams[turnOrder[i]]));
 
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();

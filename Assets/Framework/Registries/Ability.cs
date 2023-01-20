@@ -273,7 +273,7 @@ public abstract class Ability
         /// <param name="followUpMethod"></param>
         /// <param name="targetingConditions"></param>
         /// <param name="sourceConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
             base(name, typeIdentity)
         {
             HitArea = new HashSet<Vector3Int>(hitArea);
@@ -295,7 +295,7 @@ public abstract class Ability
         /// <param name="hitArea"></param>
         /// <param name="followUpMethod"></param>
         /// <param name="targetingConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
             this(name, typeIdentity, targetEffects, hitArea, followUpMethod, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
         { }
 

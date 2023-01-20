@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         _turnOrder = new();
         for (int i = 0; i < settings.TurnOrder.Count; i++)
         {
-            _turnOrder.AddLast(settings.TurnOrder[i].CreateInstance());
+            _turnOrder.AddLast(settings.TurnOrder[i].Invoke());
         }
 
         Settings = settings;

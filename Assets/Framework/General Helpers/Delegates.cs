@@ -1,11 +1,12 @@
 
 /// <summary>
-/// [Notifying Delegate]
+/// [Specialized Delegate] <br></br>
+/// <i>A template to create new objects with the same construction.</i>
 /// </summary>
 /// <typeparam name="T"></typeparam>
 /// <remarks>
-/// Methods of this delegate type should always return a <see langword="new"/> <typeparamref name="T"/> instance.
+/// Must construct and <see langword="return"/> -> a <see langword="new"/> <typeparamref name="T"/> instance.
 /// <br></br>
-/// > Actual constructed type may inherit[ : ] from <typeparamref name="T"/>, but must be casted.
+/// > Constructed type may inherit[ : ] from <typeparamref name="T"/>.
 /// </remarks>
 public delegate T ConstructionTemplate<T> () where T : class;

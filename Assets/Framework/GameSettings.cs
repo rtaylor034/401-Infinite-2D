@@ -18,10 +18,12 @@ public record GameSettings
         List<ConstructionTemplate<Player>> orderInit = new();
         for (int i = 0; i < turnOrder.Count; i++)
         {
+            //This might be a big issue, and may warrant keeping ConstructorTemplate the way it was.
             var t = teams[turnOrder[i]];
             orderInit.Add(() => new Player(t));
+            //DESIRED: orderInit.Add(() => new Player(teams[turnOrder[i]]));
         }
-        
+
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;

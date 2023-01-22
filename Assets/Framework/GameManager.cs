@@ -118,11 +118,18 @@ public class GameManager : MonoBehaviour
             _boards.Add(board);
         }
 
+        //put under a single "startgame" action action
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].Invoke(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].Invoke(), _turnOrder.First.Next.Value));
         await NextTurn();
         
+        TEMP_AssignTestInputs();
+        
 
+    }
+
+    private void TEMP_AssignTestInputs()
+    {
         //TEST MOVEMENT
         INPUT.Test.moveprompt.performed += async _ =>
         {
@@ -154,7 +161,7 @@ public class GameManager : MonoBehaviour
         INPUT.Test.undo.performed += _ =>
         {
             Debug.Log($"UNDO CALL: {_game.Peek()}\n {UndoLastGameAction(true)}");
-            
+
         };
 
         //TEST EFFECT
@@ -184,7 +191,6 @@ public class GameManager : MonoBehaviour
                     (CurrentPlayer, AbilityRegistry.Registry[id], _boards[0]),
                     _ => Debug.Log("ABILITY CANCELLED")));
         }
-
     }
 
     //TBI

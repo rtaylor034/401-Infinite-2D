@@ -4,19 +4,24 @@ using UnityEngine;
 using System.Collections.ObjectModel;
 using System;
 
-public record GameSettings
+public class GameSettings
 {
 
-    public ReadOnlyCollection<ConstructorTemplate<Player>> TurnOrder { get; private set; }
+    public ReadOnlyCollection<ConstructionTemplate<Player>> TurnOrder { get; private set; }
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
-    public ReadOnlyCollection<Func<ManualAction>> DefaultManualActions { get; private set; }
+    public ReadOnlyCollection<ConstructionTemplate<ManualAction>> DefaultManualActions { get; private set; }
     public int BoardCount { get; private set; } = 1;
 
-    private GameSettings(List<Team> teams, List<int> turnOrder, List<Func<ManualAction>> defaultManualActions, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, int standardEffectDuration)
     {
-        List<ConstructorTemplate<Player>> orderInit = new();
-        for (int i = 0; i < turnOrder.Count; i++) orderInit.Add(new(typeof(Player), teams[turnOrder[i]]));
+        List<ConstructionTemplate<Player>> orderInit = new();
+        for (int i = 0; i < turnOrder.Count; i++)
+        {
+            //this shit is weird, google "closure" for explanation.
+            var t = teams[turnOrder[i]];
+            orderInit.Add(() => new Player(t));
+        }
 
         Teams = teams.AsReadOnly();
         TurnOrder = orderInit.AsReadOnly();

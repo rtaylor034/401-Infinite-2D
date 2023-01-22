@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         _turnOrder = new();
         for (int i = 0; i < settings.TurnOrder.Count; i++)
         {
-            _turnOrder.AddLast(settings.TurnOrder[i].CreateInstance());
+            _turnOrder.AddLast(settings.TurnOrder[i].Invoke());
         }
 
         Settings = settings;
@@ -108,6 +108,7 @@ public class GameManager : MonoBehaviour
         AbilityRegistry.Initialize(settings);
         PassiveRegistry.Initialize(settings);
 
+        _boards = new();
         if (maps.Count != settings.BoardCount) throw new ArgumentException("Too many/little maps specified for this the specified GameSettings (maps.Count != settings.BoardCount)");
         for(int i = 0; i < settings.BoardCount; i++)
         {
@@ -117,8 +118,8 @@ public class GameManager : MonoBehaviour
             _boards.Add(board);
         }
 
-        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].CreateInstance(), _turnOrder.First.Value));
-        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].CreateInstance(), _turnOrder.First.Next.Value));
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].Invoke(), _turnOrder.First.Value));
+        await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].Invoke(), _turnOrder.First.Next.Value));
         await NextTurn();
         
 

@@ -8,44 +8,26 @@ using UnityEngine;
 public static class AbilityRegistry
 {
 
-    public static ReadOnlyCollection<ConstructorTemplate<Ability>> Registry { get; private set; }
+    public static ReadOnlyCollection<ConstructionTemplate<Ability>> Registry { get; private set; }
     
 
     public static void Initialize(GameSettings settings)
     {
-
+        //captured values
         int STD_DURATION = settings.StandardEffectDuration;
-        /*
-        * Sourced:
-        * NAME - string
-        * TYPE IDENTITY - Ability.ETypeIdentity
-        * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
-        * HIT AREA - HashSet<Vector3Int>
-        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction <Task (GameAction.PlayAbility)>
-        * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
-        * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
-        * 
-        * Unsourced:
-        * NAME - string
-        * TYPE IDENTITY - Ability.ETypeIdentity
-        * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
-        * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
-        * ON-PLAY ACTION - Ability.PlayAction <Task (GameAction.PlayAbility)>
-        */
 
-        List<ConstructorTemplate<Ability>> masterList = new()
+        List<ConstructionTemplate<Ability>> masterList = new()
         {
             //>0 LANCE
-            new
+            () => new Ability.Sourced
             (
-                typeof(Ability.Sourced),
 
                 "Lance", Ability.ETypeIdentity.Attack,
 
-                new ConstructorTemplate<UnitEffect>[]
+                new ConstructionTemplate<UnitEffect>[]
                 {
-                    new(typeof(UnitEffect.Slow), STD_DURATION),
-                    new(typeof(UnitEffect.Damage), STD_DURATION)
+                    () => new UnitEffect.Slow(STD_DURATION),
+                    () => new UnitEffect.Damage(STD_DURATION)
                 },
                 new HashSet<Vector3Int>
                 {
@@ -71,10 +53,8 @@ public static class AbilityRegistry
             ),
 
             //>1 BREAK WILL
-            new
+            () => new Ability.Unsourced
             (
-                typeof(Ability.Unsourced),
-
                 "Break Will", Ability.ETypeIdentity.Utility,
 
                 new Ability.Unsourced.SingleTargetCondition((p, u) => p.Team != u.Team),
@@ -93,13 +73,13 @@ public static class AbilityRegistry
 
             //>2 INSPIRE
             //uses new format
-            new(typeof(Ability.Sourced), new object[]
-            {
+            () => new Ability.Sourced
+            (
                 "Inspire", Ability.ETypeIdentity.Defense,
 
-                new ConstructorTemplate<UnitEffect>[]
+                new ConstructionTemplate<UnitEffect>[]
                 {
-                    new(typeof(UnitEffect.Shield), STD_DURATION)
+                    () => new UnitEffect.Shield(STD_DURATION)
                 },
 
                 new HashSet<Vector3Int>
@@ -129,12 +109,12 @@ public static class AbilityRegistry
                     Ability.Sourced.STANDARD_COLLISION
                 }
 
-            })
+            )
         };
 
 
         //FINALIZE REGISTRY
-        Registry = new ReadOnlyCollection<ConstructorTemplate<Ability>>(masterList);
+        Registry = new ReadOnlyCollection<ConstructionTemplate<Ability>>(masterList);
     }
 
     private static Vector3Int H(int left, int up, int right) => BoardCoords.Simple(left, up, right);

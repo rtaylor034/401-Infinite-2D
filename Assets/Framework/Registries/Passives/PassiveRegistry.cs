@@ -5,16 +5,16 @@ using UnityEngine;
 
 public static class PassiveRegistry
 {
-    public static ReadOnlyCollection<ConstructorTemplate<Passive>> Registry { get; private set; }
+    public static ReadOnlyCollection<ConstructionTemplate<Passive>> Registry { get; private set; }
 
 
     public static void Initialize(GameSettings settings)
     {
-        List<ConstructorTemplate<Passive>> masterList = new()
+        List<ConstructionTemplate<Passive>> masterList = new()
         {
-            new(typeof(Passive.Agile), "Agile"),
-            new(typeof(Passive.PointRunner), "Point Runner"),
-            new(typeof(Passive.Quantum), "Quantum")
+            () => new Passive.Agile("Agile"),
+            () => new Passive.PointRunner("Point Runner"),
+            () => new Passive.Quantum("Quantum"),
         };
 
         Registry = masterList.AsReadOnly();

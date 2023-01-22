@@ -4,6 +4,8 @@ using System.Dynamic;
 using System.Linq;
 using UnityEngine;
 
+//[DEPRICATED] (See ConstructionTemplate in "Delegates" file)
+/*
 public class ConstructorTemplate<T>
 {
     public System.Type ConstructionType => _type;
@@ -53,3 +55,4 @@ public class ConstructorTemplate<T>
     }
 
 }
+*/

@@ -181,7 +181,7 @@ public abstract class Ability
         /// <summary>
         /// The effects that this ability inflicts upon the Target when played.
         /// </summary>
-        public List<ConstructorTemplate<UnitEffect>> TargetEffects { get; set; }
+        public List<ConstructionTemplate<UnitEffect>> TargetEffects { get; set; }
         /// <summary>
         /// A <see cref="Unit"/> must pass ALL of these conditions in order to be a valid Source.
         /// </summary>
@@ -273,21 +273,21 @@ public abstract class Ability
         /// <param name="followUpMethod"></param>
         /// <param name="targetingConditions"></param>
         /// <param name="sourceConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
             base(name, typeIdentity)
         {
             HitArea = new HashSet<Vector3Int>(hitArea);
-            TargetEffects = new List<ConstructorTemplate<UnitEffect>>(targetEffects);
+            TargetEffects = new List<ConstructionTemplate<UnitEffect>>(targetEffects);
             TargetingConditions = new(targetingConditions);
             SourceConditions = new(sourceConditions);
             FollowUpMethod = followUpMethod;
         }
         ///<summary>
-        ///<inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructorTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/>
+        ///<inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/>
         /// </summary>
         /// <remarks>
-        /// <inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructorTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/> <br></br> <br></br>
-        /// >This constructor assumes that <paramref name="sourceConditions"/> only include <see cref="STANDARD_VALID_SOURCE"/>.
+        /// <inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/> <br></br> <br></br>
+        /// >This constructor assumes that <paramref name="sourceConditions"/> only includes <see cref="STANDARD_VALID_SOURCE"/>.
         /// </remarks>
         /// <param name="name"></param>
         /// <param name="typeIdentity"></param>
@@ -295,7 +295,7 @@ public abstract class Ability
         /// <param name="hitArea"></param>
         /// <param name="followUpMethod"></param>
         /// <param name="targetingConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructorTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
+        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
             this(name, typeIdentity, targetEffects, hitArea, followUpMethod, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
         { }
 

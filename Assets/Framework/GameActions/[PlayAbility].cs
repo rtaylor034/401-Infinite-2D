@@ -162,7 +162,7 @@ public partial class GameAction
                 {
                     //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
                     for (int i = 1; i < ParticipatingUnits.Length; i++)
-                        await AddResultant(new InflictEffect(Performer, effectC.CreateInstance(), ParticipatingUnits[i]));
+                        await AddResultant(new InflictEffect(Performer, effectC.Invoke(), ParticipatingUnits[i]));
                 }
 
             }
@@ -200,11 +200,11 @@ public partial class GameAction
             /// <param name="performer"></param>
             /// <param name="abilityConstruction"></param>
             /// <param name="board"></param>
-            public PromptArgs(Player performer, ConstructorTemplate<Ability> abilityConstruction, Board board)
+            public PromptArgs(Player performer, ConstructionTemplate<Ability> abilityConstruction, Board board)
             {
                 Performer = performer;
                 Board = board;
-                Ability = abilityConstruction.CreateInstance();
+                Ability = abilityConstruction.Invoke();
             }
         }
 

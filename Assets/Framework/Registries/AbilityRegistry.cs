@@ -13,25 +13,8 @@ public static class AbilityRegistry
 
     public static void Initialize(GameSettings settings)
     {
-
+        //captured values
         int STD_DURATION = settings.StandardEffectDuration;
-        /*
-        * Sourced:
-        * NAME - string
-        * TYPE IDENTITY - Ability.ETypeIdentity
-        * TARGET EFFECTS - ConstructorTemplate<UnitEffect>[]
-        * HIT AREA - HashSet<Vector3Int>
-        * ON-PLAY FOLLOWUP METHOD - Ability.PlayAction <Task (GameAction.PlayAbility)>
-        * TARGETING CONDITIONS - Ability.Sourced.TargetingCondition[]
-        * (defaulted) SOURCE CONDITIONS - Ability.Sourced.SourceCondition[] = new[] {STANDARD_VALID_SOURCE}
-        * 
-        * Unsourced:
-        * NAME - string
-        * TYPE IDENTITY - Ability.ETypeIdentity
-        * INITIAL TARGET CONDITION - Ability.Unsourced.SingleTargetCondition
-        * (May be excluded) SECONDARY TARGET CONDITIONS  - Ability.Unsourced.TargetCondition[]
-        * ON-PLAY ACTION - Ability.PlayAction <Task (GameAction.PlayAbility)>
-        */
 
         List<ConstructionTemplate<Ability>> masterList = new()
         {

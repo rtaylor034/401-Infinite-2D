@@ -283,11 +283,11 @@ public abstract class Ability
             FollowUpMethod = followUpMethod;
         }
         ///<summary>
-        ///<inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructorTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/>
+        ///<inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/>
         /// </summary>
         /// <remarks>
-        /// <inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructorTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/> <br></br> <br></br>
-        /// >This constructor assumes that <paramref name="sourceConditions"/> only include <see cref="STANDARD_VALID_SOURCE"/>.
+        /// <inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/> <br></br> <br></br>
+        /// >This constructor assumes that <paramref name="sourceConditions"/> only includes <see cref="STANDARD_VALID_SOURCE"/>.
         /// </remarks>
         /// <param name="name"></param>
         /// <param name="typeIdentity"></param>

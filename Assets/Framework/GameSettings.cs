@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Collections.ObjectModel;
 using System;
 
-public record GameSettings
+public class GameSettings
 {
 
     public ReadOnlyCollection<ConstructionTemplate<Player>> TurnOrder { get; private set; }

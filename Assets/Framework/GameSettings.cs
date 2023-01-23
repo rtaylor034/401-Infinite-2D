@@ -11,9 +11,10 @@ public class GameSettings
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
     public ReadOnlyCollection<ConstructionTemplate<ManualAction>> DefaultManualActions { get; private set; }
+    public ReadOnlyCollection<Func<Player, Player, GameAction>> TurnActions { get; private set; }
     public int BoardCount { get; private set; } = 1;
 
-    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, List<Func<Player, Player, GameAction>> turnActions, int standardEffectDuration)
     {
         List<ConstructionTemplate<Player>> orderInit = new();
         for (int i = 0; i < turnOrder.Count; i++)
@@ -59,6 +60,11 @@ public class GameSettings
                 },
                 PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
             }
+        },
+        turnActions: new()
+        {
+            (current, next) => new GameAction.EnergyChange(next, next, e => e + 2),
+            (current, next) => new GameAction.EnergyChange(next, current, _ => 0)
         },
         standardEffectDuration: 1
         );

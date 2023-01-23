@@ -218,7 +218,7 @@ public class GameManager : MonoBehaviour
 
         GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
         await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2));
-        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => e = 0));
+        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => 0));
         await GameAction.Declare(turnAction);
 
     }

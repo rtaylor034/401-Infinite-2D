@@ -23,5 +23,9 @@ public partial class GameAction
             FromList = affectedPlayer.ManualActions;
             ToList = new(actionList);
         }
+        public override string ToString()
+        {
+            return $"<MA SET> {{{string.Join(", ", FromList)}}} -> {{{string.Join(", ", ToList)}}}" + base.ToString();
+        }
     }
 }

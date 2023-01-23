@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Mono.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -62,6 +63,7 @@ public static class GExtensions
 
     #region InvokeAll()
     //Add more when needed
+    //NEEDS DOCS
     public static TResult[] InvokeAll<TResult>(this IList<Func<TResult>> list)
     {
         var o = new TResult[list.Count];
@@ -126,7 +128,6 @@ public static class GExtensions
             if (value == invert) return false;
         return true;
     }
-
     public static bool GateOR(this IEnumerable<bool> bools, bool invert = false)
     {
         foreach (bool value in bools)
@@ -161,4 +162,5 @@ public static class GExtensions
         for (uint i = 0; i < n; i++) queue.Enqueue(queue.Dequeue());
     }
     #endregion
+
 }

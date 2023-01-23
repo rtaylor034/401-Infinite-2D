@@ -40,4 +40,9 @@ public class ManualAction
     {
         StandardType = standardType;
     }
+
+    public override string ToString()
+    {
+        return $"<MA:{StandardType}>";
+    }
 }

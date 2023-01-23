@@ -119,10 +119,17 @@ public class GameManager : MonoBehaviour
         }
 
         //put under a single "startgame" action action
+
+        foreach (Player player in _turnOrder)
+        {
+            var actions = settings.DefaultManualActions.ToList().ConvertAll(x => new Func<ManualAction>(x)).InvokeAll();
+            await GameAction.Declare(new GameAction.ManualActionsSet(player, actions, player));
+        }
+
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Value, PassiveRegistry.Registry[1].Invoke(), _turnOrder.First.Value));
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].Invoke(), _turnOrder.First.Next.Value));
+
         await NextTurn();
-        
         TEMP_AssignTestInputs();
         
 

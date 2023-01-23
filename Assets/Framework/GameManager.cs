@@ -217,8 +217,7 @@ public class GameManager : MonoBehaviour
         var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
         GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
-        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, nextPlayer, e => e + 2));
-        await turnAction.AddResultant(new GameAction.EnergyChange(nextPlayer, CurrentPlayer, e => 0));
+        foreach (var func in Settings.TurnActions) await turnAction.AddResultant(func(CurrentPlayer, nextPlayer));
         await GameAction.Declare(turnAction);
 
     }

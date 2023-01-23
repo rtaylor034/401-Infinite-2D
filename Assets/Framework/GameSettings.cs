@@ -28,6 +28,7 @@ public class GameSettings
         TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;
         DefaultManualActions = defaultManualActions.AsReadOnly();
+        TurnActions = turnActions.AsReadOnly();
     }
 
     public readonly static GameSettings STANDARD = new(

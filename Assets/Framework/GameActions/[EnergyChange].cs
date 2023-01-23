@@ -55,7 +55,7 @@ public abstract partial class GameAction
 
         public override string ToString()
         {
-            var offset = _ChangedValue - Reciever.Energy;
+            var offset = _changeStack.Peek();
             return $"<ENERGY CHANGE> {Reciever} ({((offset >= 0) ? "+" : "")}{offset} Energy)" + base.ToString();
         }
     }

@@ -136,8 +136,7 @@ public static class GExtensions
     }
     #endregion
 
-    public delegate bool CompareStatement<T>(T value, T allOthers);
-    public static T CompareAndSelect<T>(this IEnumerable<T> values, CompareStatement<T> statement)
+    public static T CompareAndSelect<T>(this IEnumerable<T> values, Func<T, T, bool> statement)
     {
         var o = values.GetEnumerator().Current;
         foreach(T t in values)
@@ -163,4 +162,17 @@ public static class GExtensions
     }
     #endregion
 
+    #region Trig
+    public static Vector2 PolarToCartesian(this Vector2 polar, bool isDegrees = false)
+    {
+        polar.x = isDegrees ? polar.x * Mathf.Deg2Rad : polar.x;
+        return new(Mathf.Cos(polar.x) * polar.y, Mathf.Sin(polar.x) * polar.y);
+    }
+    public static Vector2 PolarToCartesian(this (float angle, float radius) polar, bool isDegrees = false)
+    {
+        polar.angle = isDegrees ? polar.angle * Mathf.Deg2Rad : polar.angle;
+        return new(Mathf.Cos(polar.angle) * polar.radius, Mathf.Sin(polar.angle) * polar.radius);
+    }
+
+    #endregion
 }

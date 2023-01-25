@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board _boardPrefab;
+    [SerializeField]
+    private ActionPromptWheel _actionPromptWheelPrefab;
+    [SerializeField]
+    private ActionPromptWheelEntry _actionPromptWheelEntryPrefab;
 
     public List<Board> ActiveBoards => new(_boards);
     private List<Board> _boards;
@@ -91,7 +95,7 @@ public class GameManager : MonoBehaviour
     private async void StartGame(GameSettings settings, IList<Map> maps)
     {
         
-        if (_gameActive) throw new Exception("Game is already active!");
+        if (_gameActive) throw new Exception("Game is already active.");
 
         _gameActive = true;
 
@@ -130,11 +134,29 @@ public class GameManager : MonoBehaviour
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].Invoke(), _turnOrder.First.Next.Value));
 
         await NextTurn();
-        TEMP_AssignTestInputs();
+        //TEMP_AssignTestInputs();
         
+        while (true)
+        {
+            
+        }
 
     }
 
+    private Dictionary<Selectable, HashSet<ManualAction>> GetActionMap()
+    {
+        Dictionary<Selectable, HashSet<ManualAction>> actionMap = new();
+        foreach (var manual in CurrentPlayer.ManualActions)
+        {
+            foreach (var element in manual.EntryPoints(CurrentPlayer))
+            {
+                if (actionMap.TryGetValue(element, out var set)) set.Add(manual);
+                else actionMap[element] = new() { manual };
+            }
+        }
+        return actionMap;
+        
+    }
     private void TEMP_AssignTestInputs()
     {
         //TEST MOVEMENT

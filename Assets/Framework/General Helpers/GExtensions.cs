@@ -46,6 +46,17 @@ public static class GExtensions
     {
         yield return item;
     }
+
+    public static IEnumerable<T> Without<T>(this IEnumerable<T> enumerable, IEnumerable<T> exclusions)
+    {
+        foreach (var item in enumerable)
+        {
+            if (exclusions.Contains(item)) continue;
+            yield return item;
+        }
+    }
+    public static IEnumerable<T> Without<T>(this IEnumerable<T> enumerable, T exclusion) =>
+        Without(enumerable, exclusion.Wrapped());
     #endregion
 
     #region Delegates

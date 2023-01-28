@@ -138,17 +138,28 @@ public class GameManager : MonoBehaviour
         
         while (true)
         {
-            
+            await GameLoop();
         }
 
     }
 
-    private Dictionary<Selectable, HashSet<ManualAction>> GetActionMap()
+    private async Task GameLoop()
+    {
+        var actionMap = GetManualActionMapping(CurrentPlayer);
+        HashSet<Selectable> available = new(actionMap.Keys);
+        var manSel = await SELECTOR.Prompt(available);
+
+        if (manSel.WasEmpty) throw new Exception("Current Player has no valid entry points?");
+        if (manSel.WasCancelled) UndoLastGameAction(false);
+        
+    }
+
+    private Dictionary<Selectable, HashSet<ManualAction>> GetManualActionMapping(Player forPlayer)
     {
         Dictionary<Selectable, HashSet<ManualAction>> actionMap = new();
-        foreach (var manual in CurrentPlayer.ManualActions)
+        foreach (var manual in forPlayer.ManualActions)
         {
-            foreach (var element in manual.EntryPoints(CurrentPlayer))
+            foreach (var element in manual.EntryPoints(forPlayer))
             {
                 if (actionMap.TryGetValue(element, out var set)) set.Add(manual);
                 else actionMap[element] = new() { manual };

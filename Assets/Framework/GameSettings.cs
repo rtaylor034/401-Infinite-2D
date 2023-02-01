@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.ObjectModel;
 using System;
+using UnityEditor.Build.Content;
 
 public class GameSettings
 {
@@ -51,7 +52,7 @@ public class GameSettings
                 Action = async (player, selectedUnit) =>
                 {
                     if (selectedUnit is not Unit u) throw new System.Exception();
-
+                    //!!!BUG!!! if canceled, crashes due to null exception.
                     return await (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
                     {
                         Distance = 4,

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ActionPromptWheelEntry : Selectable
+public class ActionPromptWheelOption : Selectable
 {
     public bool IsActionable =>
         Action.PlayerConditions.InvokeAll(ParentWheel.Performer).GateAND() ||
@@ -10,7 +10,7 @@ public class ActionPromptWheelEntry : Selectable
 
     public ActionPromptWheel ParentWheel { get; private set; }
     public ManualAction Action { get; private set; }
-    public ActionPromptWheelEntry Init(ActionPromptWheel parentWheel, ManualAction action)
+    public ActionPromptWheelOption Init(ActionPromptWheel parentWheel, ManualAction action)
     {
         ParentWheel = parentWheel;
         Action = action;

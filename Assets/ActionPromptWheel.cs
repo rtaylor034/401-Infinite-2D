@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,29 +12,29 @@ public class ActionPromptWheel : MonoBehaviour
     public Player Performer { get; private set; }
     public Selectable Root { get; private set; }
 
-    public HashSet<ActionPromptWheelEntry> Entries => new(_entries);
-    private HashSet<ActionPromptWheelEntry> _entries;
+    public HashSet<ActionPromptWheelOption> Options => new(_options);
+    private HashSet<ActionPromptWheelOption> _options;
 
-    public ActionPromptWheel Init(Player performer, Selectable root, IEnumerable<ManualAction> actions, ActionPromptWheelEntry entryPrefab, float radius)
+    public ActionPromptWheel Init(Player performer, Selectable root, IEnumerable<ManualAction> actions, ActionPromptWheelOption optionPrefab, float radius)
     {
         Performer = performer;
         Root = root;
-        _entries = new();
+        _options = new();
         foreach (var action in actions)
         {
-            _entries.Add(Instantiate(entryPrefab, transform).Init(this, action));
+            _options.Add(Instantiate(optionPrefab, transform).Init(this, action));
         }
-        SpreadEntries(radius);
+        SpreadOptions(radius);
         return this;
     }
 
-    private void SpreadEntries(float radius)
+    private void SpreadOptions(float radius)
     {
         int i = 0;
-        float inc = 360 / _entries.Count;
-        foreach (var entry in _entries)
+        float inc = 360 / _options.Count;
+        foreach (var option in _options)
         {
-            entry.transform.localPosition = (inc * i, radius).PolarToCartesian();
+            option.transform.localPosition = ((inc * i) + 90, radius).PolarToCartesian(true);
         }
     }
 

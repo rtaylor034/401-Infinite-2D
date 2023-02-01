@@ -133,41 +133,43 @@ public partial class GameAction
 
             async Task<Move> __HandlePathed(PathedInfo pathed)
             {
+                Board.ContinuePathCondition __GenerateDirectionals(Unit unit)
+                {
+                    List<Func<Hex, Hex, bool>> blockedConditions = new();
+                    var blocks = pathed.DirectionalBlocks.InvokeAll(unit);
+                    foreach (var block in blocks)
+                    {
+                        foreach (var (anchor, rule) in block)
+                        {
+                            blockedConditions.Add((p, n) =>
+                            anchor.RadiusBetween(n.Position) - anchor.RadiusBetween(p.Position) == (sbyte)rule);
+                        }
+                    }
+                    return (p, n) => blockedConditions.Count == 0 || !blockedConditions.InvokeAll(p, n).GateOR();
+                }
+                Board.ContinuePathCondition __GetPathCondition(Unit unit) => (Hex p, Hex n) =>
+                    (pathed.PathingConditions
+                    .InvokeAll(unit)
+                    .InvokeAll(p, n)
+                    .GateAND() &&
+                    __GenerateDirectionals(unit)(p, n))
+                    ||
+                    pathed.PathingOverrides
+                    .InvokeAll(unit)
+                    .InvokeAll(p, n)
+                    .GateOR();
+                Board.PathWeightFunction __GetWeightFunction(Unit unit) => (Hex p, Hex n) =>
+                    pathed.PathingWeightFunctions
+                    .InvokeAll(unit)
+                    .InvokeAll(p, n)
+                    .Sum();
+
                 int traversed = 0;
+
                 Stack<(PositionChange PosChange, int Dist)> moves = new();
                 while (queue.Count > 0)
                 {
                     movingUnit = queue.Dequeue();
-                    Board.ContinuePathCondition __GenerateDirectionals(Unit unit)
-                    {
-                        List<Func<Hex, Hex, bool>> blockedConditions = new();
-                        var blocks = pathed.DirectionalBlocks.InvokeAll(unit);
-                        foreach (var block in blocks)
-                        {
-                            foreach(var (anchor, rule) in block)
-                            {
-                                blockedConditions.Add((p, n) =>
-                                anchor.RadiusBetween(n.Position) - anchor.RadiusBetween(p.Position) == (sbyte)rule);
-                            }
-                        }
-                        return (p, n) => blockedConditions.Count == 0 || !blockedConditions.InvokeAll(p, n).GateOR();
-                    }
-                    Board.ContinuePathCondition __GetPathCondition(Unit unit) => (Hex p, Hex n) =>
-                        (pathed.PathingConditions
-                        .InvokeAll(unit)
-                        .InvokeAll(p, n)
-                        .GateAND() &&
-                        __GenerateDirectionals(unit)(p, n))
-                        ||
-                        pathed.PathingOverrides
-                        .InvokeAll(unit)
-                        .InvokeAll(p, n)
-                        .GateOR();
-                    Board.PathWeightFunction __GetWeightFunction(Unit unit) => (Hex p, Hex n) =>
-                        pathed.PathingWeightFunctions
-                        .InvokeAll(unit)
-                        .InvokeAll(p, n)
-                        .Sum();
 
                     int max = Math.Min(pathed.MaxDistancePerUnit, pathed.Distance - traversed);
 
@@ -195,6 +197,7 @@ public partial class GameAction
                     {
                         var (action, travel) = moves.Pop();
                         queue.Enqueue(action.AffectedUnit);
+                        queue.Enqueue(movingUnit);
                         queue.CycleTo(action.AffectedUnit);
                         traversed -= travel;
                         action.InternalUndo();
@@ -244,6 +247,7 @@ public partial class GameAction
                     {
                         var action = moves.Pop();
                         queue.Enqueue(action.AffectedUnit);
+                        queue.Enqueue(movingUnit);
                         queue.CycleTo(action.AffectedUnit);
                         action.InternalUndo();
                         continue;

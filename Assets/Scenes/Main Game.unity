@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardPrefab: {fileID: 2229590987079166900, guid: 0cb38a50bec1fb64d8b1bb810c33fa36, type: 3}
   _actionPromptWheelPrefab: {fileID: 7270264418828539907, guid: 2c01325110a027a48995e775a5ffd8ec, type: 3}
-  _actionPromptWheelEntryPrefab: {fileID: 0}
+  _actionPromptWheelOptionPrefab: {fileID: -966917200640910767, guid: e1731d9b5885a2042912c38a789114b5, type: 3}
 --- !u!4 &1289678319
 Transform:
   m_ObjectHideFlags: 0

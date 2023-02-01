@@ -156,7 +156,7 @@ public class GameManager : MonoBehaviour
             var selargs = await SELECTOR.Prompt(available);
             if (selargs.Selection == null)
             {
-                if (selargs.WasCancelled) UndoLastGameAction(false);
+                if (selargs.WasCancelled) if (!UndoLastGameAction(false)) print("Undo unsucessful");
                 if (selargs.WasEmpty) throw new Exception("no valid manual action entry-points (handle later)");
 
                 return true;

@@ -4,9 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Scripting;
 /// <summary>
 /// [ : ] <see cref="MonoBehaviour"/>
 /// </summary>
@@ -15,6 +17,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private Board _boardPrefab;
+    [SerializeField]
+    private ActionPromptWheel _actionPromptWheelPrefab;
+    [SerializeField]
+    private ActionPromptWheelOption _actionPromptWheelOptionPrefab;
 
     public List<Board> ActiveBoards => new(_boards);
     private List<Board> _boards;
@@ -91,7 +97,7 @@ public class GameManager : MonoBehaviour
     private async void StartGame(GameSettings settings, IList<Map> maps)
     {
         
-        if (_gameActive) throw new Exception("Game is already active!");
+        if (_gameActive) throw new Exception("Game is already active.");
 
         _gameActive = true;
 
@@ -130,11 +136,78 @@ public class GameManager : MonoBehaviour
         await GameAction.Declare(new GameAction.ActivatePassive(_turnOrder.First.Next.Value, PassiveRegistry.Registry[0].Invoke(), _turnOrder.First.Next.Value));
 
         await NextTurn();
-        TEMP_AssignTestInputs();
-        
+        //TEMP_AssignTestInputs();
 
+        while (await GameLoop()) { }
     }
 
+    //returns true if should loop again, false to break gameloop.
+    private async Task<bool> GameLoop()
+    {
+
+        if (!await __ManualPrompt()) return false;
+        return true;
+
+        async Task<bool> __ManualPrompt()
+        {
+            var actionMap = GetManualActionMapping(CurrentPlayer);
+            HashSet<Selectable> available = new(actionMap.Keys);
+
+            var selargs = await SELECTOR.Prompt(available);
+            if (selargs.Selection == null)
+            {
+                if (selargs.WasCancelled) if (!UndoLastGameAction(false)) print("Undo unsucessful");
+                if (selargs.WasEmpty) throw new Exception("no valid manual action entry-points (handle later)");
+
+                return true;
+            }
+
+            var selection = selargs.Selection;
+
+            while (true)
+            {
+                ActionPromptWheel actionWheel = Instantiate(_actionPromptWheelPrefab, transform).Init(CurrentPlayer, selection, actionMap[selection], _actionPromptWheelOptionPrefab, 1);
+                actionWheel.transform.position = actionWheel.Root.transform.position;
+
+                HashSet<Selectable> prevAvailable = new(available);
+                available.UnionWith(actionWheel.Options.Where(o => o.IsActionable));
+                available.Remove(selection);
+                selargs = await SELECTOR.Prompt(available);
+                Destroy(actionWheel.gameObject);
+                if (selargs.Selection is not ActionPromptWheelOption opt)
+                {
+                    if (selargs.WasCancelled) return true;
+                    if (selargs.WasEmpty) throw new Exception("no selection available upon wheel prompt?");
+
+                    selection = selargs.Selection;
+                    available = prevAvailable;
+                    continue;
+                }
+                await HandleActionWheelOptionSelection(opt);
+                break;
+            }
+            return true;
+        }
+    }
+
+    private async Task HandleActionWheelOptionSelection(ActionPromptWheelOption option)
+    {
+        await GameAction.Declare(await option.Action.Action.Invoke(option.ParentWheel.Performer, option.ParentWheel.Root));
+    }
+    private Dictionary<Selectable, HashSet<ManualAction>> GetManualActionMapping(Player forPlayer)
+    {
+        Dictionary<Selectable, HashSet<ManualAction>> actionMap = new();
+        foreach (var manual in forPlayer.ManualActions)
+        {
+            foreach (var element in manual.EntryPoints.Invoke(forPlayer))
+            {
+                if (actionMap.TryGetValue(element, out var set)) set.Add(manual);
+                else actionMap[element] = new() { manual };
+            }
+        }
+        return actionMap;
+        
+    }
     private void TEMP_AssignTestInputs()
     {
         //TEST MOVEMENT

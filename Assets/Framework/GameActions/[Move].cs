@@ -191,7 +191,7 @@ public partial class GameAction
 
                     var selArgs = await GameManager.SELECTOR.Prompt(available);
 
-                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) break;
                     if (selArgs.WasEmpty) continue;
                     if (selArgs.WasCancelled)
                     {
@@ -241,7 +241,7 @@ public partial class GameAction
 
                     var selArgs = await GameManager.SELECTOR.Prompt(available);
 
-                    if (moves.Count == 0 && __CheckCancel(selArgs)) continue;
+                    if (moves.Count == 0 && __CheckCancel(selArgs)) break;
                     if (selArgs.WasEmpty) continue;
                     if (selArgs.WasCancelled)
                     {

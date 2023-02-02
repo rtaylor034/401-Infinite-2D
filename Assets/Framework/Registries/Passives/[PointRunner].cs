@@ -48,7 +48,8 @@ public partial class Passive
                             new GameAction.Move.PathedInfo(m.AffectedUnit, hex.Occupant)
                             {
                                 Distance = 2
-                            }));
+                            },
+                            _ => Debug.Log("TEST")));
                         break;
                     }
 

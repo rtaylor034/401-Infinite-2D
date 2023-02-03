@@ -28,7 +28,7 @@ public partial class GameAction
         public Unit[] ParticipatingUnits { get; private set; }
 
         /// <summary>
-        /// Occurs when any <see cref="PlayAbility"/> is prompted using <see cref="Prompt(PromptArgs, Action{PlayAbility}, Selector.SelectionConfirmMethod)"/>. <br></br>
+        /// Occurs when any <see cref="PlayAbility"/> is prompted using <see cref="Prompt(PromptArgs, Action{Selector.SelectionArgs})"/>. <br></br>
         /// </summary>
         /// <remarks>
         /// <i>Modifications to the <see cref="PromptArgs"/> will be applied to the Prompt() call.</i>

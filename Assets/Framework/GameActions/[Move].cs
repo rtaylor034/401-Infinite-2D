@@ -16,7 +16,7 @@ public partial class GameAction
     /// <summary>
     /// [ : ] <see cref="GameAction"/>
     /// </summary>
-    public class Move : GameAction
+    public class Move : ContainerAction
     {
         /// <summary>
         /// [Delegate]
@@ -52,17 +52,6 @@ public partial class GameAction
         public List<PositionChange> PositionChanges => new(_positionChanges);
         private readonly List<PositionChange> _positionChanges;
 
-        protected override void InternalPerform() { }
-        protected override void InternalUndo() { }
-        protected override async Task InternalEvaluate()
-        {
-            foreach (var change in _positionChanges)
-            {
-                await AddResultant(change);
-            }
-                
-        }
-
         /// <summary>
         /// Creates a <see cref="Move"/> with <paramref name="moveInfo"/>, resulting in the <see cref="PositionChange"/> actions <paramref name="positionChanges"/>, by <paramref name="performer"/>.
         /// <br></br><br></br>
@@ -71,7 +60,7 @@ public partial class GameAction
         /// <param name="performer"></param>
         /// <param name="moveInfo"></param>
         /// <param name="positionChanges"></param>
-        public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer)
+        public Move(Player performer, Info moveInfo, IEnumerable<PositionChange> positionChanges) : base(performer, positionChanges)
         {
             _positionChanges = new(positionChanges);
             MoveInfo = moveInfo;

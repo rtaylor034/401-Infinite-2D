@@ -26,14 +26,8 @@ public abstract partial class GameAction
     private readonly static List<EvaluationEventHandler> _onEvaluationEventSubscribers = new();
     public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent = new(_onEvaluationEventSubscribers);
 
-    /// <summary>
-    /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
-    /// > Resultant GameActions will be performed and undone whenever this <see cref="GameAction"/> is.
-    /// </summary>
-    /// <remarks>
-    /// <i>See <see cref="AddResultant(GameAction)"/></i>
-    /// </remarks>
-    public List<GameAction> ResultantActions => new(_resultantActions);
+    
+    //public List<GameAction> ResultantActions => new(_resultantActions);
     //consider removing public access from resultant actions, as there is no need, and resultant action reliant behavior is not clean.
 
     /// <summary>
@@ -41,7 +35,13 @@ public abstract partial class GameAction
     /// </summary>
     public Player Performer { get; private set; }
 
-    /// <inheritdoc cref="ResultantActions"/>
+    /// <summary>
+    /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
+    /// > Resultant GameActions will be performed and undone whenever this <see cref="GameAction"/> is.
+    /// </summary>
+    /// <remarks>
+    /// <i>See <see cref="AddResultant(GameAction)"/></i>
+    /// </remarks>
     private readonly List<GameAction> _resultantActions = new();
 
     #region Quick Documentation Inherits
@@ -131,6 +131,7 @@ public abstract partial class GameAction
         if (action is not null)
         {
             _resultantActions.Add(action);
+            await action.Evaluate();
         }   
 
         return this;
@@ -148,22 +149,21 @@ public abstract partial class GameAction
         if (action == null) return;
 
         await action.Evaluate();
+        action.Perform();
         Debug.Log($"(Action Declare) {action}");
         GameManager.GAME.PushGameAction(action);
         
     }
 
-    private async Task Evaluate()
+    protected async Task Evaluate()
     {
         await InternalEvaluate();
         InternalPerform();
-        //PositionChanges from move must somehow performed first without disrupting flow/perform twice?
         foreach (var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
         {
             await externalEvaluation(this);
         }
-        
-        for (int i = 0; i < _resultantActions.Count; i++) await _resultantActions[i].Evaluate();
+        InternalUndo();
     }
     protected virtual Task InternalEvaluate() => Task.CompletedTask;
 

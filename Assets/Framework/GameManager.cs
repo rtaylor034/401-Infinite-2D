@@ -290,7 +290,7 @@ public class GameManager : MonoBehaviour
         var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
         GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
-        foreach (var func in Settings.TurnActions) await turnAction.AddResultant(func(CurrentPlayer, nextPlayer));
+        foreach (var func in Settings.TurnActions) turnAction.AddImplicitResultant(func(CurrentPlayer, nextPlayer));
         await GameAction.Declare(turnAction);
 
     }

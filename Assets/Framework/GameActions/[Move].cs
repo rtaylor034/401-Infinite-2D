@@ -57,7 +57,7 @@ public partial class GameAction
         protected override async Task InternalEvaluate()
         {
             foreach (var change in _positionChanges)
-                await AddResultant(change);
+                AddImplicitResultant(change);
         }
 
         /// <summary>

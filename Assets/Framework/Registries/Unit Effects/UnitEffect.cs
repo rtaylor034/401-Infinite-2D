@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -75,7 +76,7 @@ public abstract partial class UnitEffect
         if (effect.Effect != this) yield break;
         GameAction.ExternalEvaluation -= CallWhenInflicted;
 
-        await WhenInflicted(effect);
+        await foreach (var a in WhenInflicted(effect)) yield return a;
     }
 
     /// <summary>
@@ -94,7 +95,10 @@ public abstract partial class UnitEffect
     /// (<c><see langword="this"/>.AffectedUnit</c> has not been set yet, use <c><paramref name="action"/>.AffectedUnit</c>)
     /// </remarks>
     /// <param name="action"></param>
-    protected virtual Task WhenInflicted(GameAction.InflictEffect action) => Task.CompletedTask;
+    protected virtual async IAsyncEnumerable<GameAction> WhenInflicted(GameAction.InflictEffect action)
+    {
+        yield break;
+    }
     
 
     private async IAsyncEnumerable<GameAction> TickDown(GameAction action)

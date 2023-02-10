@@ -162,7 +162,7 @@ public partial class GameAction
                 {
                     //realistically should only have 1 target (ParticipatingUnits[1]), but this is multitarget support for no reason.
                     for (int i = 1; i < ParticipatingUnits.Length; i++)
-                        await AddResultant(new InflictEffect(Performer, effectC.Invoke(), ParticipatingUnits[i]));
+                        AddImplicitResultant(new InflictEffect(Performer, effectC.Invoke(), ParticipatingUnits[i]));
                 }
 
             }

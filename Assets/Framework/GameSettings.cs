@@ -53,12 +53,12 @@ public class GameSettings
                 {
                     if (selectedUnit is not Unit u) throw new System.Exception();
                     //!!!BUG!!! if canceled, crashes due to null exception.
-                    return await (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
+                    return (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
                     {
                         Distance = 4,
                         MinDistance = 1
                     })
-                    )?.AddResultant(new GameAction.EnergyChange(player, player, e => e - 1));
+                    )?.AddImplicitResultant(new GameAction.EnergyChange(player, player, e => e - 1));
                 },
                 PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
             }

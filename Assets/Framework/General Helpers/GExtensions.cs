@@ -46,6 +46,10 @@ public static class GExtensions
     {
         yield return item;
     }
+    public async static IAsyncEnumerable<T> WrappedAsync<T>(this T item)
+    {
+        yield return item;
+    }
 
     public static IEnumerable<T> Without<T>(this IEnumerable<T> enumerable, IEnumerable<T> exclusions)
     {

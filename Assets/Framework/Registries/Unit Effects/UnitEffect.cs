@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -34,7 +35,7 @@ public abstract partial class UnitEffect
     protected UnitEffect(int duration)
     {
         Duration = duration;
-        GameAction.OnEvaluationEvent += CallWhenInflicted;
+        GameAction.ExternalEvaluation += CallWhenInflicted;
     }
 
     /// <summary>
@@ -52,11 +53,11 @@ public abstract partial class UnitEffect
         InternalSetup(val);
         if (val)
         {
-            GameAction.OnEvaluationEvent += TickDown;
+            GameAction.ExternalEvaluation += TickDown;
         } 
         else
         {
-            GameAction.OnEvaluationEvent -= TickDown;
+            GameAction.ExternalEvaluation -= TickDown;
         }
         
     }
@@ -69,13 +70,13 @@ public abstract partial class UnitEffect
     {
         Duration = val;
     }
-    private async Task CallWhenInflicted(GameAction action)
+    private async IAsyncEnumerable<GameAction> CallWhenInflicted(GameAction action)
     {
-        if (action is not GameAction.InflictEffect effect) return;
-        if (effect.Effect != this) return;
-        GameAction.OnEvaluationEvent -= CallWhenInflicted;
+        if (action is not GameAction.InflictEffect effect) yield break;
+        if (effect.Effect != this) yield break;
+        GameAction.ExternalEvaluation -= CallWhenInflicted;
 
-        await WhenInflicted(effect);
+        await foreach (var a in WhenInflicted(effect)) yield return a;
     }
 
     /// <summary>
@@ -94,13 +95,16 @@ public abstract partial class UnitEffect
     /// (<c><see langword="this"/>.AffectedUnit</c> has not been set yet, use <c><paramref name="action"/>.AffectedUnit</c>)
     /// </remarks>
     /// <param name="action"></param>
-    protected virtual Task WhenInflicted(GameAction.InflictEffect action) => Task.CompletedTask;
+    protected virtual async IAsyncEnumerable<GameAction> WhenInflicted(GameAction.InflictEffect action)
+    {
+        yield break;
+    }
     
 
-    private async Task TickDown(GameAction action)
+    private async IAsyncEnumerable<GameAction> TickDown(GameAction action)
     {
-        if (action is not GameAction.Turn turn) return;
-        await action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
+        if (action is not GameAction.Turn turn) yield break;
+        yield return new GameAction.EffectDurationChange(action.Performer, this, d => d - 1);
     }
 
 

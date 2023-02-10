@@ -29,13 +29,11 @@ public abstract partial class GameAction
         protected override void InternalPerform()
         {
             _changeStack.Push(_ChangedValue - Reciever.Energy);
-            Debug.Log(_changeStack.Peek());
             Reciever.UpdateEnergy(_ChangedValue);
         }
 
         protected override void InternalUndo()
         {
-            Debug.Log(_changeStack.Peek());
             Reciever.UpdateEnergy(Reciever.Energy - _changeStack.Pop());
         }
 

@@ -34,7 +34,6 @@ public abstract partial class GameAction
     /// <i>See <see cref="AddResultant(GameAction)"/></i>
     /// </remarks>
     public List<GameAction> ResultantActions => new(_resultantActions);
-    //consider removing public access from resultant actions, as there is no need, and resultant action reliant behavior is not clean.
 
     /// <summary>
     /// The Player that performed this <see cref="GameAction"/>.
@@ -89,7 +88,6 @@ public abstract partial class GameAction
     /// </remarks>
     public void Undo()
     {
-        Debug.Log("UNDO - " + ToString());
         for (int i = _resultantActions.Count - 1; i >= 0; i--) _resultantActions[i].Undo();
         InternalUndo();
         
@@ -130,6 +128,7 @@ public abstract partial class GameAction
     {
         if (action is not null)
         {
+            await action.Evaluate();
             _resultantActions.Add(action);
         }   
 
@@ -155,15 +154,12 @@ public abstract partial class GameAction
 
     private async Task Evaluate()
     {
-        await InternalEvaluate();
         InternalPerform();
-        //PositionChanges from move must somehow performed first without disrupting flow/perform twice?
-        foreach (var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
+        await InternalEvaluate();
+        foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
         {
             await externalEvaluation(this);
         }
-        
-        for (int i = 0; i < _resultantActions.Count; i++) await _resultantActions[i].Evaluate();
     }
     protected virtual Task InternalEvaluate() => Task.CompletedTask;
 

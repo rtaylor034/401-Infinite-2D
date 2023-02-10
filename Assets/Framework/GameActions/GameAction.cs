@@ -105,6 +105,12 @@ public abstract partial class GameAction
     /// </remarks>
     protected abstract void InternalUndo();
 
+    /*
+     * DEV NOTE:
+     * Alr, so shit works, thats pretty poggers. still a bug when fully cancelling a split move.
+     * and please DO NOT FUCKING FORGET TO UPDATE DOCS, because of the paradigm shift a whole bunch of docs
+     * are just obsolete and wrong.
+     */
     protected GameAction(Player performer)
     {
         Performer = performer;

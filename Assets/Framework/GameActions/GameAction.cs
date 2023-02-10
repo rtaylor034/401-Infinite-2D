@@ -161,6 +161,7 @@ public abstract partial class GameAction
         {
             await foreach(var resultant in eval(this))
             {
+                if (resultant == null) continue;
                 _resultantActions.Add(resultant);
                 await resultant.Evaluate();
             }

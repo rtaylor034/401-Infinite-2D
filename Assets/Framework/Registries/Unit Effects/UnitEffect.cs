@@ -34,7 +34,7 @@ public abstract partial class UnitEffect
     protected UnitEffect(int duration)
     {
         Duration = duration;
-        GameAction.OnEvaluationEvent += CallWhenInflicted;
+        GameAction.ExternalEvaluation += CallWhenInflicted;
     }
 
     /// <summary>
@@ -52,11 +52,11 @@ public abstract partial class UnitEffect
         InternalSetup(val);
         if (val)
         {
-            GameAction.OnEvaluationEvent += TickDown;
+            GameAction.ExternalEvaluation += TickDown;
         } 
         else
         {
-            GameAction.OnEvaluationEvent -= TickDown;
+            GameAction.ExternalEvaluation -= TickDown;
         }
         
     }
@@ -69,11 +69,11 @@ public abstract partial class UnitEffect
     {
         Duration = val;
     }
-    private async Task CallWhenInflicted(GameAction action)
+    private async IAsyncEnumerable<GameAction> CallWhenInflicted(GameAction action)
     {
-        if (action is not GameAction.InflictEffect effect) return;
-        if (effect.Effect != this) return;
-        GameAction.OnEvaluationEvent -= CallWhenInflicted;
+        if (action is not GameAction.InflictEffect effect) yield break;
+        if (effect.Effect != this) yield break;
+        GameAction.ExternalEvaluation -= CallWhenInflicted;
 
         await WhenInflicted(effect);
     }
@@ -97,10 +97,10 @@ public abstract partial class UnitEffect
     protected virtual Task WhenInflicted(GameAction.InflictEffect action) => Task.CompletedTask;
     
 
-    private async Task TickDown(GameAction action)
+    private async IAsyncEnumerable<GameAction> TickDown(GameAction action)
     {
-        if (action is not GameAction.Turn turn) return;
-        await action.AddResultant(new GameAction.EffectDurationChange(action.Performer, this, d => d - 1));
+        if (action is not GameAction.Turn turn) yield break;
+        yield return new GameAction.EffectDurationChange(action.Performer, this, d => d - 1);
     }
 
 

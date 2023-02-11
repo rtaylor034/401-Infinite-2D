@@ -35,6 +35,7 @@ public class ActionPromptWheel : MonoBehaviour
         foreach (var option in _options)
         {
             option.transform.localPosition = ((inc * i) + 90, radius).PolarToCartesian(true);
+            i++;
         }
     }
 

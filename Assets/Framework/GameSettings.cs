@@ -52,7 +52,6 @@ public class GameSettings
                 Action = async (player, selectedUnit) =>
                 {
                     if (selectedUnit is not Unit u) throw new System.Exception();
-                    //!!!BUG!!! if canceled, crashes due to null exception.
                     return (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
                     {
                         Distance = 4,
@@ -63,6 +62,7 @@ public class GameSettings
                 PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
             }
         },
+
         turnActions: new()
         {
             (current, next) => new GameAction.EnergyChange(next, next, e => e + 2),

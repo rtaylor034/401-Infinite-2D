@@ -23,6 +23,8 @@ public partial class UnitEffect
 
         private async IAsyncEnumerable<GameAction> ShieldHandling(GameAction action)
         {
+            await Task.CompletedTask;
+
             if (action is not GameAction.InflictEffect effect) yield break;
             if (effect.Effect is not UnitEffect.Shield) yield break;
             //once a shield has been used to absorb this damage, stop listening for shields.
@@ -33,6 +35,8 @@ public partial class UnitEffect
 
         protected override async IAsyncEnumerable<GameAction> WhenInflicted(GameAction.InflictEffect action)
         {
+            await Task.CompletedTask;
+
             yield return new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1);
         }
     }

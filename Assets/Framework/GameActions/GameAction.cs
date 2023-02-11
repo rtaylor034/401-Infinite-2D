@@ -17,7 +17,7 @@ public abstract partial class GameAction
 
     //consider changing from static, kinda lazy
     private readonly static List<EvaluationResultantAdder> _externalEvaluationAdders = new();
-    private List<EvaluationResultantAdder> _implicitResultantAdders = new();
+    private readonly List<EvaluationResultantAdder> _implicitResultantAdders = new();
     public static GuardedCollection<EvaluationResultantAdder> ExternalEvaluation = new(_externalEvaluationAdders);
 
     /// <summary>

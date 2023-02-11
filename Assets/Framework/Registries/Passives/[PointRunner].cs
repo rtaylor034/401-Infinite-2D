@@ -60,6 +60,8 @@ public partial class Passive
         {
             if (action is not GameAction.Turn turn) yield break;
             if (turn.ToPlayer == EmpoweredPlayer) yield return new StateSet(this, true);
+
+            await Task.CompletedTask;
         }
     }
 

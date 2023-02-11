@@ -54,10 +54,11 @@ public partial class GameAction
 
         protected override void InternalPerform() { }
         protected override void InternalUndo() { }
-        protected override async Task InternalEvaluate()
+        protected override Task InternalEvaluate()
         {
             foreach (var change in _positionChanges)
                 AddImplicitResultant(change);
+            return Task.CompletedTask;
         }
 
         /// <summary>

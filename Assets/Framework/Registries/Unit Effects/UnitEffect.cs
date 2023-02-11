@@ -97,16 +97,17 @@ public abstract partial class UnitEffect
     /// <param name="action"></param>
     protected virtual async IAsyncEnumerable<GameAction> WhenInflicted(GameAction.InflictEffect action)
     {
-        yield break;
+        await Task.CompletedTask; yield break;
     }
-    
 
     private async IAsyncEnumerable<GameAction> TickDown(GameAction action)
     {
         if (action is not GameAction.Turn turn) yield break;
         yield return new GameAction.EffectDurationChange(action.Performer, this, d => d - 1);
-    }
 
+        await Task.CompletedTask;
+
+    }
 
     public override string ToString()
     {

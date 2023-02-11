@@ -12,19 +12,13 @@ using UnityEngine;
 /// </summary>
 public abstract partial class GameAction
 {
-    /// <summary>
-    /// [Event Handler Delegate] <br></br>
-    /// </summary>
-    /// <remarks>
-    /// <c>EventSubscriberMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c>
-    /// </remarks>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="action"></param>
-    public delegate Task EvaluationEventHandler(GameAction action);
+
+    public delegate IAsyncEnumerable<GameAction> EvaluationResultantAdder(GameAction action);
 
     //consider changing from static, kinda lazy
-    private readonly static List<EvaluationEventHandler> _onEvaluationEventSubscribers = new();
-    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent = new(_onEvaluationEventSubscribers);
+    private readonly static List<EvaluationResultantAdder> _externalEvaluationAdders = new();
+    private readonly List<EvaluationResultantAdder> _implicitResultantAdders = new();
+    public static GuardedCollection<EvaluationResultantAdder> ExternalEvaluation = new(_externalEvaluationAdders);
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
@@ -111,6 +105,12 @@ public abstract partial class GameAction
     /// </remarks>
     protected abstract void InternalUndo();
 
+    /*
+     * DEV NOTE:
+     * Alr, so shit works, thats pretty poggers. still a bug when fully cancelling a split move.
+     * and please DO NOT FUCKING FORGET TO UPDATE DOCS, because of the paradigm shift a whole bunch of docs
+     * are just obsolete and wrong.
+     */
     protected GameAction(Player performer)
     {
         Performer = performer;
@@ -124,12 +124,11 @@ public abstract partial class GameAction
     /// <returns>
     /// <see langword="this"/> <see cref="GameAction"/>
     /// </returns>
-    public async Task<GameAction> AddResultant(GameAction action)
+    public GameAction AddImplicitResultant(GameAction action)
     {
         if (action is not null)
         {
-            await action.Evaluate();
-            _resultantActions.Add(action);
+            _implicitResultantAdders.Add(_ => action.WrappedAsync());
         }   
 
         return this;
@@ -156,9 +155,16 @@ public abstract partial class GameAction
     {
         InternalPerform();
         await InternalEvaluate();
-        foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
+        List<EvaluationResultantAdder> resultantAdders = new(_implicitResultantAdders);
+        resultantAdders.AddRange(_externalEvaluationAdders);
+        foreach(var eval in resultantAdders)
         {
-            await externalEvaluation(this);
+            await foreach(var resultant in eval(this))
+            {
+                if (resultant == null) continue;
+                _resultantActions.Add(resultant);
+                await resultant.Evaluate();
+            }
         }
     }
     protected virtual Task InternalEvaluate() => Task.CompletedTask;

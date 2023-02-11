@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour
 
             while (true)
             {
-                ActionPromptWheel actionWheel = Instantiate(_actionPromptWheelPrefab, transform).Init(CurrentPlayer, selection, actionMap[selection], _actionPromptWheelOptionPrefab, 1);
+                ActionPromptWheel actionWheel = Instantiate(_actionPromptWheelPrefab, transform).Init(CurrentPlayer, selection, actionMap[selection], _actionPromptWheelOptionPrefab);
                 actionWheel.transform.position = actionWheel.Root.transform.position;
 
                 HashSet<Selectable> prevAvailable = new(available);
@@ -290,7 +290,7 @@ public class GameManager : MonoBehaviour
         var nextPlayer = (cnode is not null && cnode.Next is not null) ? cnode.Next.Value : _turnOrder.First.Value;
 
         GameAction.Turn turnAction = new(CurrentPlayer, nextPlayer);
-        foreach (var func in Settings.TurnActions) await turnAction.AddResultant(func(CurrentPlayer, nextPlayer));
+        foreach (var func in Settings.TurnActions) turnAction.AddImplicitResultant(func(CurrentPlayer, nextPlayer));
         await GameAction.Declare(turnAction);
 
     }

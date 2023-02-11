@@ -15,7 +15,7 @@ public class ActionPromptWheel : MonoBehaviour
     public HashSet<ActionPromptWheelOption> Options => new(_options);
     private HashSet<ActionPromptWheelOption> _options;
 
-    public ActionPromptWheel Init(Player performer, Selectable root, IEnumerable<ManualAction> actions, ActionPromptWheelOption optionPrefab, float radius)
+    public ActionPromptWheel Init(Player performer, Selectable root, IEnumerable<ManualAction> actions, ActionPromptWheelOption optionPrefab)
     {
         Performer = performer;
         Root = root;
@@ -24,7 +24,7 @@ public class ActionPromptWheel : MonoBehaviour
         {
             _options.Add(Instantiate(optionPrefab, transform).Init(this, action));
         }
-        SpreadOptions(radius);
+        SpreadOptions(1);
         return this;
     }
 
@@ -35,6 +35,7 @@ public class ActionPromptWheel : MonoBehaviour
         foreach (var option in _options)
         {
             option.transform.localPosition = ((inc * i) + 90, radius).PolarToCartesian(true);
+            i++;
         }
     }
 

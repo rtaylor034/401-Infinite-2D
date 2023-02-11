@@ -14,26 +14,30 @@ public partial class UnitEffect
         {
             if (val)
             {
-                GameAction.OnEvaluationEvent += ShieldHandling;
+                GameAction.ExternalEvaluation += ShieldHandling;
             } else
             {
-                GameAction.OnEvaluationEvent -= ShieldHandling;
+                GameAction.ExternalEvaluation -= ShieldHandling;
             }
         }
 
-        private async Task ShieldHandling(GameAction action)
+        private async IAsyncEnumerable<GameAction> ShieldHandling(GameAction action)
         {
-            if (action is not GameAction.InflictEffect effect) return;
-            if (effect.Effect is not UnitEffect.Shield) return;
-            //once a shield has been used to absorb this damage, stop listening for shields.
-            GameAction.OnEvaluationEvent -= ShieldHandling;
+            await Task.CompletedTask;
 
-            await action.AddResultant(new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp + 1));
+            if (action is not GameAction.InflictEffect effect) yield break;
+            if (effect.Effect is not UnitEffect.Shield) yield break;
+            //once a shield has been used to absorb this damage, stop listening for shields.
+            GameAction.ExternalEvaluation -= ShieldHandling;
+
+            yield return new GameAction.HPChange(Inflicter, AffectedUnit, hp => hp + 1);
         }
 
-        protected override async Task WhenInflicted(GameAction.InflictEffect action)
+        protected override async IAsyncEnumerable<GameAction> WhenInflicted(GameAction.InflictEffect action)
         {
-            await action.AddResultant(new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1));
+            await Task.CompletedTask;
+
+            yield return new GameAction.HPChange(action.Performer, action.AffectedUnit, hp => hp - 1);
         }
     }
 }

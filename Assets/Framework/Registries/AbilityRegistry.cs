@@ -38,7 +38,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                    a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
                         new GameAction.Move.PathedInfo(a.ParticipatingUnits[0])
                         {
                             Distance = 1
@@ -61,7 +61,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                    a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
                         new GameAction.Move.PathedInfo(a.ParticipatingUnits[0])
                         {
                             Distance = 3
@@ -96,7 +96,7 @@ public static class AbilityRegistry
 
                 new Ability.PlayAction(async a =>
                 {
-                    await a.AddResultant(await GameAction.Move.Prompt(a.Performer,
+                    a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
                         new GameAction.Move.PathedInfo(a.ParticipatingUnits[1])
                         {
                             Distance = 5

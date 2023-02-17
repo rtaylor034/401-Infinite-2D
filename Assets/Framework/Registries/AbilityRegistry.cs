@@ -117,5 +117,13 @@ public static class AbilityRegistry
         Registry = new ReadOnlyCollection<ConstructionTemplate<Ability>>(masterList);
     }
 
+    /// <summary>
+    /// [Local Shorthand]<br></br>
+    /// Equivalent to <c><see cref="BoardCoords.Simple(int, int, int)"/></c>
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="up"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
     private static Vector3Int H(int left, int up, int right) => BoardCoords.Simple(left, up, right);
 }

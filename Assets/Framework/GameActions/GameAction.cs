@@ -12,12 +12,30 @@ using UnityEngine;
 /// </summary>
 public abstract partial class GameAction
 {
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// <c> <see langword="async"/> IAsyncEnumerable&lt;<see cref="GameAction"/>&gt; EvaluationResultantAdderMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c><br></br>
+    /// - <paramref name="action"/> : The <see cref="GameAction"/> being evaluated.<br></br>
+    /// <see langword="yield"/> -> Each <see cref="GameAction"/> to be evaluated as a resultant of <paramref name="action"/>.<br></br>
+    /// (Each <see langword="yield"/> evaluates itself before moving onto the next)
+    /// </remarks>
+    /// <param name="action"></param>
+    /// <returns></returns>
     public delegate IAsyncEnumerable<GameAction> EvaluationResultantAdder(GameAction action);
 
     //consider changing from static, kinda lazy
     private readonly static List<EvaluationResultantAdder> _externalEvaluationAdders = new();
     private readonly List<EvaluationResultantAdder> _implicitResultantAdders = new();
+    /// <summary>
+    /// [Custom Return Event]<br></br>
+    /// Occurs when any <see cref="GameAction"/> is evaluated.<br></br>
+    /// Used to externally add resultants upon evaluation (Passives, game events, etc.)
+    /// </summary>
+    /// <remarks>
+    /// <inheritdoc cref="EvaluationResultantAdder"/>
+    /// </remarks>
     public static GuardedCollection<EvaluationResultantAdder> ExternalEvaluation = new(_externalEvaluationAdders);
 
     /// <summary>
@@ -117,9 +135,12 @@ public abstract partial class GameAction
     }
 
     /// <summary>
-    /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
+    /// Makes <paramref name="action"/> an implicit resultant of this <see cref="GameAction"/>. <br></br>
     /// (Adds to <see cref="ResultantActions"/>)
     /// </summary>
+    /// <remarks>
+    /// > Implicit resultants are not evaluated until the parent <see cref="GameAction"/> is evaluated.
+    /// </remarks>
     /// <param name="action"></param>
     /// <returns>
     /// <see langword="this"/> <see cref="GameAction"/>
@@ -135,7 +156,7 @@ public abstract partial class GameAction
     }
 
     /// <summary>
-    /// Adds <paramref name="action"/> to the main action stack, finalizing and performing it.
+    /// Adds <paramref name="action"/> to the main action stack, evaluating and performing it.
     /// </summary>
     /// <remarks>
     /// Primary method for making GameActions part of the game.

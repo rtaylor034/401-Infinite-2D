@@ -141,9 +141,19 @@ public class GameManager : MonoBehaviour
         while (await GameLoop()) { }
     }
 
-    //returns true if should loop again, false to break gameloop.
+    /// <summary>
+    /// DEV: Returns <see langword="false"/> if gameloop should be broken.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     private async Task<bool> GameLoop()
     {
+        //__TEMP__ for testing purposes
+        if (CurrentPlayer.Energy == 0)
+        {
+            await NextTurn();
+            return true;
+        }
 
         if (!await __ManualPrompt()) return false;
         return true;

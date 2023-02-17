@@ -37,7 +37,7 @@ public class ManualAction
     /// </remarks>
     public Func<Player, IEnumerable<Selectable>> EntryPoints { get; set; }
     /// <summary>
-    /// The <see cref="GameAction"/> to be declared.<br></br>
+    /// The <see cref="GameAction"/> object to be declared when this manual action is selected.<br></br>
     /// > Function of the declaring <see cref="Player"/> and their selected Root <see cref="Selectable"/>.
     /// </summary>
     /// <remarks>

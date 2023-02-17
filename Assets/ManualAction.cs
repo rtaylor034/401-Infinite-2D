@@ -49,7 +49,7 @@ public class ManualAction
     /// </remarks>
     public Func<Player, Selectable, Task<GameAction>> Action { get; set; }
     /// <summary>
-    /// A Player must pass all of these conditions in order for this manual action to be availabe to them.
+    /// A Player must pass ALL of these conditions in order for this manual action to be availabe to them.
     /// </summary>
     /// <remarks>
     /// <c><see cref="bool"/> PlayerConditionFunction(<see cref="Player"/> <i>player</i>) { }</c><br></br>
@@ -58,7 +58,7 @@ public class ManualAction
     /// </remarks>
     public List<Func<Player, bool>> PlayerConditions { get; set; } = new() { _ => true };
     /// <summary>
-    /// A Player can pass any of these conditions in order for this manual action to be availabe to them.<br></br>
+    /// A Player can pass ANY of these conditions in order for this manual action to be availabe to them.<br></br>
     /// (Overriding <see cref="PlayerConditions"/>)
     /// </summary>
     /// <remarks>

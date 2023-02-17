@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.ObjectModel;
 using System;
+using UnityEditor.Build.Content;
 
 public class GameSettings
 {
@@ -11,9 +12,10 @@ public class GameSettings
     public int StandardEffectDuration { get; private set; }
     public ReadOnlyCollection<Team> Teams { get; private set; }
     public ReadOnlyCollection<ConstructionTemplate<ManualAction>> DefaultManualActions { get; private set; }
+    public ReadOnlyCollection<Func<Player, Player, GameAction>> TurnActions { get; private set; }
     public int BoardCount { get; private set; } = 1;
 
-    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, int standardEffectDuration)
+    private GameSettings(List<Team> teams, List<int> turnOrder, List<ConstructionTemplate<ManualAction>> defaultManualActions, List<Func<Player, Player, GameAction>> turnActions, int standardEffectDuration)
     {
         List<ConstructionTemplate<Player>> orderInit = new();
         for (int i = 0; i < turnOrder.Count; i++)
@@ -27,6 +29,7 @@ public class GameSettings
         TurnOrder = orderInit.AsReadOnly();
         StandardEffectDuration = standardEffectDuration;
         DefaultManualActions = defaultManualActions.AsReadOnly();
+        TurnActions = turnActions.AsReadOnly();
     }
 
     public readonly static GameSettings STANDARD = new(
@@ -49,16 +52,21 @@ public class GameSettings
                 Action = async (player, selectedUnit) =>
                 {
                     if (selectedUnit is not Unit u) throw new System.Exception();
-
-                    return await (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
+                    return (await GameAction.Move.Prompt(player, new GameAction.Move.PathedInfo(u)
                     {
                         Distance = 4,
                         MinDistance = 1
                     })
-                    )?.AddResultant(new GameAction.EnergyChange(player, player, e => e - 1));
+                    )?.AddImplicitResultant(new GameAction.EnergyChange(player, player, e => e - 1));
                 },
                 PlayerConditions = new() { ManualAction.ONE_ENERGY_REQUIRED }
             }
+        },
+
+        turnActions: new()
+        {
+            (current, next) => new GameAction.EnergyChange(next, next, e => e + 2),
+            (current, next) => new GameAction.EnergyChange(next, current, _ => 0)
         },
         standardEffectDuration: 1
         );

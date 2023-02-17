@@ -9,7 +9,7 @@ public class Player
 
     public Team Team { get; private set; }
     public List<ManualAction> ManualActions => new(_manualActions);
-    private List<ManualAction> _manualActions;
+    private List<ManualAction> _manualActions = new();
     public int Energy { get; private set; } = 0;
     public int ControlSpheres { get; private set; } = 0;
 
@@ -62,7 +62,7 @@ public class Player
     //Players are *not* Units. Units are the peices that move across the board that have HP, status effects, etc. , while Player objects hold information about the entire side, such as the cards, passive, etc. a player has.
     public override string ToString()
     {
-        return $"P*{Team}";
+        return $"P*{Team}({Energy})";
     }
 
     

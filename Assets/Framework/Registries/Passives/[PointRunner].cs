@@ -19,20 +19,20 @@ public partial class Passive
         {
             if (val)
             {
-                GameAction.OnEvaluationEvent += Effect;
-                GameAction.OnEvaluationEvent += Refresh;
+                GameAction.ExternalEvaluation += Effect;
+                GameAction.ExternalEvaluation += Refresh;
             } else
             {
-                GameAction.OnEvaluationEvent -= Effect;
-                GameAction.OnEvaluationEvent -= Refresh;
+                GameAction.ExternalEvaluation -= Effect;
+                GameAction.ExternalEvaluation -= Refresh;
             }
         }
 
-        private async Task Effect(GameAction action)
+        private async IAsyncEnumerable<GameAction> Effect(GameAction action)
         {
-            if (action is not GameAction.Move move) return;
-            if (action.Performer != EmpoweredPlayer) return;
-            if (!Triggerable) return;
+            if (action is not GameAction.Move move) yield break;
+            if (action.Performer != EmpoweredPlayer) yield break;
+            if (!Triggerable) yield break;
 
             foreach(var m in move.PositionChanges)
             {
@@ -41,14 +41,13 @@ public partial class Passive
                 {
                     if (hex.Occupant != null && hex.Occupant.Team == EmpoweredPlayer.Team)
                     {
-                        await action.AddResultant(new StateSet(this, false));
-                        await action.AddResultant(new GameAction.EnergyChange
-                            (EmpoweredPlayer, EmpoweredPlayer, e => e + 1));
-                        await action.AddResultant(await GameAction.Move.Prompt(EmpoweredPlayer,
+                        yield return new StateSet(this, false);
+                        yield return new GameAction.EnergyChange(EmpoweredPlayer, EmpoweredPlayer, e => e + 1);
+                        yield return await GameAction.Move.Prompt(EmpoweredPlayer,
                             new GameAction.Move.PathedInfo(m.AffectedUnit, hex.Occupant)
                             {
                                 Distance = 2
-                            }));
+                            });
                         break;
                     }
 
@@ -57,13 +56,13 @@ public partial class Passive
             
         }
 
-        private async Task Refresh(GameAction action)
+        private async IAsyncEnumerable<GameAction> Refresh(GameAction action)
         {
-            if (action is not GameAction.Turn turn) return;
-            if (turn.ToPlayer == EmpoweredPlayer) await turn.AddResultant(new StateSet(this, true));
+            if (action is not GameAction.Turn turn) yield break;
+            if (turn.ToPlayer == EmpoweredPlayer) yield return new StateSet(this, true);
 
-            return;
+            await Task.CompletedTask;
         }
     }
 
-}
+} 

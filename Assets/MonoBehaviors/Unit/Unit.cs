@@ -72,10 +72,10 @@ public class Unit : Selectable, ITeamable
     public Unit Init(Board board, int maxhp, Vector3Int pos)
     {
         _board = board;
-        Position = pos;
         MaxHP = maxhp;
         HP = MaxHP;
         ID = ++_idCount;
+        UpdatePosition(pos);
         return this;
     }
 

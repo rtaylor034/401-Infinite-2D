@@ -13,18 +13,30 @@ using UnityEngine;
 public abstract partial class GameAction
 {
     /// <summary>
-    /// [Event Handler Delegate] <br></br>
+    /// 
     /// </summary>
     /// <remarks>
-    /// <c>EventSubscriberMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c>
+    /// <c> <see langword="async"/> IAsyncEnumerable&lt;<see cref="GameAction"/>&gt; EvaluationResultantAdderMethod(<see cref="GameAction"/> <paramref name="action"/>) { }</c><br></br>
+    /// - <paramref name="action"/> : The <see cref="GameAction"/> being evaluated.<br></br>
+    /// <see langword="yield"/> -> Each <see cref="GameAction"/> to be evaluated as a resultant of <paramref name="action"/>.<br></br>
+    /// (Each <see langword="yield"/> evaluates itself before moving onto the next)
     /// </remarks>
-    /// <typeparam name="T"></typeparam>
     /// <param name="action"></param>
-    public delegate Task EvaluationEventHandler(GameAction action);
+    /// <returns></returns>
+    public delegate IAsyncEnumerable<GameAction> EvaluationResultantAdder(GameAction action);
 
     //consider changing from static, kinda lazy
-    private readonly static List<EvaluationEventHandler> _onEvaluationEventSubscribers = new();
-    public static GuardedCollection<EvaluationEventHandler> OnEvaluationEvent = new(_onEvaluationEventSubscribers);
+    private readonly static List<EvaluationResultantAdder> _externalEvaluationAdders = new();
+    private readonly List<EvaluationResultantAdder> _implicitResultantAdders = new();
+    /// <summary>
+    /// [Custom Return Event]<br></br>
+    /// Occurs when any <see cref="GameAction"/> is evaluated.<br></br>
+    /// Used to externally add resultants upon evaluation (Passives, game events, etc.)
+    /// </summary>
+    /// <remarks>
+    /// <inheritdoc cref="EvaluationResultantAdder"/>
+    /// </remarks>
+    public static GuardedCollection<EvaluationResultantAdder> ExternalEvaluation = new(_externalEvaluationAdders);
 
     /// <summary>
     /// GameActions that occured as a result of this <see cref="GameAction"/>. <br></br>
@@ -111,32 +123,40 @@ public abstract partial class GameAction
     /// </remarks>
     protected abstract void InternalUndo();
 
+    /*
+     * DEV NOTE:
+     * Alr, so shit works, thats pretty poggers. still a bug when fully cancelling a split move.
+     * and please DO NOT FUCKING FORGET TO UPDATE DOCS, because of the paradigm shift a whole bunch of docs
+     * are just obsolete and wrong.
+     */
     protected GameAction(Player performer)
     {
         Performer = performer;
     }
 
     /// <summary>
-    /// Makes <paramref name="action"/> a resultant of this <see cref="GameAction"/>. <br></br>
+    /// Makes <paramref name="action"/> an implicit resultant of this <see cref="GameAction"/>. <br></br>
     /// (Adds to <see cref="ResultantActions"/>)
     /// </summary>
+    /// <remarks>
+    /// > Implicit resultants are not evaluated until the parent <see cref="GameAction"/> is evaluated.
+    /// </remarks>
     /// <param name="action"></param>
     /// <returns>
     /// <see langword="this"/> <see cref="GameAction"/>
     /// </returns>
-    public async Task<GameAction> AddResultant(GameAction action)
+    public GameAction AddImplicitResultant(GameAction action)
     {
         if (action is not null)
         {
-            await action.Evaluate();
-            _resultantActions.Add(action);
+            _implicitResultantAdders.Add(_ => action.WrappedAsync());
         }   
 
         return this;
     }
 
     /// <summary>
-    /// Adds <paramref name="action"/> to the main action stack, finalizing and performing it.
+    /// Adds <paramref name="action"/> to the main action stack, evaluating and performing it.
     /// </summary>
     /// <remarks>
     /// Primary method for making GameActions part of the game.
@@ -156,9 +176,16 @@ public abstract partial class GameAction
     {
         InternalPerform();
         await InternalEvaluate();
-        foreach(var externalEvaluation in new List<EvaluationEventHandler>(_onEvaluationEventSubscribers))
+        List<EvaluationResultantAdder> resultantAdders = new(_implicitResultantAdders);
+        resultantAdders.AddRange(_externalEvaluationAdders);
+        foreach(var eval in resultantAdders)
         {
-            await externalEvaluation(this);
+            await foreach(var resultant in eval(this))
+            {
+                if (resultant == null) continue;
+                _resultantActions.Add(resultant);
+                await resultant.Evaluate();
+            }
         }
     }
     protected virtual Task InternalEvaluate() => Task.CompletedTask;

@@ -16,7 +16,6 @@ public class ManualAction
         Ability,
         Discard
     }
-    //make specific delegates
     /// <summary>
     /// The "standard" type/role identity of this action.<br></br>
     /// > This does not affect internal behavior.
@@ -28,19 +27,18 @@ public class ManualAction
     public EStandardType StandardType { get; set; }
     /// <summary>
     /// The set of objects that the player can select to be the Root of this action.<br></br>
-    /// > Function of the Turn-holding <see cref="Player"/>.
+    /// > Function of the <see cref="Player"/> being prompted to make a manual action.
     /// </summary>
     /// <remarks>
     /// <c><see cref="IEnumerable"/>&lt;<see cref="Selectable"/>&gt;
     /// EntryPointsFunction(<see cref="Player"/> <i>player</i>) { }</c><br></br>
-    /// - <i>player</i> : The <see cref="Player"/> who holds the current Turn.<br></br>
+    /// - <i>player</i> : The <see cref="Player"/> that is being prompted to make a manual action.<br></br>
     /// <see langword="return"/> -> The selectables that the player can select as a root of this <see cref="ManualAction"/>.
     /// </remarks>
     public Func<Player, IEnumerable<Selectable>> EntryPoints { get; set; }
     /// <summary>
     /// The <see cref="GameAction"/> to be declared.<br></br>
     /// > Function of the declaring <see cref="Player"/> and their selected Root <see cref="Selectable"/>.
-    /// 
     /// </summary>
     /// <remarks>
     /// <c><see langword="async"/> <see cref="Task"/>&lt;<see cref="GameAction"/>&gt;
@@ -50,13 +48,37 @@ public class ManualAction
     /// <see langword="return"/> -> The <see cref="GameAction"/> to be declared.
     /// </remarks>
     public Func<Player, Selectable, Task<GameAction>> Action { get; set; }
+    /// <summary>
+    /// A Player must pass all of these conditions in order for this manual action to be availabe to them.
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="bool"/> PlayerConditionFunction(<see cref="Player"/> <i>player</i>) { }</c><br></br>
+    /// - <i>player</i> : The <see cref="Player"/> being prompted to make a manual move.<br></br>
+    /// <see langword="return"/> -> -> whether or not the condition was passed.
+    /// </remarks>
     public List<Func<Player, bool>> PlayerConditions { get; set; } = new() { _ => true };
+    /// <summary>
+    /// A Player can pass any of these conditions in order for this manual action to be availabe to them.<br></br>
+    /// (Overriding <see cref="PlayerConditions"/>)
+    /// </summary>
+    /// <remarks>
+    /// <c><see cref="bool"/> PlayerConditionFunction(<see cref="Player"/> <i>player</i>) { }</c><br></br>
+    /// - <i>player</i> : The <see cref="Player"/> being prompted to make a manual move.<br></br>
+    /// <see langword="return"/> -> whether or not the condition was passed.
+    /// </remarks>
     public List<Func<Player, bool>> PlayerConditionOverrides { get; set; } = new() { _ => false };
 
+    /// <summary>
+    /// The standard PlayerCondition that all regular manual actions should have.
+    /// </summary>
+    /// <remarks>
+    /// <c>p => p.Energy >= 1;</c>
+    /// </remarks>
     public static readonly Func<Player, bool> ONE_ENERGY_REQUIRED = p => p.Energy >= 1;
 
     /// <summary>
-    /// 
+    /// Creates a <see cref="ManualAction"/> of type <paramref name="standardType"/>.<br></br>
+    /// <i><see cref="ManualAction"/> objects are not GameActions themselves, but store information about when/how a <see cref="Player"/> can declare a GameAction when it is their Turn.</i>
     /// </summary>
     /// <remarks>
     /// Required Properties: <br></br>

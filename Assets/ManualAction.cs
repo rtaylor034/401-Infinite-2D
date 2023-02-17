@@ -69,7 +69,7 @@ public class ManualAction
     public List<Func<Player, bool>> PlayerConditionOverrides { get; set; } = new() { _ => false };
 
     /// <summary>
-    /// The standard PlayerCondition that all regular manual actions should have.
+    /// The standard PlayerCondition that requires the player to have at least 1 Energy.
     /// </summary>
     /// <remarks>
     /// <c>p => p.Energy >= 1;</c>

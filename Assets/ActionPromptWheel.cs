@@ -9,12 +9,29 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class ActionPromptWheel : MonoBehaviour
 {
+    /// <summary>
+    /// The <see cref="Player"/> that is being prompted to make an action.
+    /// </summary>
     public Player Performer { get; private set; }
+    /// <summary>
+    /// The <see cref="Selectable"/> that was selected to bring up this action wheel.
+    /// </summary>
     public Selectable Root { get; private set; }
 
+    /// <summary>
+    /// The <see cref="ActionPromptWheelOption"/> objects that are parented to this wheel.
+    /// </summary>
     public HashSet<ActionPromptWheelOption> Options => new(_options);
     private HashSet<ActionPromptWheelOption> _options;
 
+    /// <summary>
+    /// <b>[MUST BE CALLED AFTER INSTANTIATION]</b> (<see cref="Object.Instantiate(Object)"/>)
+    /// </summary>
+    /// <param name="performer"></param>
+    /// <param name="root"></param>
+    /// <param name="actions"></param>
+    /// <param name="optionPrefab"></param>
+    /// <returns></returns>
     public ActionPromptWheel Init(Player performer, Selectable root, IEnumerable<ManualAction> actions, ActionPromptWheelOption optionPrefab)
     {
         Performer = performer;

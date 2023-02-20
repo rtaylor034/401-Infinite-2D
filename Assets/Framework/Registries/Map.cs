@@ -87,13 +87,13 @@ public struct Map
             "wowooooowwooowww/" +
             "woowoowooooooowww/" +
             "ooowoooooooooooww/" +
-            "oowwocowooowoooow/" +
+            "oowwocowoowwoooow/" +
             "ooooooowooowwoooo/" +
-            "ooooooowowooowowo/" +
+            "ooooooowowooooowo/" +
             "wooooowoooocooooo/" +
             "wwooooooooooowooo/" +
-            "wwowwoooooowoooww/" +
-            " wwoooowwoowwwoow/" +
+            "wwowwooooowwoooww/" +
+            " wwoooowwoowwooow/" +
             "   wwoooowooooooo/" +
             "     wooooooooowo/" +
             "       B1B1oooooooo/" +

@@ -22,8 +22,8 @@ public static class AbilityRegistry
             () => new Ability.Sourced
             (
 
-                "Lance", Ability.ETypeIdentity.Attack,
-
+                "Lance",
+                Ability.ETypeIdentity.Attack,
                 new ConstructionTemplate<UnitEffect>[]
                 {
                     () => new UnitEffect.Slow(STD_DURATION),
@@ -31,11 +31,10 @@ public static class AbilityRegistry
                 },
                 new HashSet<Vector3Int>
                 {
-                    H(0, 1, 0),
-                    H(0, 2, 0),
-                    H(0, 3, 0)
+                    Hit(0, 1, 0),
+                    Hit(0, 2, 0),
+                    Hit(0, 3, 0)
                 },
-
                 new Ability.PlayAction(async a =>
                 {
                     a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
@@ -44,7 +43,6 @@ public static class AbilityRegistry
                             Distance = 1
                         }));
                 }),
-
                 new Ability.Sourced.TargetingCondition[]
                 {
                     Ability.Sourced.STANDARD_ATTACK_TARGET,
@@ -56,9 +54,7 @@ public static class AbilityRegistry
             () => new Ability.Unsourced
             (
                 "Break Will", Ability.ETypeIdentity.Utility,
-
                 new Ability.Unsourced.SingleTargetCondition((p, u) => p.Team != u.Team),
-
                 new Ability.PlayAction(async a =>
                 {
                     a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
@@ -81,19 +77,17 @@ public static class AbilityRegistry
                 {
                     () => new UnitEffect.Shield(STD_DURATION)
                 },
-
                 new HashSet<Vector3Int>
                 {
-                    H(1, 0, 0),
-                    H(2, 0, 0),
-                    H(0, 1, 0),
-                    H(0, 2, 0),
-                    H(0, 0, 1),
-                    H(0, 0, 2),
-                    H(1, 1, 0),
-                    H(0, 1, 1)
+                    Hit(1, 0, 0),
+                    Hit(2, 0, 0),
+                    Hit(0, 1, 0),
+                    Hit(0, 2, 0),
+                    Hit(0, 0, 1),
+                    Hit(0, 0, 2),
+                    Hit(1, 1, 0),
+                    Hit(0, 1, 1)
                 },
-
                 new Ability.PlayAction(async a =>
                 {
                     a.AddImplicitResultant(await GameAction.Move.Prompt(a.Performer,
@@ -102,7 +96,6 @@ public static class AbilityRegistry
                             Distance = 5
                         }));
                 }),
-
                 new Ability.Sourced.TargetingCondition[]
                 {
                     Ability.Sourced.STANDARD_DEFENSE_TARGET,
@@ -125,5 +118,5 @@ public static class AbilityRegistry
     /// <param name="up"></param>
     /// <param name="right"></param>
     /// <returns></returns>
-    private static Vector3Int H(int left, int up, int right) => BoardCoords.Simple(left, up, right);
+    private static Vector3Int Hit(int left, int up, int right) => BoardCoords.Simple(left, up, right);
 }

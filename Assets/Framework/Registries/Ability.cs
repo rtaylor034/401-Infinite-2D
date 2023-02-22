@@ -121,9 +121,7 @@ public abstract class Ability
         /// <param name="name"></param>
         /// <param name="typeIdentity"></param>
         public Unsourced(string name, ETypeIdentity typeIdentity) : base(name, typeIdentity) { }
-
-        public List<TargetCondition> SingleTargetCondition(Func<Player, Unit, bool> singleUnitCondition) =>
-            new() { (p, _, u) => singleUnitCondition(p, u) };
+        
     }
     
     /// <summary>

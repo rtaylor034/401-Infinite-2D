@@ -14,7 +14,7 @@ public static class AbilityRegistry
 
     public static void Initialize(GameSettings settings)
     {
-        //captured values
+        //evaluate captured values
         int STD_DURATION = settings.StandardEffectDuration;
 
         List<ConstructionTemplate<Ability>> masterList = new()
@@ -94,7 +94,6 @@ public static class AbilityRegistry
 
             }
         };
-
 
         //FINALIZE REGISTRY
         Registry = new ReadOnlyCollection<ConstructionTemplate<Ability>>(masterList);

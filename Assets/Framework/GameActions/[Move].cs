@@ -287,6 +287,14 @@ public partial class GameAction
         {
             return $"<MOVE> ({string.Join(", ",MoveInfo.MovingUnits)})" + base.ToString();
         }
+
+        /// <summary>
+        /// <b>abstract</b><br></br>
+        /// <i>(See <see cref="PositionalInfo"/> / <see cref="PathedInfo"/>)</i>
+        /// </summary>
+        /// <remarks>
+        /// { Constructed by Property }
+        /// </remarks>
         public abstract record Info
         {
             #region Documentation Helpers

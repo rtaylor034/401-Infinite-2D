@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        StartGame(GameSettings.STANDARD, new Map[] { Map.MapList[0] });
+        StartGame(GameSettings.STANDARD, new Map[] { Map.MapList[1] });
     }
     #endregion
 
@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
         {
             //multiple boards would be instantiated at the same position, can fix later, but no need rn.
             var board = Instantiate(_boardPrefab, transform);
+            print("MAP: " + maps[i].Name);
             board.CreateBoard(maps[i], settings);
             _boards.Add(board);
         }

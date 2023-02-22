@@ -23,8 +23,6 @@ public struct Map
                 Spawns[i][h] = (spawns[i][h].x * BoardCoords.up) - (spawns[i][h].y * BoardCoords.left);
             }
         }
-
-        MapList.Add(this);
     }
 
 
@@ -76,6 +74,50 @@ public struct Map
             }
             ));
 
+        //alcoves map [1]
+        MapList.Add(new Map("Alcoves Map",
+            (
+            "ww/" +
+            "wwww/" +
+            "wwooww/" +
+            "ooowoooB0/" +
+            "oooowoooB0B0/" +
+            "ooooooooooow/" +
+            "ooooooowooooww/" +
+            "wowooooowwooowww/" +
+            "woowoowooooooowww/" +
+            "ooowoooooooooooww/" +
+            "oowwocowooowoooow/" +
+            "ooooooowooowwowoo/" +
+            "ooooooowowooooooo/" +
+            "wooooowoooocooooo/" +
+            "wwooooooooooowooo/" +
+            "wwowwoooooowoooww/" +
+            " wwoooowwoowwooow/" +
+            "   wwoooowooooooo/" +
+            "     woooooooowoo/" +
+            "       B1B1oooooooo/" +
+            "         B1ooooooo/" +
+            "           wwwwww/" +
+            "             wwww/" +
+            "               ww"
+            ).Split('/'),
+
+            new Vector2Int[][]
+            { new Vector2Int[]
+            {
+                new(3, 7),
+                new(4, 8),
+                new(4, 9)
+            },
+            new Vector2Int[]
+            {
+                new(19, 7),
+                new(19, 8),
+                new(20, 9)
+            }
+            }
+            ));
 
 
     }

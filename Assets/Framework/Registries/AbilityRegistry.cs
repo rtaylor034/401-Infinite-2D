@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using static Ability.Unsourced;
 
 public static class AbilityRegistry
 {
@@ -119,4 +120,6 @@ public static class AbilityRegistry
     /// <param name="right"></param>
     /// <returns></returns>
     private static Vector3Int Hit(int left, int up, int right) => BoardCoords.Simple(left, up, right);
+    private static List<TargetCondition> UnsourcedSingleTarget(Func<Player, Unit, bool> singleUnitCondition) =>
+            new() { (p, _, u) => singleUnitCondition(p, u) };
 }

@@ -52,6 +52,15 @@ public abstract class Ability
         Special
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// - <see cref="Name"/> (Set by constructor)<br></br>
+    /// - <see cref="TypeIdentity"/> (Set by constructor)
+    /// </remarks>
+    /// <param name="name"></param>
+    /// <param name="typeIdentity"></param>
     protected Ability(string name, ETypeIdentity typeIdentity)
     {
         Name = name;
@@ -71,6 +80,7 @@ public abstract class Ability
         /// <c><see cref="bool"/> TargetConditionMethod(<see cref="Player"/> <paramref name="user"/>, <see cref="Unit"/> <paramref name="previousTarget"/>, <see cref="Unit"/> <paramref name="currentTarget"/>) { }</c> <br></br>
         /// - <paramref name="user"/> : The <see cref="Player"/> that played the ability. <br></br>
         /// - <paramref name="previousTarget"/> : The <see cref="Unit"/> that was selected as a Target before this one. <br></br>
+        /// <i>(<see langword="null"/> if there was no previous Target)</i><br></br>
         /// - <paramref name="currentTarget"/> : The <see cref="Unit"/> being evaluated as a valid/invalid Target. <br></br>
         ///  <see langword="return"/> -> Whether or not <paramref name="currentTarget"/> is a valid Target.
         /// </remarks>
@@ -80,24 +90,12 @@ public abstract class Ability
         public delegate bool TargetCondition(Player user, Unit previousTarget, Unit currentTarget);
 
         /// <summary>
-        /// [Delegate] <br></br><br></br>
-        /// Same as <see cref="TargetCondition"/>, but <paramref name="previousTarget"/> is discarded.
-        /// </summary>
-        /// <remarks>
-        /// <inheritdoc cref="TargetCondition"/>
-        /// </remarks>
-        /// <param name="user"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        public delegate bool SingleTargetCondition(Player user, Unit target);
-
-        /// <summary>
         /// in order for a Target to be valid, it must pass it's respective <see cref="TargetCondition"/>. <br></br>
         /// > The size of this list determines how many Targets this ability has.
         /// </summary>
         /// <remarks>
         ///<inheritdoc cref="TargetCondition"/> <br></br> <br></br>
-        /// TargetConditions[0] is generated from a <see cref="SingleTargetCondition"/> specified in the constructor.
+        /// TargetConditions[0] will have <see langword="null"/> as previousUnit.
         /// </remarks>
         public List<TargetCondition> TargetConditions { get; set; }
         /// <summary>
@@ -109,37 +107,23 @@ public abstract class Ability
         /// </remarks>
         public PlayAction ActionMethod { get; set; }
 
-        /// <inheritdoc cref="Unsourced(string, ETypeIdentity, SingleTargetCondition, TargetCondition[], PlayAction)"/>
-        /// <remarks>
-        /// > This constructor is meant for abilities with only 1 Target. <br></br>
-        /// (Only <paramref name="initialTargetCondition"/> needs to be specified)
-        /// </remarks>
-        public Unsourced(string name, ETypeIdentity typeIdentity, SingleTargetCondition initialTargetCondition, PlayAction actionMethod)
-            : this(name, typeIdentity, initialTargetCondition, new TargetCondition[0], actionMethod) { }
-
         /// <summary>
-        /// Creates an <see cref="Unsourced"/> called <paramref name="name"/> of type <paramref name="typeIdentity"/>.<br></br>
-        /// - Its primary (first) target must respect <paramref name="initialTargetCondition"/>. <br></br>
-        /// - All following targets must respect the <paramref name="secondaryTargetConditions"/> in order. <i>(See <see cref="TargetConditions"/>)</i><br></br>
-        /// - When the ability is played, <paramref name="actionMethod"/> will be called with the play <see cref="GameAction"/>. <i>(Chosen targets are <see cref="GameAction.PlayAbility.ParticipatingUnits"/>)</i>
+        /// Creates a <see cref="Unsourced"/> with name <paramref name="name"/> and of type <paramref name="typeIdentity"/>.
         /// </summary>
+        /// <remarks>
+        /// Required Properties:<br></br>
+        /// - <see cref="TargetConditions"/><br></br>
+        /// - <see cref="ActionMethod"/><br></br>
+        /// <br></br>
+        /// Defaulted Properties:<br></br>
+        /// <inheritdoc cref="Ability.Ability(string, ETypeIdentity)"/>
+        /// </remarks>
         /// <param name="name"></param>
         /// <param name="typeIdentity"></param>
-        /// <param name="initialTargetCondition"></param>
-        /// <param name="secondaryTargetConditions"></param>
-        /// <param name="actionMethod"></param>
-        public Unsourced(string name, ETypeIdentity typeIdentity, SingleTargetCondition initialTargetCondition, TargetCondition[] secondaryTargetConditions, PlayAction actionMethod)
-            : base(name, typeIdentity)
-        {
-            Name = name;
-            TypeIdentity = typeIdentity;
-            TargetConditions = new()
-            {
-                (p, _, t) => initialTargetCondition(p, t)
-            };
-            TargetConditions.AddRange(secondaryTargetConditions);
-            ActionMethod = actionMethod;
-        }
+        public Unsourced(string name, ETypeIdentity typeIdentity) : base(name, typeIdentity) { }
+
+        public List<TargetCondition> SingleTargetCondition(Func<Player, Unit, bool> singleUnitCondition) =>
+            new() { (p, _, u) => singleUnitCondition(p, u) };
     }
     
     /// <summary>
@@ -182,13 +166,7 @@ public abstract class Ability
         /// The effects that this ability inflicts upon the Target when played.
         /// </summary>
         public List<ConstructionTemplate<UnitEffect>> TargetEffects { get; set; }
-        /// <summary>
-        /// A <see cref="Unit"/> must pass ALL of these conditions in order to be a valid Source.
-        /// </summary>
-        /// <remarks>
-        /// <inheritdoc cref="SourceCondition"/>
-        /// </remarks>
-        public List<SourceCondition> SourceConditions { get; set; }
+
         /// <summary>
         /// A <see cref="Unit"/> must pass ALL of these conditions in order to be a valid Target.
         /// </summary>
@@ -198,14 +176,23 @@ public abstract class Ability
         /// </remarks>
         public List<TargetingCondition> TargetingConditions { get; set; }
         /// <summary>
-        /// The Follow Up method of this ability. <br></br>
-        /// > Called when this ability is played. <br></br>
-        /// (<i>If this ability has no Follow Up, set to <see cref="NO_ACTION"/>)</i>
+        /// A <see cref="Unit"/> must pass ALL of these conditions in order to be a valid Source.
         /// </summary>
         /// <remarks>
+        /// Default: <c>{ <see cref="STANDARD_VALID_SOURCE"/> }</c>
+        /// <br></br><br></br>
+        /// <inheritdoc cref="SourceCondition"/>
+        /// </remarks>
+        public List<SourceCondition> SourceConditions { get; set; } = new() { STANDARD_VALID_SOURCE };
+        /// <summary>
+        /// The Follow Up method of this ability. <br></br>
+        /// > Called when this ability is played. (primarily to add implicit resultants)
+        /// </summary>
+        /// <remarks>
+        /// Default: <c><see cref="NO_ACTION"/></c><br></br><br></br>
         /// <inheritdoc cref="PlayAction"/>
         /// </remarks>
-        public PlayAction FollowUpMethod { get; set; }
+        public PlayAction FollowUpMethod { get; set; } = NO_ACTION;
 
         /// <summary>
         /// The standard <see cref="SourceCondition"/> that all Sourced abilities implicitly have. (Unless explicitly ommitted)
@@ -257,47 +244,23 @@ public abstract class Ability
         };
 
         /// <summary>
-        /// Creates a <see cref="Sourced"/> called <paramref name="name"/> of type <paramref name="typeIdentity"/>. <br></br>
-        /// - It has a Hit Area of <paramref name="hitArea"/> and inflicts <paramref name="targetEffects"/> onto it's Target. <br></br>
-        /// - In addition to inflicting effects, <paramref name="followUpMethod"/> is called when the ability is played. <br></br>
-        /// - Targets must pass ALL <paramref name="targetingConditions"/> in addition to being inside of the Hit Area in order to be valid. <br></br>
-        /// - Units must also pass ALL <paramref name="sourceConditions"/> in order to be a valid source.
+        /// Creates a <see cref="Sourced"/> with name <paramref name="name"/> and of type <paramref name="typeIdentity"/>. <br></br>
         /// </summary>
         /// <remarks>
-        /// <i>See <see cref="Sourced"/>.STANDARD conditions (such as <see cref="STANDARD_ATTACK_TARGET"/>)</i>
+        /// Required Properties:<br></br>
+        /// - <see cref="HitArea"/><br></br>
+        /// - <see cref="TargetEffects"/><br></br>
+        /// - <see cref="TargetingConditions"/><br></br>
+        /// <br></br>
+        /// Defaulted Properties:<br></br>
+        /// - <see cref="SourceConditions"/><br></br>
+        /// - <see cref="FollowUpMethod"/><br></br>
+        /// <inheritdoc cref="Ability.Ability(string, ETypeIdentity)"/>
+        /// 
         /// </remarks>
         /// <param name="name"></param>
         /// <param name="typeIdentity"></param>
-        /// <param name="targetEffects"></param>
-        /// <param name="hitArea"></param>
-        /// <param name="followUpMethod"></param>
-        /// <param name="targetingConditions"></param>
-        /// <param name="sourceConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions, SourceCondition[] sourceConditions) :
-            base(name, typeIdentity)
-        {
-            HitArea = new HashSet<Vector3Int>(hitArea);
-            TargetEffects = new List<ConstructionTemplate<UnitEffect>>(targetEffects);
-            TargetingConditions = new(targetingConditions);
-            SourceConditions = new(sourceConditions);
-            FollowUpMethod = followUpMethod;
-        }
-        ///<summary>
-        ///<inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/>
-        /// </summary>
-        /// <remarks>
-        /// <inheritdoc cref="Sourced.Sourced(string, ETypeIdentity, ConstructionTemplate{UnitEffect}[], HashSet{Vector3Int}, PlayAction, TargetingCondition[], SourceCondition[])"/> <br></br> <br></br>
-        /// >This constructor assumes that <paramref name="sourceConditions"/> only includes <see cref="STANDARD_VALID_SOURCE"/>.
-        /// </remarks>
-        /// <param name="name"></param>
-        /// <param name="typeIdentity"></param>
-        /// <param name="targetEffects"></param>
-        /// <param name="hitArea"></param>
-        /// <param name="followUpMethod"></param>
-        /// <param name="targetingConditions"></param>
-        public Sourced(string name, ETypeIdentity typeIdentity, ConstructionTemplate<UnitEffect>[] targetEffects, HashSet<Vector3Int> hitArea, PlayAction followUpMethod, TargetingCondition[] targetingConditions) :
-            this(name, typeIdentity, targetEffects, hitArea, followUpMethod, targetingConditions, new SourceCondition[] { STANDARD_VALID_SOURCE })
-        { }
+        public Sourced(string name, ETypeIdentity typeIdentity) : base(name, typeIdentity) { }
 
 
 

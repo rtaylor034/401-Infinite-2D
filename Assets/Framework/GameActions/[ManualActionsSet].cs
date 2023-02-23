@@ -4,7 +4,7 @@ using UnityEngine;
 
 public partial class GameAction
 {
-
+    //Does not have multi-perform/multi-undo functionality, consider implementing.
     /// <summary>
     /// [ : ] <see cref="GameAction"/>
     /// </summary>

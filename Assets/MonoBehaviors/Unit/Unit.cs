@@ -4,6 +4,9 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// [ : ] <see cref="Selectable"/>, <see cref="ITeamable"/>
+/// </summary>
 public class Unit : Selectable, ITeamable
 {
 

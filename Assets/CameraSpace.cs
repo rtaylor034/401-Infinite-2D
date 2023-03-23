@@ -44,4 +44,5 @@ public class CameraSpace : MonoBehaviour
         _instance._links[obj] = pos;
         return false;
     }
+    public static bool LinkAtCurrentPosition(GameObject obj) => Link(obj, ActiveCamera.WorldToViewportPoint(obj.transform.position));
 }

@@ -6,7 +6,6 @@ using UnityEngine.Scripting;
 public class CameraSpace : MonoBehaviour
 {
     public static Camera ActiveCamera { get; private set; }
-    public GameObject test;
 
     private static CameraSpace _instance;
 
@@ -17,7 +16,6 @@ public class CameraSpace : MonoBehaviour
     {
         SetCamera(Camera.main, true);
         _instance = this;
-        Link(test, 0.2f, 0.8f);
     }
     private void Update()
     {
@@ -28,7 +26,7 @@ public class CameraSpace : MonoBehaviour
         }
     }
 
-    private void SetCamera(Camera camera, bool setBaseSize)
+    public void SetCamera(Camera camera, bool setBaseSize)
     {
         ActiveCamera = camera;
         if (setBaseSize) _baseSize = Camera.main.orthographicSize;
@@ -39,10 +37,13 @@ public class CameraSpace : MonoBehaviour
     public static bool Link(GameObject obj, float x, float y) => Link(obj, new Vector2(x, y));
     public static bool Link(GameObject obj, Vector2 pos)
     {
-        obj.transform.SetParent(_instance.transform);
         if (_instance._links.TryAdd(obj, pos)) return true;
         _instance._links[obj] = pos;
         return false;
     }
     public static bool LinkAtCurrentPosition(GameObject obj) => Link(obj, ActiveCamera.WorldToViewportPoint(obj.transform.position));
+    public static bool Unlink(GameObject obj)
+    {
+        return _instance._links.Remove(obj);
+    }
 }

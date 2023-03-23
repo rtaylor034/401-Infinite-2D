@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour
 
             while (true)
             {
-                ActionPromptWheel actionWheel = Instantiate(_actionPromptWheelPrefab, transform).Init(CurrentPlayer, selection, actionMap[selection], _actionPromptWheelOptionPrefab);
+                ActionPromptWheel actionWheel = Instantiate(_actionPromptWheelPrefab, selection.transform).Init(CurrentPlayer, selection, actionMap[selection], _actionPromptWheelOptionPrefab);
                 actionWheel.transform.position = actionWheel.Root.transform.position;
 
                 HashSet<Selectable> prevAvailable = new(available);

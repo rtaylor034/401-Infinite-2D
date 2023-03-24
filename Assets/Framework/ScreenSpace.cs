@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-public class CameraSpace : MonoBehaviour
+public class ScreenSpace : MonoBehaviour
 {
     public static Camera ActiveCamera { get; private set; }
 
-    private static CameraSpace _instance;
+    private static ScreenSpace _instance;
 
     private float _baseSize;
     private Dictionary<GameObject, Vector2> _links = new();
@@ -27,7 +27,7 @@ public class CameraSpace : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets the camera that defines the "camera space".<br></br>
+    /// Sets the camera that defines the "screen space".<br></br>
     /// > If <paramref name="setBaseSize"/> is <see langword="true"/>, objects will appear as the size that they appear *right now* when linked.
     /// </summary>
     /// <param name="camera"></param>
@@ -45,10 +45,10 @@ public class CameraSpace : MonoBehaviour
     public static bool Link(GameObject obj, float x, float y) => Link(obj, new Vector2(x, y));
 
     /// <summary>
-    /// Links <paramref name="obj"/> to camera space at the position <paramref name="pos"/>.<br></br>
+    /// Links <paramref name="obj"/> to screen space at the position <paramref name="pos"/>.<br></br>
     /// (<paramref name="pos"/> coordinates range from (0, 0) bottom-left to (1, 1) top-right)
     /// <br></br><br></br>
-    /// Objects linked to camera space move and scale with the camera's view.<br></br>
+    /// Objects linked to screen space move and scale with the camera's view.<br></br>
     /// <i>i.e. Linked objects will act as a HUD element, fixed to the player's screen.</i>
     /// </summary>
     /// <remarks>
@@ -64,7 +64,7 @@ public class CameraSpace : MonoBehaviour
         return false;
     }
     /// <summary>
-    /// Links <paramref name="obj"/> to camera space at its current position on-screen.<br></br><br></br>
+    /// Links <paramref name="obj"/> to screen space at its current position on-screen.<br></br><br></br>
     /// <i>(See <see cref="Link(GameObject, Vector2)"/>)</i>
     /// </summary>
     /// <param name="obj"></param>
@@ -72,10 +72,10 @@ public class CameraSpace : MonoBehaviour
     public static bool LinkAtCurrentPosition(GameObject obj) => Link(obj, ActiveCamera.WorldToViewportPoint(obj.transform.position));
 
     /// <summary>
-    /// Unlinks <paramref name="obj"/> from camera space.
+    /// Unlinks <paramref name="obj"/> from screen space.
     /// </summary>
     /// <remarks>
-    /// <i><paramref name="obj"/> will keep the transform changes that camera space applied while linked.</i>
+    /// <i><paramref name="obj"/> will keep the transform changes that screen space applied while linked.</i>
     /// </remarks>
     /// <param name="obj"></param>
     /// <returns></returns>

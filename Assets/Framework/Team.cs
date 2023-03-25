@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/// <summary>
+/// REQUIRES DOCS
+/// </summary>
 public class Team
 {
     public string Name { get; private set; }
@@ -28,6 +31,7 @@ public class Team
             Primary = primary;
             Unit = Color.Lerp(primary, Color.white, 0.2f);
             BaseHex = Color.Lerp(primary, Color.black, 0.0f);
+            
         }
     }
     public override string ToString() => Name;

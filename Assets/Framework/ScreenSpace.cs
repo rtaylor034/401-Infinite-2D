@@ -41,7 +41,7 @@ public class ScreenSpace : MonoBehaviour
 
     //returns false if anchor is already linked. still updates position
 
-    /// <inheritdoc cref="Link(GameObject, Vector2)"/>
+    /// <inheritdoc cref="Link(Transform, Vector2)"/>
     public static bool Link(Transform anchor, float x, float y) => Link(anchor, new Vector2(x, y));
 
     /// <summary>

@@ -67,14 +67,3 @@ public class Player
 
     
 }
-public static class PlayerExtensions
-{
-    /// <summary>
-    /// Rotates (<see langword="this"/>)<paramref name="coords"/> around <paramref name="anchor"/> to respect <paramref name="player"/>'s perspective.
-    /// </summary>
-    /// <param name="coords"></param>
-    /// <param name="player"></param>
-    /// <param name="anchor"></param>
-    /// <returns></returns>
-    public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Player player, Vector3Int anchor) => coords.Rotate(anchor, player.Team.PerspectiveRotation);
-}

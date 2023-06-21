@@ -36,3 +36,14 @@ public class Team
     }
     public override string ToString() => Name;
 }
+public static class TeamExtensions
+{
+    /// <summary>
+    /// Rotates (<see langword="this"/>)<paramref name="coords"/> around <paramref name="anchor"/> to respect <paramref name="team"/>'s perspective.
+    /// </summary>
+    /// <param name="coords"></param>
+    /// <param name="team"></param>
+    /// <param name="anchor"></param>
+    /// <returns></returns>
+    public static HashSet<Vector3Int> RotateForPerspective(this IEnumerable<Vector3Int> coords, Team team, Vector3Int anchor) => coords.Rotate(anchor, team.PerspectiveRotation);
+}
